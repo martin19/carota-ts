@@ -91,8 +91,8 @@ export class PositionedWord extends CNode {
     this.word.draw(ctx, this.line.left + this.left, this.line.baseline);
 
     // Handy for showing how word boundaries work
-    var b = this.bounds();
-    ctx.strokeRect(b.l, b.t, b.w, b.h);
+    //var b = this.bounds();
+    //ctx.strokeRect(b.l, b.t, b.w, b.h);
   }
 
   bounds() {

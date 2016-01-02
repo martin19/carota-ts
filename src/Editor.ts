@@ -19,6 +19,7 @@ export interface EditorOptions {
   bindHandlers? : boolean,
   manageTextArea? : boolean,
   paintSelection? : boolean,
+  paintBaselines? : boolean,
 }
 
 export class Editor {
@@ -53,6 +54,7 @@ export class Editor {
   public bindHandlers : boolean;
   public manageTextArea : boolean;
   public paintSelection : boolean;
+  public paintBaselines : boolean;
 
   constructor(options:EditorOptions) {
 
@@ -69,6 +71,7 @@ export class Editor {
     this.bindHandlers = typeof options.bindHandlers === "boolean" ? options.bindHandlers : true;
     this.manageTextArea = typeof options.manageTextArea === "boolean" ? options.manageTextArea : true;
     this.paintSelection = typeof options.paintSelection === "boolean" ? options.paintSelection : true;
+    this.paintBaselines = typeof options.paintBaselines === "boolean" ? options.paintBaselines : false;
 
     if(this.manageTextArea) {
       this.textArea = document.createElement("textarea");
@@ -191,9 +194,14 @@ export class Editor {
 
     this.doc.draw(ctx, new Rect(0, 0, logicalWidth, logicalHeight));
 
+    if(this.paintBaselines) {
+      this.doc.drawBaselines(ctx, new Rect(0,0,logicalWidth,logicalHeight));
+    }
+
     if(this.paintSelection) {
       this.doc.drawSelection(ctx, true, new Rect(0,0, logicalWidth, logicalHeight));
     }
+
     ctx.restore();
   }
 

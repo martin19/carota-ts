@@ -18,6 +18,7 @@ import {ICoords} from "./Word";
 import {Character} from "./Characters";
 import {Run} from "./Run";
 import {IFormattingMap} from "./Run";
+import {Line} from "./Line";
 
 export interface ISelection {
   start : number;
@@ -441,6 +442,19 @@ export class CarotaDoc extends CNode {
       caret = this.getCaretCoords(ordinal);
     }
     return this.byOrdinal(ordinal);
+  }
+
+  drawBaselines(ctx:CanvasRenderingContext2D, viewport:Rect) {
+    ctx.strokeStyle = "black";
+    this.frame.lines.forEach((line:Line)=>{
+      var b = line.bounds(true);
+      if(viewport.contains(line.left,line.baseline) && viewport.contains(line.left+line.width, line.baseline)) {
+        ctx.beginPath();
+        ctx.moveTo(b.l, line.baseline);
+        ctx.lineTo(b.r, line.baseline);
+        ctx.stroke();
+      }
+    });
   }
 
   drawSelection(ctx:CanvasRenderingContext2D, hasFocus:boolean, viewport:Rect) {
