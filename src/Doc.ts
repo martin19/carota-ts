@@ -86,6 +86,7 @@ export class CarotaDoc extends CNode {
   _filtersRunning:number;
   _currentTransaction:(f1:(f2:()=>void)=>void)=>void;
   sendKey:(key:number, selecting:boolean, ctrlKey:boolean)=>void;
+  wrap : boolean;
 
   constructor() {
     super();
@@ -102,6 +103,7 @@ export class CarotaDoc extends CNode {
     this.selectionChanged = new LiteEvent<any>();
     this.contentChanged = new LiteEvent<any>();
     this.editFilters = [Codes.editFilter];
+    this.wrap = true;
     this.load([]);
   }
 
@@ -121,7 +123,11 @@ export class CarotaDoc extends CNode {
   layout() {
     this.frame = null;
     try {
-      this.frame = new Per(this.words).per(Frame.wrap(0, 0, this._width, 0, this)).first();
+      if(this.wrap) {
+        this.frame = new Per(this.words).per(Frame.wrap(0, 0, this._width, 0, this)).first();
+      } else {
+        this.frame = new Per(this.words).per(Frame.noWrap(0, 0, 0, this)).first();
+      }
     } catch (x) {
       console.error(x);
     }
@@ -634,4 +640,9 @@ export class CarotaDoc extends CNode {
 
   //TODO
   setVerticalAlignment(va:any){}
+
+  setWrap(wrap : boolean) {
+    this.wrap = wrap;
+    this.layout();
+  }
 }

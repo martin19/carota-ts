@@ -63,7 +63,12 @@ export class Input {
       var xC = (xT3 + 0.5) * this.editor.getSize().w;
       var yC = (yT3 + 0.5) * this.editor.getSize().h;
 
+      console.log(x +""+y);
+      if(x == 180 && y == 128) {
+        this.editor.doc.byCoordinate(xC, yC);
+      }
       handler(this.editor.doc.byCoordinate(xC, yC));
+
 
     });
   }

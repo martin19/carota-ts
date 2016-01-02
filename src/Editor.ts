@@ -16,6 +16,7 @@ export interface EditorOptions {
   h? : number,
   sx? : number,
   sy? : number,
+  wrap? : boolean
   bindHandlers? : boolean,
   manageTextArea? : boolean,
   paintSelection? : boolean,
@@ -51,10 +52,11 @@ export class Editor {
   private sy:number;
   private w:number;
   private h:number;
-  public bindHandlers : boolean;
-  public manageTextArea : boolean;
-  public paintSelection : boolean;
-  public paintBaselines : boolean;
+  wrap : boolean;
+  bindHandlers : boolean;
+  manageTextArea : boolean;
+  paintSelection : boolean;
+  paintBaselines : boolean;
 
   constructor(options:EditorOptions) {
 
@@ -68,6 +70,7 @@ export class Editor {
     this.h = options.h || 100;
     this.sx = 1.0;
     this.sy = 1.0;
+    this.wrap = typeof options.wrap === "boolean" ? options.wrap : true;
     this.bindHandlers = typeof options.bindHandlers === "boolean" ? options.bindHandlers : true;
     this.manageTextArea = typeof options.manageTextArea === "boolean" ? options.manageTextArea : true;
     this.paintSelection = typeof options.paintSelection === "boolean" ? options.paintSelection : true;
@@ -102,6 +105,8 @@ export class Editor {
       this.verticalAlignment = va;
       this.paint();
     };
+
+    this.doc.setWrap(this.wrap);
 
     this.doc.selectionChanged.on(({getFormatting:getFormatting, takeFocus:takeFocus}) => {
       this.paint();

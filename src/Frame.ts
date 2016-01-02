@@ -4,6 +4,7 @@ import {Rect} from "./Rect";
 import {Line} from "./Line";
 import {Word} from "./Word";
 import {ICode} from "./Part";
+import {NoWrap} from "./NoWrap";
 
 export class Frame extends CNode {
   type:string;
@@ -14,7 +15,7 @@ export class Frame extends CNode {
   height:number;
   _actualWidth:number;
 
-  constructor(left:number, top:number, width:number, ordinal:number, parent:CNode, includeTerminator?:(p:ICode)=>boolean, initialAscent?:number, initialDescent?:number) {
+  constructor(parent:CNode, ordinal : number) {
     super();
     this.type = 'frame';
     this.lines = [];
@@ -22,8 +23,53 @@ export class Frame extends CNode {
     this.ordinal = ordinal;
   }
 
+  /**
+   * Creates a Frame by adding words without wrapping at boundaries.
+   * @param left
+   * @param top
+   * @param ordinal
+   * @param parent
+   * @param includeTerminator
+   * @param initialAscent
+   * @param initialDescent
+   * @return {function(function(Frame): void, Word): boolean}
+   */
+  static noWrap(left:number, top:number, ordinal:number, parent:CNode, includeTerminator?:(p:ICode)=>boolean, initialAscent?:number, initialDescent?:number) {
+    var frame_ = new Frame(parent, ordinal);
+    var lines = frame_.lines;
+    var wrapper = NoWrap(left, top, ordinal, frame_, includeTerminator, initialAscent, initialDescent);
+    var length = 0, height = 0;
+    return function (emit:(p:Frame)=>void, word:Word) {
+      if (wrapper(function (line:number|Line) {
+          if (typeof line === 'number') {
+            height = line;
+          } else {
+            length = (line.ordinal + line.length) - ordinal;
+            lines.push(line);
+          }
+        }, word)) {
+        frame_.length = length;
+        frame_.height = height;
+        emit(frame_);
+        return true;
+      }
+    };
+  }
+
+  /**
+   * Creates a Frame by wrapping words at frame boundaries.
+   * @param left
+   * @param top
+   * @param width
+   * @param ordinal
+   * @param parent
+   * @param includeTerminator
+   * @param initialAscent
+   * @param initialDescent
+   * @return {function(function(Frame): void, Word): boolean}
+   */
   static wrap(left:number, top:number, width:number, ordinal:number, parent:CNode, includeTerminator?:(p:ICode)=>boolean, initialAscent?:number, initialDescent?:number) {
-    var frame_ = new Frame(left, top, width, ordinal, parent, includeTerminator, initialAscent, initialDescent);
+    var frame_ = new Frame(parent, ordinal);
     var lines = frame_.lines;
     var wrapper = Wrap(left, top, width, ordinal, frame_, includeTerminator, initialAscent, initialDescent);
     var length = 0, height = 0;
