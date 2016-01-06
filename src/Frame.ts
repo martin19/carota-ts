@@ -91,20 +91,17 @@ export class Frame extends CNode {
   }
 
   bounds() {
-    if (!this._bounds) {
-      var left = 0, top = 0, right = 0, bottom = 0;
-      if (this.lines.length) {
-        var first = this.lines[0].bounds();
-        left = first.l;
-        top = first.t;
-        this.lines.forEach(function (line) {
-          var b = line.bounds();
-          right = Math.max(right, b.l + b.w);
-          bottom = Math.max(bottom, b.t + b.h);
-        });
-      }
-      this._bounds = new Rect(left, top, right - left, this.height || bottom - top);
+    var left = Number.MAX_VALUE, top = Number.MAX_VALUE, right = -Number.MAX_VALUE, bottom = -Number.MAX_VALUE;
+    if (this.lines.length) {
+      this.lines.forEach(function (line) {
+        var b = line.bounds();
+        left = Math.min(left, b.l);
+        top = Math.min(top, b.t);
+        right = Math.max(right, b.l + b.w);
+        bottom = Math.max(bottom, b.t + b.h);
+      });
     }
+    this._bounds = new Rect(left, top, right - left, this.height || bottom - top);
     return this._bounds;
   }
 

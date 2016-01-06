@@ -25,7 +25,7 @@ export class Line extends CNode {
   actualWidth:number;
   length:number;
   type:string;
-  doc:Frame;
+  frame:Frame;
   left:number;
   width:number;
   baseline:number;
@@ -34,14 +34,14 @@ export class Line extends CNode {
   ordinal:number;
   align:string;
 
-  constructor(doc:Frame, left:number, width:number, baseline:number, ascent:number, descent:number, words:Array<Word>, ordinal:number) {
+  constructor(frame:Frame, left:number, width:number, baseline:number, ascent:number, descent:number, words:Array<Word>, ordinal:number) {
     super();
     this.type = 'line';
     var self = this;
 
     var align = words[0].align();
 
-    this.doc = doc; // should be called frame, or else switch to using parent on all nodes
+    this.frame = frame;
     this.left = left;
     this.width = width;
     this.baseline = baseline;
@@ -100,7 +100,7 @@ export class Line extends CNode {
   }
 
   parent() {
-    return this.doc;
+    return this.frame;
   }
 
   children() {

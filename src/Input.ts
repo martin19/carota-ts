@@ -9,9 +9,9 @@ import {LiteEvent} from "./LiteEvent";
 export class Input {
   editor : Editor;
 
-  constructor(editor:Editor) {
+  constructor(editor:Editor, bindInputHandlers : boolean) {
     this.editor = editor;
-    if(editor.bindHandlers) {
+    if(bindInputHandlers) {
       this.bindHandlersInternal();
     }
     editor.doc.sendKey = this.onKeyDown;
@@ -48,25 +48,26 @@ export class Input {
   registerMouseEvent(name:string, handler:(n:CNode)=>void) {
     Dom.handleMouseEvent(this.editor.canvas, name, (e:MouseEvent,x:number,y:number) => {
 
-      //normalized box coordinates (-0.5,0.5|-0.5,0.5)
       var alpha = this.editor.getRotation();
       var center = this.editor.getPosition();
       var scale = this.editor.getScale();
-      var xT = (x - center.cx) * (1/this.editor.getSize().w);
-      var yT = (y - center.cy) * (1/this.editor.getSize().h);
+      var origin = this.editor.getOrigin();
+      var b = this.editor.editorBounds();
+
+       //image coordinates to normalized box coordinates (-0.5,0.5|-0.5,0.5)
+      var xT = (x - center.x);
+      var yT = (y - center.y);
       var xT2 = (Math.cos(-alpha) * xT - Math.sin(-alpha) * yT);
       var yT2 = (Math.sin(-alpha) * xT + Math.cos(-alpha) * yT);
-      var xT3 = xT2 * (1/scale.sx);
-      var yT3 = yT2 * (1/scale.sy);
+      var xT3 = xT2 * (1/b.w) * (1/scale.x);
+      var yT3 = yT2 * (1/b.h) * (1/scale.y);
+      var xT4 = xT3 + (origin.x+0.5);
+      var yT4 = yT3 + (origin.y+0.5);
 
       //transform to textbox coordinates (0,editor.size|0,editor.size)
-      var xC = (xT3 + 0.5) * this.editor.getSize().w;
-      var yC = (yT3 + 0.5) * this.editor.getSize().h;
+      var xC = (xT4) * b.w;
+      var yC = (yT4) * b.h;
 
-      console.log(x +""+y);
-      if(x == 180 && y == 128) {
-        this.editor.doc.byCoordinate(xC, yC);
-      }
       handler(this.editor.doc.byCoordinate(xC, yC));
 
 
@@ -207,24 +208,8 @@ export class Input {
         break;
     }
 
-    //var toggle = editor.toggles[key];
-    //if (ctrlKey && toggle) {
-    //  var selRange = editor.doc.selectedRange();
-    //  selRange.setFormatting(toggle, (<IFormattingMap>selRange.getFormatting())[toggle] !== true);
-    //  editor.paint();
-    //  handled = true;
-    //}
-
     return false;
   };
-
-  /*
-   var newFocused = document.activeElement === this.textArea;
-   if (focused !== newFocused) {
-   focused = newFocused;
-   requirePaint = true;
-   }*/
-
 
   updateTextArea() {
     this.editor.textAreaContent = this.editor.doc.selectedRange().plainText();

@@ -9,13 +9,11 @@ import {Run} from "./Run";
 
 export interface EditorOptions {
   canvas : HTMLCanvasElement;
-  cx? : number,
-  cy? : number,
-  alpha? : number;
-  w? : number,
-  h? : number,
-  sx? : number,
-  sy? : number,
+  x : number;
+  y : number;
+  w? : number;
+  h? : number;
+
   wrap? : boolean
   bindHandlers? : boolean,
   manageTextArea? : boolean,
@@ -43,35 +41,39 @@ export class Editor {
   verticalAlignment:string;
   nextCaretToggle:number;
 
-  rect:Rect;
+  private ox : number;
+  private oy : number;
+  private w : number;
+  private h : number;
+  private cx : number;
+  private cy : number;
+  private sx : number;
+  private sy : number;
+  private alpha : number;
 
-  private cx:number;
-  private cy:number;
-  private alpha:number;
-  private sx:number;
-  private sy:number;
-  private w:number;
-  private h:number;
-  wrap : boolean;
-  bindHandlers : boolean;
-  manageTextArea : boolean;
-  paintSelection : boolean;
-  paintBaselines : boolean;
+  private wrap : boolean;
+  private bindInputHandlers : boolean;
+  private manageTextArea : boolean;
+  private paintSelection : boolean;
+  private paintBaselines : boolean;
 
   constructor(options:EditorOptions) {
 
     this.canvas = options.canvas;
     this.canvas.classList.add("carotaEditorCanvas");
 
-    this.cx = options.cx || 0;
-    this.cy = options.cy || 0;
-    this.alpha = options.alpha || 0;
-    this.w = options.w || 100;
-    this.h = options.h || 100;
+    this.cx = options.x;
+    this.cy = options.y;
+    this.w = typeof options.w == "number" ? options.w : 0;
+    this.h = typeof options.h == "number" ? options.h : 0;
+    this.ox = 0;
+    this.oy = 0;
+    this.alpha = 0;
     this.sx = 1.0;
     this.sy = 1.0;
+
     this.wrap = typeof options.wrap === "boolean" ? options.wrap : true;
-    this.bindHandlers = typeof options.bindHandlers === "boolean" ? options.bindHandlers : true;
+    this.bindInputHandlers = typeof options.bindHandlers === "boolean" ? options.bindHandlers : true;
     this.manageTextArea = typeof options.manageTextArea === "boolean" ? options.manageTextArea : true;
     this.paintSelection = typeof options.paintSelection === "boolean" ? options.paintSelection : true;
     this.paintBaselines = typeof options.paintBaselines === "boolean" ? options.paintBaselines : false;
@@ -117,30 +119,13 @@ export class Editor {
       this.update();
     });
 
-    this.updateTransform();
+    this.paint();
     this.update();
-    this.input = new Input(this);
+    this.input = new Input(this, this.bindInputHandlers);
   }
 
   getDoc() {
     return this.doc;
-  }
-
-  /**
-   * Gets vertical offset of editor
-   * @return {number}
-   */
-  getVerticalOffset() {
-    var docHeight = this.doc.frame.bounds().h;
-    if (docHeight < this.h) {
-      switch (this.verticalAlignment) {
-        case 'middle':
-          return (this.h - docHeight) / 2;
-        case 'bottom':
-          return this.h - docHeight;
-      }
-    }
-    return 0;
   }
 
   /**
@@ -165,21 +150,34 @@ export class Editor {
     }
   }
 
+  editorBounds() {
+    var frameBounds = this.doc.frame.bounds();
+    if(this.doc.wrap) {
+      var xF = 0;
+      var yF = 0;
+      var wF = this.w;
+      var hF = this.h;
+    } else {
+      xF = frameBounds.l;
+      yF = frameBounds.t;
+      wF = frameBounds.w;
+      hF = frameBounds.h;
+    }
+    return { x : xF, y : yF, w : wF, h : hF };
+  }
+
   /**
    * Paint editor contents
    */
   paint() {
 
-    var availableWidth = this.w;
-    if (this.doc.width() !== availableWidth) {
-      this.doc.width(availableWidth);
+    if (this.doc.width() !== this.w) {
+      this.doc.width(this.w);
     }
 
-    var logicalWidth = Math.max(this.doc.frame.actualWidth(), this.w);
-    var logicalHeight = this.h;
-
-    var l = this.cx - this.w / 2;
-    var t = this.cy - this.h / 2;
+    var b = this.editorBounds();
+    var anchorX = this.cx - b.w * (this.ox+0.5);
+    var anchorY = this.cy - b.h * (this.oy+0.5);
 
     var ctx = this.canvas.getContext('2d');
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -189,35 +187,37 @@ export class Editor {
     ctx.rotate(this.alpha);
     ctx.scale(this.sx, this.sy);
     ctx.translate(-this.cx, - this.cy);
-    ctx.translate(l, t + this.getVerticalOffset());
+    ctx.translate(anchorX, anchorY);
     ctx.fillStyle = "#FFF";
-    ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+    ctx.fillRect(b.x, b.y, b.w, b.h);
 
     if(this.manageTextArea) {
-      this.updateTextArea(logicalWidth, logicalHeight);
+      this.updateTextArea(b.w, b.h);
     }
 
-    this.doc.draw(ctx, new Rect(0, 0, logicalWidth, logicalHeight));
+    this.doc.draw(ctx, new Rect(b.x, b.y, b.w, b.h));
 
     if(this.paintBaselines) {
-      this.doc.drawBaselines(ctx, new Rect(0,0,logicalWidth,logicalHeight));
+      this.doc.drawBaselines(ctx, new Rect(b.x, b.y, b.w, b.h));
     }
 
     if(this.paintSelection) {
-      this.doc.drawSelection(ctx, true, new Rect(0,0, logicalWidth, logicalHeight));
+      this.doc.drawSelection(ctx, true, new Rect(b.x, b.y, b.w, b.h));
     }
 
     ctx.restore();
   }
 
   private updateTextArea(logicalWidth : number, logicalHeight : number) {
-    var l = this.cx - this.w / 2;
-    var t = this.cy - this.h / 2;
+    var b = this.editorBounds();
+    var anchorX = this.cx - b.w * (this.ox+0.5);
+    var anchorY = this.cy - b.h * (this.oy+0.5);
+
     var transform = "translate(" + this.cx + "px," + this.cy + "px) " +
       "rotate(" + this.alpha + "rad) " +
       "scale(" + this.sx + "," + this.sy + ") " +
       "translate(" + -this.cx + "px," + -this.cy + "px) " +
-      "translate(" + l + "px," + (t+this.getVerticalOffset()) + "px) ";
+      "translate(" + anchorX + "px," + anchorY + "px) ";
     this.textArea.style.transformOrigin = "0 0";
     this.textArea.style.left = "10px";
     this.textArea.style.top = "40px";
@@ -254,7 +254,6 @@ export class Editor {
     }
     this.focusChar = ordinal;
     this.doc.select(start, end);
-
     this.keyboardX = this.nextKeyboardX;
   }
 
@@ -263,6 +262,9 @@ export class Editor {
     return this.keyboardSelect === 1 ? end : start;
   }
 
+  /**
+   * Delete the character before the caret.
+   */
   delCharBefore() {
     var start = this.doc.selection.start,
       end = this.doc.selection.end;
@@ -275,6 +277,9 @@ export class Editor {
     }
   }
 
+  /**
+   * Deletes the character after the caret.
+   */
   delCharAfter() {
     var start = this.doc.selection.start,
         end = this.doc.selection.end,
@@ -287,28 +292,43 @@ export class Editor {
     }
   }
 
+  /**
+   * Moves caret to start of document.
+   */
   goDocStart() {
     var ordinal = 0;
     this.updateCaretAndSelection(ordinal);
   }
 
+  /**
+   * Moves caret to end of document.
+   */
   goDocEnd() {
     var ordinal = this.doc.frame.length - 1;
     this.updateCaretAndSelection(ordinal);
   }
 
+  /**
+   * Moves caret to start of line.
+   */
   goLineStart() {
     var ordinal = this.getOrdinal();
     ordinal = this.doc.endOfLine(ordinal, -1);
     this.updateCaretAndSelection(ordinal);
   }
 
+  /**
+   * Moves caret to end of line.
+   */
   goLineEnd() {
     var ordinal = this.getOrdinal();
     ordinal = this.doc.endOfLine(ordinal, 1);
     this.updateCaretAndSelection(ordinal);
   }
 
+  /**
+   * Moves caret one line up.
+   */
   goLineUp() {
     var ordinal = this.getOrdinal();
     var caretX = this.doc.getCaretCoords(ordinal).l;
@@ -317,6 +337,9 @@ export class Editor {
     this.updateCaretAndSelection(ordinal);
   }
 
+  /**
+   * Moves caret one line down.
+   */
   goLineDown() {
     var ordinal = this.getOrdinal();
     var caretX = this.doc.getCaretCoords(ordinal).l;
@@ -325,6 +348,9 @@ export class Editor {
     this.updateCaretAndSelection(ordinal);
   }
 
+  /**
+   * Moves caret left one character.
+   */
   goCharLeft() {
     var start = this.doc.selection.start,
       end = this.doc.selection.end;
@@ -338,6 +364,9 @@ export class Editor {
     this.updateCaretAndSelection(ordinal);
   }
 
+  /**
+   * Moves caret right one character.
+   */
   goCharRight() {
     var start = this.doc.selection.start,
       end = this.doc.selection.end;
@@ -352,6 +381,9 @@ export class Editor {
     this.updateCaretAndSelection(ordinal);
   }
 
+  /**
+   * Moves caret left one word.
+   */
   goWordLeft() {
     var start = this.doc.selection.start,
       end = this.doc.selection.end;
@@ -370,6 +402,9 @@ export class Editor {
     }
   }
 
+  /**
+   * Moves caret right one word.
+   */
   goWordRight() {
     var start = this.doc.selection.start,
       end = this.doc.selection.end;
@@ -385,53 +420,123 @@ export class Editor {
     }
   }
 
+  /**
+   * Select whole document.
+   */
   selectAll() {
     var length = this.doc.frame.length - 1;
     //handled = true;
     this.doc.select(0, length);
   }
 
-  updateTransform() {
-    this.paint();
+  /**
+   * Get origin for editor frame transformations in normalized object coordinate system.
+   * @return {{x: number, y: number}}
+   */
+  getOrigin() {
+    return { x : this.ox, y : this.oy }
   }
 
+  /**
+   * Set origin for editor frame transformations in normalized object coordinate system.
+   * @param x
+   * @param y
+   */
+  setOrigin(x : number, y : number) {
+    this.ox = x;
+    this.oy = y;
+  }
+
+  /**
+   * Get translation of editor frame in world coordinates.
+   * Translation is relative to origin.
+   * @return {{x: number, y: number}}
+   */
   getPosition() {
-    return { cx : this.cx, cy : this.cy }
+    return { x : this.cx, y : this.cy }
   }
 
+  /**
+   * Set translation of editor frame in world coordinates.
+   * Translation is relative to origin.
+   * @return {{x: number, y: number}}
+   */
   setPosition(x : number, y : number) {
     this.cx = x;
     this.cy = y;
-    this.updateTransform();
+    this.paint();
   }
 
+  /**
+   * Get size of editor frame in world coordinates.
+   * @return {{w: number, h: number}}
+   */
   getSize() {
     return { w : this.w, h : this.h }
   }
 
+  /**
+   * Set size of editor frame in world coordinates.
+   * @param w
+   * @param h
+   */
   setSize(w : number, h : number) {
     this.w = w;
     this.h = h;
-    this.updateTransform();
+    this.paint();
   }
 
+  /**
+   * Set rotation of editor frame.
+   * @param alpha
+   */
   setRotation(alpha : number) {
     this.alpha = alpha;
-    this.updateTransform();
+    this.paint();
   }
 
+  /**
+   * Get rotation of editor frame.
+   * @return {number}
+   */
   getRotation() {
     return this.alpha;
   }
 
+  /**
+   * Set scale factor of editor frame.
+   * @param sx
+   * @param sy
+   */
   setScale(sx : number, sy : number) {
     this.sx = sx;
     this.sy = sy;
-    this.updateTransform();
+    this.paint();
   }
 
+  /**
+   * Get scale factor of editor frame.
+   * @return {{x: number, y: number}}
+   */
   getScale() {
-    return { sx : this.sx, sy : this.sy };
+    return { x : this.sx, y : this.sy };
+  }
+
+  /**
+   * If set to true, baselines are painted.
+   * @param value
+   */
+  setPaintBaselines(value : boolean) {
+    this.paintBaselines = value;
+    this.paint();
+  }
+
+  /**
+   *
+   * @return {boolean}
+   */
+  getPaintBaselines() {
+    return this.paintBaselines;
   }
 }
 
@@ -440,9 +545,6 @@ setInterval(function () {
 
   var ev = document.createEvent('Event');
   ev.initEvent('carotaEditorSharedTimer', true, true);
-
-  // not in IE, apparently:
-  // var ev = new CustomEvent('carotaEditorSharedTimer');
 
   for (var n = 0; n < editors.length; n++) {
     editors[n].dispatchEvent(ev);

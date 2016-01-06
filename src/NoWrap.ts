@@ -43,7 +43,21 @@ export var NoWrap = function (left:number, top:number, ordinal:number, parent:Fr
       width += word.width;
     });
 
-    var l = new Line(parent, left, width, y + maxAscent, maxAscent, maxDescent, lineBuffer, ordinal);
+    var align = lineBuffer[0].align();
+    var x = left;
+    switch(align) {
+      case 'right':
+        x = left - width;
+        break;
+      case 'center':
+        x = left - width/2;
+        break;
+      case 'justify':
+        //TODO: what is the desired behaviour?
+        break;
+    }
+
+    var l = new Line(parent, x, width, y + maxAscent, maxAscent, maxDescent, lineBuffer, ordinal);
     ordinal += l.length;
     quit = emit(l);
     y += (maxAscent + maxDescent);

@@ -27,6 +27,7 @@ gulp.task( 'build', function() {
     "src/Text.ts",
     "src/Word.ts",
     "src/Wrap.ts",
+    "src/NoWrap.ts",
     "src/Carota.ts"
     ])
     .pipe(replace(/^import.*$\r\n/gm,''))

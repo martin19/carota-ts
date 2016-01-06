@@ -236,8 +236,8 @@
       var canvas = document.querySelector("#exampleCanvas");
       var editor = new carota.Editor({
         canvas: canvas,
-        cx : 200,
-        cy : 200,
+        x : 200,
+        y : 200,
         w : 200,
         h : 200
       });
@@ -335,12 +335,18 @@
             redo: function () {
               exampleEditor.performUndo(true);
             },
-            valign: "top"
+            valign: "top",
+            wrap : true,
+            origin : "center",
+            baselines : false
           };
 
           var gui = new dat.GUI();
 
           var f1 = gui.addFolder("Formatting");
+          var cOrigin = f1.add(textBoxOptions, "origin", ["topleft","center","bottomright"]);
+          var cWrap = f1.add(textBoxOptions, "wrap");
+          var cBaselines = f1.add(textBoxOptions,"baselines");
           var cFormatting = [];
           cFormatting.push(f1.add(textBoxOptions, "font", ["serif", "sans-serif", "monospace", "cursive", "fantasy"]).listen());
           cFormatting.push(f1.add(textBoxOptions, "size", [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 30, 36, 72]).listen());
@@ -360,6 +366,19 @@
           });
           cValign.onFinishChange(function (value) {
             exampleEditor.setVerticalAlignment(value);
+          });
+          cWrap.onFinishChange(function(value) {
+            exampleEditor.setWrap(value);
+          });
+          cOrigin.onFinishChange(function(value) {
+            switch(value) {
+              case "topleft" : editor.setOrigin(-0.5,-0.5); break;
+              case "center" : editor.setOrigin(0,0); break;
+              case "bottomright" : editor.setOrigin(0.5,0.5); break;
+            }
+          });
+          cBaselines.onFinishChange(function(value) {
+            editor.setPaintBaselines(value);
           });
 
           var f2 = gui.addFolder("Undo/Redo");
@@ -402,10 +421,10 @@
           var cSy = f3.add(textBoxPosition,"sy").min(-5).max(5);
 
           cCx.onChange(function(value){
-            editor.setPosition(value, editor.getPosition().cy);
+            editor.setPosition(value, editor.getPosition().y);
           });
           cCy.onChange(function(value){
-            editor.setPosition(editor.getPosition().cx, value);
+            editor.setPosition(editor.getPosition().x, value);
           });
           cAlpha.onChange(function(value){
             editor.setRotation(value)
@@ -417,10 +436,10 @@
             editor.setSize(editor.getSize().w, value);
           });
           cSx.onChange(function(value){
-            editor.setScale(value, editor.getScale().sy);
+            editor.setScale(value, editor.getScale().y);
           });
           cSy.onChange(function(value){
-            editor.setScale(editor.getScale().sx, value);
+            editor.setScale(editor.getScale().x, value);
           });
 
           f3.open();

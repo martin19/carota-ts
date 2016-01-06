@@ -641,6 +641,10 @@ export class CarotaDoc extends CNode {
   //TODO
   setVerticalAlignment(va:any){}
 
+  /**
+   * Turns on/off wrapping lines at frame boundaries.
+   * @param wrap
+   */
   setWrap(wrap : boolean) {
     this.wrap = wrap;
     this.layout();
