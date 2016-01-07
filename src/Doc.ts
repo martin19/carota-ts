@@ -90,8 +90,9 @@ export class CarotaDoc extends CNode {
 
   constructor() {
     super();
-    var self = this;
     this.type = 'document';
+    this._left = 0;
+    this._top = 0;
     this._width = 0;
     this.selection = { start: 0, end: 0 };
     this.caretVisible = true;

@@ -78,6 +78,20 @@ export class CNode {
     return this;
   }
 
+  findChildByCoordinate(x:number, y: number) {
+    var found:CNode = null;
+    if(this.bounds().contains(x,y)) {
+      found = this;
+      this.children().forEach((child:CNode)=>{
+        var foundChild = child.findChildByCoordinate(x,y);
+        if(foundChild) {
+          found = foundChild;
+        }
+      });
+    }
+    return found;
+  }
+
   byCoordinate(x:number, y:number):CNode {
     var found:CNode;
     this.children().some(function (child) {

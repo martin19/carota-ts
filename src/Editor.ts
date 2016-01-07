@@ -163,7 +163,7 @@ export class Editor {
       wF = frameBounds.w;
       hF = frameBounds.h;
     }
-    return { x : xF, y : yF, w : wF, h : hF };
+    return new Rect(xF,yF,wF,hF);
   }
 
   /**
@@ -189,20 +189,20 @@ export class Editor {
     ctx.translate(-this.cx, - this.cy);
     ctx.translate(anchorX, anchorY);
     ctx.fillStyle = "#FFF";
-    ctx.fillRect(b.x, b.y, b.w, b.h);
+    ctx.fillRect(b.l, b.t, b.w, b.h);
 
     if(this.manageTextArea) {
       this.updateTextArea(b.w, b.h);
     }
 
-    this.doc.draw(ctx, new Rect(b.x, b.y, b.w, b.h));
+    this.doc.draw(ctx, new Rect(b.l, b.t, b.w, b.h));
 
     if(this.paintBaselines) {
-      this.doc.drawBaselines(ctx, new Rect(b.x, b.y, b.w, b.h));
+      this.doc.drawBaselines(ctx, new Rect(b.l, b.t, b.w, b.h));
     }
 
     if(this.paintSelection) {
-      this.doc.drawSelection(ctx, true, new Rect(b.x, b.y, b.w, b.h));
+      this.doc.drawSelection(ctx, true, new Rect(b.l, b.t, b.w, b.h));
     }
 
     ctx.restore();
@@ -425,8 +425,14 @@ export class Editor {
    */
   selectAll() {
     var length = this.doc.frame.length - 1;
-    //handled = true;
     this.doc.select(0, length);
+  }
+
+  /**
+   * Select nothing.
+   */
+  selectNothing() {
+    this.doc.select(0, 0);
   }
 
   /**
