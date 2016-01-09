@@ -67,6 +67,9 @@ export var NoWrap = function (left:number, top:number, ordinal:number, parent:Fr
 
   return function (emit:(p:Line|number)=>boolean|void, inputWord:Word) {
     if (inputWord.eof) {
+
+      store(inputWord, emit);
+
       if (!lineBuffer.length) {
         emit(y + lastNewLineHeight - top);
       } else {

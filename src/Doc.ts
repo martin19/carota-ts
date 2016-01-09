@@ -135,11 +135,13 @@ export class CarotaDoc extends CNode {
     if (!this.frame) {
       console.error('A bug somewhere has produced an invalid state - rolling back');
       this.performUndo();
-    } else if (this._nextSelection) {
+    } /*
+      TODO: what is this used for? causes an error when deleting the last character
+      else if (this._nextSelection) {
       var next = this._nextSelection;
-      //delete this._nextSelection;
+      this._nextSelection = null;
       this.select(next.start, next.end);
-    }
+    }*/
   }
 
   range(start:number, end:number) {

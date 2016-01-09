@@ -13,7 +13,7 @@ export interface EditorOptions {
   y : number;
   w? : number;
   h? : number;
-
+  backgroundColor? : string;
   wrap? : boolean
   bindHandlers? : boolean,
   manageTextArea? : boolean,
@@ -51,6 +51,7 @@ export class Editor {
   private sy : number;
   private alpha : number;
 
+  private backgroundColor : string;
   private wrap : boolean;
   private bindInputHandlers : boolean;
   private manageTextArea : boolean;
@@ -77,6 +78,7 @@ export class Editor {
     this.manageTextArea = typeof options.manageTextArea === "boolean" ? options.manageTextArea : true;
     this.paintSelection = typeof options.paintSelection === "boolean" ? options.paintSelection : true;
     this.paintBaselines = typeof options.paintBaselines === "boolean" ? options.paintBaselines : false;
+    this.backgroundColor = typeof options.backgroundColor === "string" ? options.backgroundColor : null;
 
     if(this.manageTextArea) {
       this.textArea = document.createElement("textarea");
@@ -188,8 +190,11 @@ export class Editor {
     ctx.scale(this.sx, this.sy);
     ctx.translate(-this.cx, - this.cy);
     ctx.translate(anchorX, anchorY);
-    ctx.fillStyle = "#FFF";
-    ctx.fillRect(b.l, b.t, b.w, b.h);
+
+    if(this.backgroundColor) {
+      ctx.fillStyle = this.backgroundColor;
+      ctx.fillRect(b.l, b.t, b.w, b.h);
+    }
 
     if(this.manageTextArea) {
       this.updateTextArea(b.w, b.h);

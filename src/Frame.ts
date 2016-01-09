@@ -49,7 +49,6 @@ export class Frame extends CNode {
           }
         }, word)) {
         frame_.length = length;
-        frame_.height = height;
         emit(frame_);
         return true;
       }
