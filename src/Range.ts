@@ -79,7 +79,15 @@ export class Range implements IRange{
       range.start = pos;
       range.end = pos + 1;
     }
-    return new Per(range.runs, range).reduce(Run.merge).last().formatting || Run.defaultFormatting;
+
+    var formatting = Run.cloneFormatting(Run.defaultFormatting);
+    var specificFormatting:IFormattingMap = new Per(range.runs, range).reduce(Run.merge).last().formatting;
+    for(var prop in specificFormatting) {
+      if(specificFormatting.hasOwnProperty(prop)) {
+       formatting[prop] = specificFormatting[prop]
+      }
+    }
+    return formatting;
   };
 
   setFormatting(attribute:string, value:string|boolean) {

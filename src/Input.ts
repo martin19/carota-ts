@@ -221,6 +221,7 @@ export class Input {
     setTimeout(function () {
       if(this.editor.textArea) {
         this.editor.textArea.focus();
+        this.editor.textArea.select();
       }
     }.bind(this), 10);
   }
