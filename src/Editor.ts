@@ -131,6 +131,33 @@ export class Editor {
   }
 
   /**
+   * Clone the editor instance.
+   * @return {Editor}
+   */
+  clone():Editor {
+    var clone = new Editor({
+      canvas : this.canvas,
+      x : this.cx,
+      y : this.cy,
+      w : this.w,
+      h : this.h,
+      backgroundColor : this.backgroundColor,
+      wrap : this.wrap,
+      bindHandlers : this.bindInputHandlers,
+      manageTextArea : this.manageTextArea,
+      paintSelection : this.paintSelection,
+      paintBaselines : this.paintBaselines,
+    });
+    clone.setOrigin(this.getOrigin().x, this.getOrigin().y);
+    clone.setScale(this.getScale().x, this.getScale().y);
+    clone.setRotation(this.getRotation());
+    clone.setPosition(this.getPosition().x, this.getPosition().y);
+    clone.setSize(this.getSize().w, this.getSize().h);
+    clone.doc.load(this.doc.save());
+    return clone;
+  }
+
+  /**
    * Updates editor contents. Paint is called if
    * caret is moved or if w/h of rect has
    * changed.
