@@ -196,9 +196,11 @@ export class Editor {
   }
 
   /**
-   * Paint editor contents
+   * Paint editor contents to the assigned canvas element.
+   * If a canvas element is passed, the contents will be rendered to this element.
+   * @param canvas
    */
-  paint() {
+  paint(canvas? : HTMLCanvasElement) {
 
     if (this.doc.width() !== this.w) {
       this.doc.width(this.w);
@@ -208,7 +210,11 @@ export class Editor {
     var anchorX = this.cx - b.w * (this.ox+0.5);
     var anchorY = this.cy - b.h * (this.oy+0.5);
 
-    var ctx = this.canvas.getContext('2d');
+    if(typeof canvas !== "undefined") {
+      var ctx = canvas.getContext("2d");
+    } else {
+      ctx = this.canvas.getContext('2d');
+    }
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     ctx.save();
 
