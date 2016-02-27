@@ -81,10 +81,13 @@ export class Range implements IRange{
     }
 
     var formatting = Run.cloneFormatting(Run.defaultFormatting);
-    var specificFormatting:IFormattingMap = new Per(range.runs, range).reduce(Run.merge).last().formatting;
-    for(var prop in specificFormatting) {
-      if(specificFormatting.hasOwnProperty(prop)) {
-       formatting[prop] = specificFormatting[prop]
+    var lastRun = new Per(range.runs, range).reduce(Run.merge).last();
+    if(lastRun) {
+      var specificFormatting:IFormattingMap = lastRun.formatting;
+      for(var prop in specificFormatting) {
+        if(specificFormatting.hasOwnProperty(prop)) {
+          formatting[prop] = specificFormatting[prop]
+        }
       }
     }
     return formatting;
