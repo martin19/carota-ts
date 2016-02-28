@@ -41,6 +41,7 @@ export interface ISection {
   parts: Array<Part>;
   ascent: number;
   descent: number;
+  lineHeight:number;
   width: number;
   length: number;
   plainText: string;
@@ -51,6 +52,7 @@ export class Word {
   space:ISection;
   ascent:number;
   descent:number;
+  lineHeight:number;
   width:number;
   length:number;
   eof:boolean;
@@ -71,7 +73,8 @@ export class Word {
     this.space = section(space, codes);
     this.ascent = Math.max(this.text.ascent, this.space.ascent);
     this.descent = Math.max(this.text.descent, this.space.descent);
-    this.width = this.text.width + this.space.width; //, configurable: true};
+    this.lineHeight = this.text.lineHeight;
+    this.width = this.text.width + this.space.width;
     this.length = this.text.length + this.space.length;
     if (!coords) {
       this.eof = true;
@@ -152,13 +155,15 @@ var section = function (runEmitter:((p:(r:Run)=>void)=>void)|Array<Run>, codes:(
     }).all(),
     ascent: 0,
     descent: 0,
+    lineHeight: 0,
     width: 0,
     length: 0,
     plainText: ''
   };
-  s.parts.forEach(function (p) {
+  s.parts.forEach(function (p:Part) {
     s.ascent = Math.max(s.ascent, p.ascent);
     s.descent = Math.max(s.descent, p.descent);
+    s.lineHeight = Math.max(s.lineHeight, p.lineHeight);
     s.width += p.width;
     s.length += Run.getPieceLength(p.run.text);
     s.plainText += Run.getPiecePlainText(p.run.text);

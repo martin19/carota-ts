@@ -4,6 +4,7 @@ import {Run} from "./Run";
 export interface ITextMeasurement {
   ascent : number;
   height? : number;
+  lineHeight? : number;
   descent : number;
   width : number;
 }
@@ -69,6 +70,12 @@ export class Text {
           parts.push('; vertical-align: sub');
           break;
       }
+
+      if(run.formatting.lineHeight) {
+        if(run.formatting.lineHeight !== "auto") {
+          parts.push("; line-height:"+run.formatting.lineHeight + "px");
+        }
+      }
     }
 
     return parts.join('');
@@ -131,23 +138,32 @@ export class Text {
     div.appendChild(block);
     document.body.appendChild(div);
     try {
-      span.setAttribute('style', style);
-
-      span.innerHTML = '';
-      span.appendChild(document.createTextNode(text_.replace(/\s/g, Text.nbsp)));
-
       var result:ITextMeasurement = {
         ascent : null,
         height : null,
         descent : null,
-        width : null
+        width : null,
+        lineHeight : null,
       };
+
+      span.setAttribute('style', style);
+      var lineHeight = parseFloat(span.style.lineHeight.replace(/"px"/,""));
+      span.style.lineHeight = "normal";
+
+      span.innerHTML = '';
+      span.appendChild(document.createTextNode(text_.replace(/\s/g, Text.nbsp)));
       block.style.verticalAlign = 'baseline';
-      result.ascent = (block.offsetTop - span.offsetTop);
+      result.ascent = (block.offsetTop);
       block.style.verticalAlign = 'bottom';
-      result.height = (block.offsetTop - span.offsetTop);
+      result.height = (block.offsetTop);
       result.descent = result.height - result.ascent;
       result.width = span.offsetWidth;
+      //if formatting contains line-height, apply this - otherwise, lineHeight is measured height
+      if(style.indexOf("line-height")>-1) {
+        result.lineHeight = lineHeight;
+      } else {
+        result.lineHeight = result.height;
+      }
     } finally {
       div.parentNode.removeChild(div);
       div = null;

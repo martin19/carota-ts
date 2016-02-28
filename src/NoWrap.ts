@@ -18,6 +18,7 @@ export var NoWrap = function (left:number, top:number, ordinal:number, parent:Fr
     lineWidth = 0,
     maxAscent = initialAscent || 0,
     maxDescent = initialDescent || 0,
+    maxLineHeight = 0,
     quit:boolean|void,
     lastNewLineHeight = 0,
     y = top;
@@ -27,6 +28,7 @@ export var NoWrap = function (left:number, top:number, ordinal:number, parent:Fr
     lineWidth += word.width;
     maxAscent = Math.max(maxAscent, word.ascent);
     maxDescent = Math.max(maxDescent, word.descent);
+    maxLineHeight = Math.max(maxLineHeight, word.lineHeight);
     if (word.isNewLine()) {
       send(emit);
       lastNewLineHeight = word.ascent + word.descent;
@@ -57,12 +59,20 @@ export var NoWrap = function (left:number, top:number, ordinal:number, parent:Fr
         break;
     }
 
-    var l = new Line(parent, x, width, y + maxAscent, maxAscent, maxDescent, lineBuffer, ordinal);
+    if(y == top) {
+      var l = new Line(parent, x, width, y + maxAscent, maxAscent, maxDescent, lineBuffer, ordinal);
+    } else {
+      var l = new Line(parent, x, width, y + maxLineHeight - maxDescent, maxAscent, maxDescent, lineBuffer, ordinal);
+    }
     ordinal += l.length;
     quit = emit(l);
-    y += (maxAscent + maxDescent);
+    if(y == top) {
+      y += (maxAscent + maxDescent);
+    } else {
+      y += maxLineHeight;
+    }
     lineBuffer.length = 0;
-    lineWidth = maxAscent = maxDescent = 0;
+    lineWidth = maxAscent = maxDescent = maxLineHeight = 0;
   };
 
   return function (emit:(p:Line|number)=>boolean|void, inputWord:Word) {

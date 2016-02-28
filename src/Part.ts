@@ -57,6 +57,7 @@ export class Part {
   width:number;
   ascent:number;
   descent:number;
+  lineHeight:number;
   code:ICode;
 
   constructor(run:Run, codes:(s:string, data?:any)=>ICode) {
@@ -76,6 +77,7 @@ export class Part {
     this.width = isNewLine ? 0 : m.width;
     this.ascent = m.ascent;
     this.descent = m.descent;
+    this.lineHeight = m.lineHeight;
     if (code) {
       this.code = code;
     }

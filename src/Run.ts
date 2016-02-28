@@ -2,6 +2,7 @@ import {Character} from "./Characters";
 
 export interface IFormatting {
   size?: number;
+  lineHeight?: string;
   font?: string;
   color?: string;
   bold?: boolean;
@@ -30,10 +31,11 @@ export type IRunMap = {[s:string]:any};
  * TODO: where are character objects created and are there really occurences? if not we might drop this abstraction
  */
 export class Run implements IRun,IFormatting {
-  static formattingKeys = ['bold', 'italic', 'underline', 'strikeout', 'color', 'font', 'size', 'align', 'script'];
+  static formattingKeys = ['bold', 'italic', 'underline', 'strikeout', 'color', 'font', 'size', 'lineHeight', 'align', 'script'];
 
   static defaultFormatting:IFormatting = {
     size: 10,
+    lineHeight: 'auto',
     font: 'sans-serif',
     color: 'black',
     bold: false,
