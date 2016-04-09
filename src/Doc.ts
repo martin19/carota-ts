@@ -10,12 +10,9 @@ import {Codes} from "./Codes";
 import {Rect} from "./Rect";
 import {ICode} from "./Part";
 import {IRange} from "./Range";
-import {PositionedWord} from "./Positionedword";
 import {PositionedChar} from "./Positionedword";
 import {IFormatting} from "./Run";
-import {Part} from "./Part";
 import {ICoords} from "./Word";
-import {Character} from "./Characters";
 import {Run} from "./Run";
 import {IFormattingMap} from "./Run";
 import {Line} from "./Line";
@@ -30,7 +27,6 @@ var makeEditCommand = function(doc:CarotaDoc, start:number, count:number, words:
   return function(log:(f1:(f2:()=>void)=>void)=>void) {
     doc._wordOrdinals = [];
 
-    //var oldWords = Array.prototype.splice.apply(doc.words, [start, count].concat(words));
     var oldWords = doc.words.splice(start,count);
     doc.words = doc.words.slice(0,start).concat(words).concat(doc.words.slice(start));
 
@@ -39,13 +35,20 @@ var makeEditCommand = function(doc:CarotaDoc, start:number, count:number, words:
   };
 };
 
+interface logFunction {
+  ():any;
+  len:number;
+}
+
 var makeTransaction = function(perform:(f1:(f2:()=>void)=>void)=>void) {
   var commands:Array<(f1:()=>void)=>void> = [];
 
-  var log = function(command:()=>void) {
+
+  var log:logFunction = <logFunction>function(command:()=>void) {
     commands.push(command);
-    log.length = commands.length;
+    log.len = commands.length;
   };
+
   perform(log);
 
   return function(outerLog:(f1:(f2:()=>void)=>void)=>void) {
@@ -321,7 +324,7 @@ export class CarotaDoc extends CNode {
     });
   }
 
-  splice(start:number, end:number, text:string|Array<Run>) {
+  splice(start:number, end:number, text:Array<Run>|string) {
     var text_:Array<Run>;
     if (typeof text === 'string') {
       var sample = Math.max(0, start - 1);
@@ -336,9 +339,6 @@ export class CarotaDoc extends CNode {
       } else {
         text_.push(new Run(text,{}));
       }
-
-    } else if (!Array.isArray(text)) {
-      text_ = [new Run(text,{})];
     } else {
       text_ = text;
     }
@@ -559,7 +559,7 @@ export class CarotaDoc extends CNode {
         try {
           perform(log);
         } finally {
-          changed = log.length > 0;
+          changed = (<logFunction>log).len > 0;
           self._currentTransaction = null;
         }
       }));

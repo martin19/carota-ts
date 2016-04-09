@@ -4,7 +4,6 @@
     "noImplicitAny": true,
     "removeComments": false,
     "preserveConstEnums": true,
-    "out": "tsc.js",
     "sourceMap": true,
     "target":"es5",
     "declaration":false
