@@ -72,20 +72,8 @@ export var Wrap = function (left:number, top:number, width:number, ordinal:numbe
         emit(node);
       }*/
     } else {
-      var code = inputWord.code();
-      if (code && code.block) {
-        if (lineBuffer.length) {
-          send(emit);
-        } else {
-          y += lastNewLineHeight;
-        }
-        consumer = code.block(left, y, width, ordinal, parent, inputWord.codeFormatting());
-        lastNewLineHeight = 0;
-      }
-      else if (code && code.eof || inputWord.eof) {
-        if (!code || (includeTerminator && includeTerminator(code))) {
-          store(inputWord, emit);
-        }
+      if (inputWord.eof) {
+        store(inputWord, emit);
         if (!lineBuffer.length) {
           emit(y + lastNewLineHeight - top);
         } else {

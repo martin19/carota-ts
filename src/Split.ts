@@ -16,7 +16,7 @@ import {ICode} from "./Part";
  * at the start of a line. So even in this case, whitespace is always treated as "trailing
  * after" a word - even if that word happens to be zero characters long!
  */
-export var Split = function(codes:(s:string)=>ICode) {
+export var Split = function() {
 
   var word:Character = null, trailingSpaces:Character = null, newLine = true;
 
@@ -45,12 +45,6 @@ export var Split = function(codes:(s:string)=>ICode) {
             if (trailingSpaces) {
               endOfWord = true;
             }
-        }
-      } else {
-        var code = codes(inputChar.char);
-        if (code.block || code.eof) {
-          endOfWord = true;
-          newLine = true;
         }
       }
     }

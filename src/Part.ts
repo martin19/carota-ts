@@ -58,18 +58,12 @@ export class Part {
   ascent:number;
   descent:number;
   lineHeight:number;
-  code:ICode;
 
-  constructor(run:Run, codes:(s:string, data?:any)=>ICode) {
-    var m : ITextMeasurement, isNewLine : boolean, code : ICode;
+  constructor(run:Run) {
+    var m : ITextMeasurement, isNewLine : boolean;
     if (typeof run.text === 'string') {
       isNewLine = (run.text.length === 1) && (run.text[0] === '\n');
       m = Text.measure(isNewLine ? Text.nbsp : <string>run.text, run);
-    } else {
-      code = codes(<string>(run.text)) || defaultInline;
-      m = code.measure ? code.measure(run) : {
-        width: 0, ascent: 0, descent: 0
-      };
     }
 
     this.run = run;
@@ -78,18 +72,11 @@ export class Part {
     this.ascent = m.ascent;
     this.descent = m.descent;
     this.lineHeight = m.lineHeight;
-    if (code) {
-      this.code = code;
-    }
   }
 
   draw(ctx:CanvasRenderingContext2D, x:number, y:number) {
     if (typeof this.run.text === 'string') {
       Text.draw(ctx, <string>(this.run.text), this.run, x, y, this.width, this.ascent, this.descent);
-    } else if (this.code && this.code.draw) {
-      ctx.save();
-      this.code.draw(ctx, x, y, this.width, this.ascent, this.descent, this.run);
-      ctx.restore();
     }
   }
 }

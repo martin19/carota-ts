@@ -57,7 +57,7 @@ export class Word {
   length:number;
   eof:boolean;
 
-  constructor(coords:ICoords, codes:(s:string)=>ICode) {
+  constructor(coords:ICoords) {
     var text:((p:(r:Run)=>void)=>void)|Array<Run>,
       space:((p:(r:Run)=>void)=>void)|Array<Run>;
     if (!coords) {
@@ -69,8 +69,8 @@ export class Word {
       space = coords.spaces.cut(coords.end);
     }
 
-    this.text = section(text, codes);
-    this.space = section(space, codes);
+    this.text = section(text);
+    this.space = section(space);
     this.ascent = Math.max(this.text.ascent, this.space.ascent);
     this.descent = Math.max(this.text.descent, this.space.descent);
     this.lineHeight = this.text.lineHeight;
@@ -83,10 +83,6 @@ export class Word {
 
   isNewLine() {
     return this.text.parts.length == 1 && this.text.parts[0].isNewLine;
-  }
-
-  code() {
-    return this.text.parts.length == 1 && this.text.parts[0].code;
   }
 
   codeFormatting() {
@@ -148,10 +144,10 @@ export class Word {
 }
 
 
-var section = function (runEmitter:((p:(r:Run)=>void)=>void)|Array<Run>, codes:(s:string)=>ICode) {
+var section = function (runEmitter:((p:(r:Run)=>void)=>void)|Array<Run>) {
   var s:ISection = {
     parts: new Per(runEmitter).map(function (p:Run) {
-      return new Part(p, codes);
+      return new Part(p);
     }).all(),
     ascent: 0,
     descent: 0,

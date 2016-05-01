@@ -7,6 +7,7 @@ import {Rect} from "./Rect";
 import {Editor} from "./Editor";
 import {html} from "./Html";
 import {Run} from "./Run";
+import {EngineData} from "./import/EngineData";
 
 export var carota = {
   Node: CNode,
@@ -17,5 +18,6 @@ export var carota = {
   Html: html,
   Frame: Frame,
   Text: Text,
-  Rect: Rect
+  Rect: Rect,
+  EngineData: EngineData
 };

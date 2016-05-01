@@ -18,7 +18,6 @@ export interface IRun extends IFormatting {
 }
 
 export type IFormattingMap = {[s:string]:any};
-export type IRunMap = {[s:string]:any};
 
 
 /**

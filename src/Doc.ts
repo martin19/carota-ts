@@ -6,7 +6,6 @@ import {Frame} from "./Frame";
 import {Split} from "./Split";
 import {LiteEvent} from "./LiteEvent";
 import {Range} from "./Range";
-import {Codes} from "./Codes";
 import {Rect} from "./Rect";
 import {ICode} from "./Part";
 import {IRange} from "./Range";
@@ -64,8 +63,6 @@ var isBreaker = function(word:Word) {
   if (word.isNewLine()) {
     return true;
   }
-  var code = word.code();
-  return !!(code && (code.block || code.eof));
 };
 
 export class CarotaDoc extends CNode {
@@ -74,8 +71,6 @@ export class CarotaDoc extends CNode {
   selection : ISelection;
   _nextSelection : ISelection;
   caretVisible : boolean;
-  customCodes:(code:string, data:any, allCodes:(code:string, data?:any)=>void)=>void;
-  codes:(code:string, data?:any)=>ICode;
   selectionChanged : LiteEvent<any>;
   contentChanged : LiteEvent<any>;
   editFilters:Array<(doc:CarotaDoc)=>void>;
@@ -99,14 +94,8 @@ export class CarotaDoc extends CNode {
     this._width = 0;
     this.selection = { start: 0, end: 0 };
     this.caretVisible = true;
-    this.customCodes = function(code:string, data:any, allCodes:(code:string, data?:any)=>void) {};
-    this.codes = function(code:string, data?:any) {
-      var instance = new Codes(code, data, this.codes);
-      return instance || this.customCodes(code, data, this.codes);
-    };
     this.selectionChanged = new LiteEvent<any>();
     this.contentChanged = new LiteEvent<any>();
-    this.editFilters = [Codes.editFilter];
     this.wrap = true;
     this.load([]);
   }
@@ -116,8 +105,8 @@ export class CarotaDoc extends CNode {
     this.undo = [];
     this.redo = [];
     this._wordOrdinals = [];
-    this.words = new Per(characters(runs)).per(Split(self.codes)).map(function (w:ICoords) {
-      return new Word(w, self.codes);
+    this.words = new Per(characters(runs)).per(Split()).map(function (w:ICoords) {
+      return new Word(w);
     }).all();
     this.layout();
     this.contentChanged.trigger();
@@ -278,49 +267,15 @@ export class CarotaDoc extends CNode {
     var self = this;
 
     var newWords = new Per(characters(runs))
-      .per(Split(self.codes))
+      .per(Split())
       .truthy()
       .map(function (w:ICoords) {
-        return new Word(w, self.codes);
+        return new Word(w);
       })
       .all();
 
-    // Check if old or new content contains any fancy control codes:
-    var runFilters = false;
-
-    if ('_filtersRunning' in self) {
-      self._filtersRunning++;
-    } else {
-      for (var n = 0; n < count; n++) {
-        if (this.words[wordIndex + n].code()) {
-          runFilters = true;
-        }
-      }
-      if (!runFilters) {
-        runFilters = newWords.some(function (word:Word) {
-          return !!word.code();
-        });
-      }
-    }
-
     this.transaction(function (log) {
       makeEditCommand(self, wordIndex, count, newWords)(log);
-      if (runFilters) {
-        self._filtersRunning = 0;
-        try {
-          for (; ;) {
-            var spliceCount = self._filtersRunning;
-            if (!self.editFilters.some(function (filter) {
-                filter(self);
-                return spliceCount !== self._filtersRunning;
-              })) {
-              break; // No further changes were made
-            }
-          }
-        } finally {
-          delete self._filtersRunning;
-        }
-      }
     });
   }
 

@@ -113,13 +113,12 @@ export class PositionedWord extends CNode {
   realiseCharacters() {
     if (!this._characters) {
       var cache:Array<PositionedChar> = [];
-      var x = 0, self = this, ordinal = this.ordinal,
-        codes = (<CarotaDoc>this.parentOfType('document')).codes;
+      var x = 0, self = this, ordinal = this.ordinal;
       this.parts(function (wordPart:Part) {
         Run.pieceCharacters(function (char) {
           var charRun = wordPart.run.clone();
           charRun.text = char;
-          var p = new Part(charRun, codes);
+          var p = new Part(charRun);
           cache.push(new PositionedChar(x, p, self, ordinal, 1));
           x += p.width;
           ordinal++;
@@ -130,7 +129,7 @@ export class PositionedWord extends CNode {
       var lastChar = cache[cache.length - 1];
       if (lastChar) {
         lastChar.width = this.width - lastChar.left;
-        if (this.word.isNewLine() || (this.word.code() && this.word.code().eof)) {
+        if (this.word.isNewLine()) {
           lastChar.newLine = true;
         }
       }
