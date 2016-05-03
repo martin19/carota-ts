@@ -4,75 +4,39 @@ import {Part} from "./Part";
 import {Rect} from "./Rect";
 import {Line} from "./Line";
 import {Word} from "./Word";
-import {CarotaDoc} from "./Doc";
 import {Run} from "./Run";
+import {PositionedChar} from "./PositionedChar";
 
 var newLineWidth = function (run:Run) {
   return Text.measure(Text.enter, run).width;
 };
 
-export class PositionedChar extends CNode {
-  type : string;
-  word : PositionedWord;
-  width : number;
-  left : number;
-  part : Part;
-  ordinal : number;
-  length : number;
-  newLine : boolean;
-
-  constructor(left : number, part : Part, word : PositionedWord, ordinal : number, length: number) {
-    super();
-    this.type = "character";
-    this.left = left;
-    this.part = part;
-    this.word = word;
-    this.ordinal = ordinal;
-    this.length = length;
-  }
-
-  bounds() {
-    var wb = this.word.bounds();
-    var width = this.word.word.isNewLine() ? newLineWidth(null) : this.width || this.part.width;
-    return new Rect(wb.l + this.left, wb.t, width, wb.h);
-  }
-
-  parent() {
-    return this.word;
-  }
-
-  byOrdinal() {
-    return this;
-  }
-
-  byCoordinate(x:number, y:number):CNode {
-    if (x <= this.bounds().center().x) {
-      return this;
-    }
-    return this.next();
-  }
-}
-
-/*  A positionedWord is just a realised Word plus a reference back to the containing Line and
- the left coordinate (x coordinate of the left edge of the word).
-
- It has methods:
-
- draw(ctx, x, y)
- - Draw the word within its containing line, applying the specified (x, y)
- offset.
- bounds()
- - Returns a rect for the bounding box.
+/**
+ * A PositionedWord is just a realised Word plus a reference back to the containing Line and
+ * the left coordinate (x coordinate of the left edge of the word).
  */
-
 export class PositionedWord extends CNode {
   type:string;
+
+  /**
+   * Word object associated with this PositionedWord.
+   */
   word:Word;
+  /**
+   * Parent of this PositionedWord. 
+   */
   line:Line;
+  /**
+   * Left offset in pixels of this PositionedWord instance in the Line.
+   */
   left:number;
+  /**
+   * Width of this instance in pixels.
+   */
   width:number;
-  ordinal:number;
-  length:number;
+  /**
+   * Children nodes of this instance.
+   */
   _characters:Array<PositionedChar>;
 
 
@@ -87,6 +51,10 @@ export class PositionedWord extends CNode {
     this.length = word.text.length + word.space.length;
   }
 
+  /**
+   * Draw the word within its containing line, applying the specified (x, y) offset.
+   * @param ctx
+   */
   draw(ctx:CanvasRenderingContext2D) {
     this.word.draw(ctx, this.line.left + this.left, this.line.baseline);
 
@@ -95,6 +63,10 @@ export class PositionedWord extends CNode {
     ctx.strokeRect(b.l, b.t, b.w, b.h);
   }
 
+  /**
+   * Returns a rect for the bounding box.
+   * @returns {Rect}
+   */
   bounds() {
     return new Rect(
       this.line.left + this.left,
@@ -103,13 +75,22 @@ export class PositionedWord extends CNode {
       this.line.ascent + this.line.descent);
   }
 
+  /**
+   * Applies function "eachPart" to each part of word's text and space section.
+   * @param eachPart
+   */
   parts(eachPart:(p:Part)=>void) {
-    /*this.word.text.parts.some(eachPart) ||
-    this.word.space.parts.some(eachPart);*/
     this.word.text.parts.forEach(eachPart);
     this.word.space.parts.forEach(eachPart);
   }
 
+  /**
+   * Creates an Array of PositionedChars from parts of the PositionedWord.
+   * The characters are pushed onto a cache "_characters"
+   * Every PositionedChar receives a new Run with the words formatting and text
+   * being a single character.
+   * TODO: formatting of character run is probably never used
+   */
   realiseCharacters() {
     if (!this._characters) {
       var cache:Array<PositionedChar> = [];
@@ -137,12 +118,20 @@ export class PositionedWord extends CNode {
     }
   }
 
+  /**
+   * Creates PositionedChars and returns them.
+   * @returns {Array<PositionedChar>}
+   */
   children() {
     this.realiseCharacters();
     return this._characters;
   }
 
-  parent():CNode {
+  /**
+   * Returns the parent Line object of the PositionedWord.
+   * @returns {Line}
+   */
+  parent():Line {
     return this.line;
   }
 }

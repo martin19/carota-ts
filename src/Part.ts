@@ -23,27 +23,6 @@ var defaultInline = {
   }
 };
 
-/**
- A Part is a section of a word with its own run, because a Word can span the
- boundaries between runs, so it may have several parts in its text or space
- arrays.
-
- run           - Run being measured.
- isNewLine     - True if this part only contain a newline (\n). This will be
- the only Part in the Word, and this is the only way newlines
- ever occur.
- width         - Width of the run
- ascent        - Distance from baseline to top
- descent       - Distance from baseline to bottom
-
- And methods:
-
- draw(ctx, x, y)
- - Draws the Word at x, y on the canvas context ctx. The y
- coordinate is assumed to be the baseline. The call
- prepareContext(ctx) will set the canvas up appropriately.
- */
-
 export interface ICode {
   measure : (p:any) => ITextMeasurement;
   draw : (ctx:CanvasRenderingContext2D, x:number, y:number, width:number, ascent:number, descent:number, formatting:Run) => void;
@@ -51,11 +30,33 @@ export interface ICode {
   eof? : boolean;
 }
 
+/**
+ * A Part is a section of a word with its own run, because a Word can span the
+ * boundaries between runs, so it may have several parts in its text or space
+ * arrays.
+ */
 export class Part {
+  /**
+   *  Run being measured.
+   */
   run:Run;
+  /**
+   * True if this part only contain a newline (\n). This will be
+   * the only Part in the Word, and this is the only way newlines
+   * ever occur.
+   */
   isNewLine:boolean;
+  /**
+   *  Width of the run.
+   */
   width:number;
+  /**
+   * Distance from baseline to top.
+   */
   ascent:number;
+  /**
+   * Distance from baseline to bottom.
+   */
   descent:number;
   lineHeight:number;
 
@@ -74,6 +75,14 @@ export class Part {
     this.lineHeight = m.lineHeight;
   }
 
+  /**
+   *  Draws the Word at x, y on the canvas context ctx. The y
+   * coordinate is assumed to be the baseline. The call
+   * prepareContext(ctx) will set the canvas up appropriately.
+   * @param ctx
+   * @param x
+   * @param y
+   */
   draw(ctx:CanvasRenderingContext2D, x:number, y:number) {
     if (typeof this.run.text === 'string') {
       Text.draw(ctx, <string>(this.run.text), this.run, x, y, this.width, this.ascent, this.descent);

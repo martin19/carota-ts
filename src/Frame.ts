@@ -10,7 +10,6 @@ export class Frame extends CNode {
   type:string;
   lines:Array<Line>;
   _parent:CNode;
-  ordinal:number;
   _bounds : Rect;
   height:number;
   _actualWidth:number;

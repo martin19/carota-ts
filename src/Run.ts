@@ -163,6 +163,12 @@ export class Run implements IRun,IFormatting {
     }
   }
 
+  /**
+   * Gets the length of text if text is a string or cumulated 
+   * length of text if text is an Array of strings. 
+   * @param text
+   * @returns {number}
+   */
   static getTextLength(text:string|Array<string>) {
     if (typeof text === 'string') {
       return text.length;
@@ -217,6 +223,11 @@ export class Run implements IRun,IFormatting {
     return result;
   }
 
+  /**
+   * Apply "each" to each character in "piece".
+   * @param each - function to apply to each character in "piece"
+   * @param piece - a string or an array of strings.
+   */
   static pieceCharacters(each:(s:string|Array<string>)=>void, piece:string|Array<string>) {
     if (typeof piece === 'string') {
       for (var c = 0; c < piece.length; c++) {

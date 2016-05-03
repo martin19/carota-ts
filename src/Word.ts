@@ -6,31 +6,6 @@ import {ICode} from "./Part";
 import {IRange} from "./Range";
 import {Run} from "./Run";
 
-/*  A Word has the following properties:
-
- text      - Section (see below) for non-space portion of word.
- space     - Section for trailing space portion of word.
- ascent    - Ascent (distance from baseline to top) for whole word
- descent   - Descent (distance from baseline to bottom) for whole word
- width     - Width of the whole word (including trailing space)
-
- It has methods:
-
- isNewLine()
- - Returns true if the Word represents a newline. Newlines are
- always represented by separate words.
-
- draw(ctx, x, y)
- - Draws the Word at x, y on the canvas context ctx.
-
- Note: a section (i.e. text and space) is an object containing:
-
- parts     - array of Parts
- ascent    - Ascent (distance from baseline to top) for whole section
- descent   - Descent (distance from baseline to bottom) for whole section
- width     - Width of the whole section
- */
-
 export interface ICoords {
   text : Character;
   spaces : Character;
@@ -38,21 +13,52 @@ export interface ICoords {
 }
 
 export interface ISection {
+  /**
+   * array of Parts
+   */
   parts: Array<Part>;
+  /**
+   * Ascent (distance from baseline to top) for whole section
+   */
   ascent: number;
+  /**
+   * Descent (distance from baseline to bottom) for whole section
+   */
   descent: number;
   lineHeight:number;
+  /**
+   * Width of the whole section
+   */
   width: number;
   length: number;
   plainText: string;
 }
 
+/**
+ * A Word object.
+ * A word contains of a non-space section (text) and a section of trailing spaces (space)
+ */
 export class Word {
+  /**
+   * Section (see below) for non-space portion of word.
+   */
   text:ISection;
+  /**
+   * Section for trailing space portion of word.
+   */
   space:ISection;
+  /**
+   * Ascent (distance from baseline to top) for whole word
+   */
   ascent:number;
+  /**
+   *  Descent (distance from baseline to bottom) for whole word
+   */
   descent:number;
   lineHeight:number;
+  /**
+   * Width of the whole word (including trailing space) in pixels.
+   */
   width:number;
   length:number;
   eof:boolean;
@@ -81,14 +87,21 @@ export class Word {
     }
   }
 
+  /**
+   * Returns true if the Word represents a newline. Newlines are
+   * always represented by separate words.
+   * @returns {boolean}
+   */
   isNewLine() {
     return this.text.parts.length == 1 && this.text.parts[0].isNewLine;
   }
 
-  codeFormatting() {
-    return this.text.parts.length == 1 && this.text.parts[0].run;
-  }
-
+  /**
+   * Draws the Word at x, y on the canvas context ctx.
+   * @param ctx
+   * @param x
+   * @param y
+   */
   draw(ctx:CanvasRenderingContext2D, x:number, y:number) {
     new Per(this.text.parts).concat(this.space.parts).forEach(function (part:Part) {
       part.draw(ctx, x, y);
@@ -100,11 +113,21 @@ export class Word {
     return this.text.plainText + this.space.plainText;
   }
 
+  /**
+   * Get the alignment of this Word.
+   * The alignment is taken as the words first parts' alignment formatting.
+   * @returns {string}
+   */
   align() {
     var first = this.text.parts[0];
     return first ? first.run.formatting.align : 'left';
   }
 
+  /**
+   * Emits this word's runs within a given Range (or the full word if no range is given.)
+   * @param emit
+   * @param range
+   */
   runs(emit:(p:Run)=>void, range?:IRange) {
     var start = range && range.start || 0,
       end = range && range.end;

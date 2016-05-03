@@ -2,7 +2,7 @@ import {Dom} from "./Dom";
 import {CarotaDoc} from "./Doc";
 import {Rect} from "./Rect";
 import {CNode} from "./Node";
-import {PositionedWord} from "./Positionedword";
+import {PositionedWord} from "./PositionedWord";
 import {IFormattingMap} from "./Run";
 import {Input} from "./Input";
 import {Run} from "./Run";

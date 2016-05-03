@@ -1,5 +1,5 @@
 import {CNode} from "./Node";
-import {PositionedWord} from "./Positionedword";
+import {PositionedWord} from "./PositionedWord";
 import {Rect} from "./Rect";
 import {CarotaDoc} from "./Doc";
 import {Word} from "./Word";
@@ -23,7 +23,6 @@ import {Frame} from "./Frame";
 export class Line extends CNode {
   positionedWords:Array<PositionedWord>;
   actualWidth:number;
-  length:number;
   type:string;
   frame:Frame;
   left:number;
@@ -31,7 +30,6 @@ export class Line extends CNode {
   baseline:number;
   ascent:number;
   descent:number;
-  ordinal:number;
   align:string;
 
   constructor(frame:Frame, left:number, width:number, baseline:number, ascent:number, descent:number, words:Array<Word>, ordinal:number) {

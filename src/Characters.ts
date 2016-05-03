@@ -8,9 +8,21 @@ function compatible(a:Character, b:Character) {
 
 export class Character {
 
+  /**
+   * Array of runs this character lives in.
+   */
   _runs:Array<Run>;
+  /**
+   * The run number this character lives in.
+   */
   _run:number;
+  /**
+   * The offset of the character within _run.
+   */
   _offset:number;
+  /**
+   * The character data.
+   */
   char:string;
 
   constructor(runArray:Array<Run>, run:number, offset:number) {
@@ -47,6 +59,12 @@ export class Character {
   }
 }
 
+/**
+ * Get first non-empty character in runArray.
+ * @param runArray
+ * @param n
+ * @returns {Character}
+ */
 function firstNonEmpty(runArray:Array<Run>, n:number) {
   for (; n < runArray.length; n++) {
     if (Run.getTextLength(runArray[n].text) != 0) {
@@ -56,6 +74,11 @@ function firstNonEmpty(runArray:Array<Run>, n:number) {
   return new Character(runArray, runArray.length, 0);
 }
 
+/**
+ * Returns a transformer function which emits all characters from an array of runs.
+ * @param runArray
+ * @returns {function(function(Character): void): undefined}
+ */
 export var characters = function (runArray:Array<Run>) {
   return function (emit:(c:Character)=>void) {
     var c = firstNonEmpty(runArray, 0);

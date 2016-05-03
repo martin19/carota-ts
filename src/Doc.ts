@@ -9,12 +9,12 @@ import {Range} from "./Range";
 import {Rect} from "./Rect";
 import {ICode} from "./Part";
 import {IRange} from "./Range";
-import {PositionedChar} from "./Positionedword";
 import {IFormatting} from "./Run";
 import {ICoords} from "./Word";
 import {Run} from "./Run";
 import {IFormattingMap} from "./Run";
 import {Line} from "./Line";
+import {PositionedChar} from "./PositionedChar";
 
 export interface ISelection {
   start : number;
@@ -73,7 +73,6 @@ export class CarotaDoc extends CNode {
   caretVisible : boolean;
   selectionChanged : LiteEvent<any>;
   contentChanged : LiteEvent<any>;
-  editFilters:Array<(doc:CarotaDoc)=>void>;
   undo : Array<(f1:(f2:()=>void)=>void)=>void>;
   redo : Array<(f1:(f2:()=>void)=>void)=>void>;
   words : Array<Word>;
@@ -81,7 +80,6 @@ export class CarotaDoc extends CNode {
   frame : Frame;
   nextInsertFormatting:{[s:string]:string|boolean|number};
   selectionJustChanged:boolean;
-  _filtersRunning:number;
   _currentTransaction:(f1:(f2:()=>void)=>void)=>void;
   sendKey:(key:number, selecting:boolean, ctrlKey:boolean)=>void;
   wrap : boolean;
@@ -203,6 +201,11 @@ export class CarotaDoc extends CNode {
     }
   }
 
+  /**
+   * Returns the ordinal number (first character) of word with index "index".
+   * @param index
+   * @returns {number}
+   */
   wordOrdinal(index:number) {
     if (index < this.words.length) {
       var cached = this._wordOrdinals.length;
@@ -218,7 +221,7 @@ export class CarotaDoc extends CNode {
   }
 
   /**
-   *
+   * Returns an object containing the word that contains the character with ordinal number "ordinal".
    * @param ordinal
    * @return {{word: Word, ordinal: number, index: number, offset: number}}
    */
@@ -246,20 +249,26 @@ export class CarotaDoc extends CNode {
     return result;
   }
 
+  /**
+   * Emits this document's runs within a given Range
+   * (or the complete document if no Range is given.)
+   * @param emit
+   * @param range
+   */
   runs(emit:(p:Run)=>void, range:IRange) {
-    var startDetails = this.wordContainingOrdinal(Math.max(0, range.start)),
-      endDetails = this.wordContainingOrdinal(Math.min(range.end, this.frame.length - 1));
-    if (startDetails.index === endDetails.index) {
-      startDetails.word.runs(emit, {
-        start: startDetails.offset,
-        end: endDetails.offset
+    var start = this.wordContainingOrdinal(Math.max(0, range.start)),
+      end = this.wordContainingOrdinal(Math.min(range.end, this.frame.length - 1));
+    if (start.index === end.index) {
+      start.word.runs(emit, {
+        start: start.offset,
+        end: end.offset
       });
     } else {
-      startDetails.word.runs(emit, {start: startDetails.offset});
-      for (var n = startDetails.index + 1; n < endDetails.index; n++) {
+      start.word.runs(emit, {start: start.offset});
+      for (var n = start.index + 1; n < end.index; n++) {
         this.words[n].runs(emit);
       }
-      endDetails.word.runs(emit, {end: endDetails.offset});
+      end.word.runs(emit, {end: end.offset});
     }
   }
 
@@ -338,10 +347,6 @@ export class CarotaDoc extends CNode {
       new Per(prefix).concat(text_).concat(suffix).per(Run.consolidate()).all());
 
     return this.frame ? (this.frame.length - oldLength) : 0;
-  }
-
-  registerEditFilter(filter:(doc:CarotaDoc)=>void) {
-    this.editFilters.push(filter);
   }
 
   width(width?:number) {

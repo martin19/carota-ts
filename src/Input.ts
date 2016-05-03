@@ -1,4 +1,4 @@
-import {PositionedWord} from "./Positionedword";
+import {PositionedWord} from "./PositionedWord";
 import {Dom} from "./Dom";
 import {IFormattingMap} from "./Run";
 import {Editor} from "./Editor";
