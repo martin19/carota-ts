@@ -180,15 +180,29 @@ export class CarotaDoc extends CNode {
     return this.range(start, end);
   }
 
+  /**
+   * Insert/Replace selection with new text (string or Array of runs.)
+   * @param text
+   * @param takeFocus
+   */
   insert(text:string|Array<Run>, takeFocus?:boolean) {
     this.select(this.selection.end + this.selectedRange().setText(text), null, takeFocus);
   }
 
+  /**
+   * Change insert formatting that will be applied to newly inserted text.
+   * @param attribute - the formatting attribute to set.
+   * @param value - the value to set the attribute to.
+   */
   modifyInsertFormatting(attribute:string, value:string|boolean) {
     this.nextInsertFormatting[attribute] = value;
     this.notifySelectionChanged();
   }
 
+  /**
+   * Applies the insertFormatting to an array of runs.
+   * @param text
+   */
   applyInsertFormatting(text:Array<Run>) {
     var formatting = this.nextInsertFormatting;
     var insertFormattingProperties = Object.keys(formatting);
@@ -250,8 +264,7 @@ export class CarotaDoc extends CNode {
   }
 
   /**
-   * Emits this document's runs within a given Range
-   * (or the complete document if no Range is given.)
+   * Emits this document's runs within a given Range (or the complete document if no Range is given.)
    * @param emit
    * @param range
    */
@@ -272,6 +285,13 @@ export class CarotaDoc extends CNode {
     }
   }
 
+  /**
+   * Splice/connect/glue given a start word by index, count of words, and an Array of runs. 
+   * Creates an array of new Words.
+   * @param wordIndex
+   * @param count
+   * @param runs
+   */
   spliceWordsWithRuns(wordIndex:number, count:number, runs:Array<Run>) {
     var self = this;
 
@@ -288,6 +308,13 @@ export class CarotaDoc extends CNode {
     });
   }
 
+  /**
+   * Splice/connect/glue a range of characters with a string/Array of runs
+   * @param start
+   * @param end
+   * @param text
+   * @returns {number}
+   */
   splice(start:number, end:number, text:Array<Run>|string) {
     var text_:Array<Run>;
     if (typeof text === 'string') {
@@ -349,6 +376,11 @@ export class CarotaDoc extends CNode {
     return this.frame ? (this.frame.length - oldLength) : 0;
   }
 
+  /**
+   * Gets/sets the current width of the document.
+   * @param width
+   * @returns {number}
+   */
   width(width?:number) {
     if (arguments.length === 0) {
       return this._width;
@@ -357,6 +389,10 @@ export class CarotaDoc extends CNode {
     this.layout();
   }
 
+  /**
+   * Returns the child (frame) of the document.
+   * @returns {Frame[]}
+   */
   children() {
     return [this.frame];
   }

@@ -2,6 +2,7 @@
 <html>
 <head>
   <title></title>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5.1/dat.gui.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.22/require.min.js"></script>
   <style>
@@ -246,26 +247,6 @@
       // Set up our custom inline - a smiley emoji
       var smiley = document.querySelector('#smiley img');
 
-      exampleEditor.customCodes = function (obj) {
-        if (obj.smiley) {
-          // Must return an object that encapsulates the inline
-          return {
-            // measure: must return width, ascent and descent
-            measure: function (/*formatting*/) {
-              return {
-                width: 24,
-                ascent: 24,
-                descent: 0
-              };
-            },
-            // draw: implements the appearance of the inline on canvas
-            draw: function (ctx, x, y, width, ascent, descent, formatting) {
-              ctx.drawImage(smiley, x, y - ascent, width, ascent);
-            }
-          }
-        }
-      };
-
       // Setting up the button so user can insert a smiley
       /*carota.Dom.handleEvent(document.querySelector('#smiley'), 'click', function () {
        exampleEditor.insert({smiley: true});
@@ -315,6 +296,13 @@
           exampleEditor.load(runs);
         }
       };
+
+      //var load = function() {
+      //  $.getJSON("./src/import/enginedata_area.json", function(engineData) {
+      //    var runs = carota.EngineData.parse(engineData);
+      //    exampleEditor.load(runs);
+      //  });
+      //};
 
       //dat.gui
       var TextBoxController = {

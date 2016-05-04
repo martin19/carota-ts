@@ -75,7 +75,7 @@ function firstNonEmpty(runArray:Array<Run>, n:number) {
 }
 
 /**
- * Returns a transformer function which emits all characters from an array of runs.
+ * Returns a function which emits all characters from an array of runs.
  * @param runArray
  * @returns {function(function(Character): void): undefined}
  */

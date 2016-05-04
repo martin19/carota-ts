@@ -27,6 +27,11 @@ export class Range implements IRange{
     }
   }
 
+  /**
+   * Emits the range's CNode objects. ??? 
+   * @param emit
+   * @param list
+   */
   parts(emit:(n:CNode)=>void, list?:Array<CNode>) {
     list = list || this.doc.children();
     var self = this;
@@ -51,14 +56,27 @@ export class Range implements IRange{
     return this.setText([]);
   }
 
+  /**
+   * Sets range's contents to a given string/Array of runs.
+   * @param text
+   * @returns {number}
+   */
   setText(text:Array<Run>|string) {
     return this.doc.splice(this.start, this.end, text);
   }
 
+  /**
+   * Emits the range's runs.
+   * @param emit
+   */
   runs(emit:(r:Run)=>void) {
     this.doc.runs(emit, this);
   };
 
+  /**
+   * Returns the range's contents as plain text.
+   * @returns {string}
+   */
   plainText():string {
     return new Per(this.runs, this).map(Run.getPlainText).all().join('');
   };
@@ -67,6 +85,10 @@ export class Range implements IRange{
     return new Per(this.runs, this).per(Run.consolidate()).all();
   };
 
+  /**
+   *
+   * @returns {IFormattingMap}
+   */
   getFormatting():IFormatting {
     var range = this;
     if (range.start === range.end) {
