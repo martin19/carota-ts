@@ -28,15 +28,12 @@ export class Frame extends CNode {
    * @param top
    * @param ordinal
    * @param parent
-   * @param includeTerminator
-   * @param initialAscent
-   * @param initialDescent
    * @return {function(function(Frame): void, Word): boolean}
    */
-  static noWrap(left:number, top:number, ordinal:number, parent:CNode, includeTerminator?:(p:ICode)=>boolean, initialAscent?:number, initialDescent?:number) {
+  static noWrap(left:number, top:number, ordinal:number, parent:CNode) {
     var frame_ = new Frame(parent, ordinal);
     var lines = frame_.lines;
-    var wrapper = NoWrap(left, top, ordinal, frame_, includeTerminator, initialAscent, initialDescent);
+    var wrapper = NoWrap(left, top, ordinal, frame_);
     var length = 0, height = 0;
     return function (emit:(p:Frame)=>void, word:Word) {
       if (wrapper(function (line:number|Line) {
