@@ -4,6 +4,7 @@ import {Word} from "./Word";
 import {ICode} from "./Part";
 import {CarotaDoc} from "./Doc";
 import {Frame} from "./Frame";
+import {Paragraph} from "./Paragraph";
 /**
  * A stateful transformer function that accepts words and emits lines.
  * Lines will grow in size until a linebreak character is encountered.
@@ -12,12 +13,12 @@ import {Frame} from "./Frame";
  *
  * Returns a stream of line objects, each containing an array of positionedWord objects.
  */
-export var NoWrap = function (left:number, top:number, ordinal:number, parent:Frame, includeTerminator?:(p:ICode)=>boolean, initialAscent?:number, initialDescent?:number) {
+export var NoWrap = function (left:number, top:number, ordinal:number, parent:Paragraph) {
 
   var lineBuffer:Array<Word> = [],
     lineWidth = 0,
-    maxAscent = initialAscent || 0,
-    maxDescent = initialDescent || 0,
+    maxAscent = 0,
+    maxDescent = 0,
     maxLineHeight = 0,
     quit:boolean|void,
     lastNewLineHeight = 0,

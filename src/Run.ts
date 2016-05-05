@@ -1,21 +1,8 @@
 import {Character} from "./Characters";
 
-export interface IFormatting {
-  size?: number;
-  lineHeight?: string;
-  font?: string;
-  color?: string;
-  bold?: boolean;
-  italic?: boolean;
-  underline?: boolean;
-  strikeout?: boolean;
-  align?: string;
-  script?: string;
-}
-
-export interface IRun extends IFormatting {
+/*export interface IRun extends IFormatting {
   text : string|Array<string>;
-}
+}*/
 
 export type IFormattingMap = {[s:string]:any};
 
@@ -29,28 +16,15 @@ export type IFormattingMap = {[s:string]:any};
  *
  * TODO: where are character objects created and are there really occurences? if not we might drop this abstraction
  */
-export class Run implements IRun,IFormatting {
-  static formattingKeys = ['bold', 'italic', 'underline', 'strikeout', 'color', 'font', 'size', 'lineHeight', 'align', 'script'];
-
-  static defaultFormatting:IFormatting = {
-    size: 10,
-    lineHeight: 'auto',
-    font: 'sans-serif',
-    color: 'black',
-    bold: false,
-    italic: false,
-    underline: false,
-    strikeout: false,
-    align: 'left',
-    script: 'normal'
-  };
+export class Run {
+  static formattingKeys:Array<string> = [];
 
   static multipleValues = {};
 
   text : string|Array<string>;
-  formatting : IFormatting;
+  formatting : IFormattingMap;
 
-  constructor(text:string|Array<string>, formatting : IFormatting) {
+  constructor(text:string|Array<string>, formatting : IFormattingMap) {
     this.text = text;
     this.formatting = Run.cloneFormatting(formatting);
   }
@@ -66,8 +40,8 @@ export class Run implements IRun,IFormatting {
   }
 
   static sameFormatting(run1:Run, run2:Run) {
-    return Run.formattingKeys.every(function (key:string) {
-      return (<IFormattingMap>run1.formatting)[key] === (<IFormattingMap>run2.formatting)[key];
+    return this.formattingKeys.every(function (key:string) {
+      return (run1.formatting)[key] === (run2.formatting)[key];
     });
   }
 
@@ -80,44 +54,44 @@ export class Run implements IRun,IFormatting {
       return Array.isArray(run1) ? run1.reduce(Run.merge) : run1;
     }
     if (arguments.length > 2) {
-      return Run.merge(Array.prototype.slice.call(arguments, 0));
+      return this.merge(Array.prototype.slice.call(arguments, 0));
     }
     if(run1 instanceof Run && run2 instanceof Run) {
       var mergedFormatting:IFormattingMap = {};
-      Run.formattingKeys.forEach(function (key) {
+      this.formattingKeys.forEach(function (key) {
         if (key in run1.formatting || key in run2.formatting) {
-          if ((<IFormattingMap>run1.formatting)[key] === (<IFormattingMap>run2.formatting)[key]) {
-            mergedFormatting[key] = (<IFormattingMap>run1.formatting)[key];
+          if ((run1.formatting)[key] === (run2.formatting)[key]) {
+            mergedFormatting[key] = (run1.formatting)[key];
           } else {
             mergedFormatting[key] = Run.multipleValues;
           }
         }
       });
     }
-    return new Run("",mergedFormatting);
+    return new this("",mergedFormatting);
   }
 
   /**
    * Formats this with given formatting
    * @param template
    */
-  format(template:IFormatting) {
+  format(template:IFormattingMap) {
     Object.keys(template).forEach(function (key) {
-      if ((<IFormattingMap>template)[key] !== Run.multipleValues) {
-        (<IFormattingMap>this.formatting)[key] = (<IFormattingMap>template)[key];
+      if ((template)[key] !== Run.multipleValues) {
+        this.formatting[key] = template[key];
       }
     });
   }
 
-  static format(run:Run|Array<Run>, template:IFormatting) {
+  static format(run:Run|Array<Run>, template:IFormattingMap) {
     if (Array.isArray(run)) {
-      run.forEach(function (r:Run) {
-        Run.format(r, template);
+      run.forEach((r:Run)=>{
+        this.format(r, template);
       });
     } else {
       Object.keys(template).forEach(function (key) {
-        if ((<IFormattingMap>template)[key] !== Run.multipleValues) {
-          (<IFormattingMap>run.formatting)[key] = (<IFormattingMap>template)[key];
+        if (template[key] !== Run.multipleValues) {
+          run.formatting[key] = template[key];
         }
       });
     }
@@ -125,8 +99,8 @@ export class Run implements IRun,IFormatting {
 
   static consolidate() {
     var current:Run;
-    return function (emit:(p:Run)=>void, run:Run) {
-      if (!current || !Run.sameFormatting(run,current) ||
+    return (emit:(p:Run)=>void, run:Run)=> {
+      if (!current || !this.sameFormatting(run,current) ||
         (typeof current.text != 'string') ||
         (typeof run.text != 'string')) {
         current = run.clone();
@@ -143,8 +117,8 @@ export class Run implements IRun,IFormatting {
     }
     if (Array.isArray(run.text)) {
       var str:Array<string> = [];
-      (<Array<string>>(run.text)).forEach(function (piece:string) {
-        str.push(Run.getPiecePlainText(piece));
+      (<Array<string>>(run.text)).forEach((piece:string)=> {
+        str.push(this.getPiecePlainText(piece));
       });
       return str.join('');
     }
@@ -176,7 +150,7 @@ export class Run implements IRun,IFormatting {
     if (Array.isArray(text)) {
       var length = 0;
       text.forEach(function (piece) {
-        length += Run.getPieceLength(piece);
+        length += this.getPieceLength(piece);
       });
       return length;
     }
@@ -198,7 +172,7 @@ export class Run implements IRun,IFormatting {
         if (count <= 0) {
           return true;
         }
-        var pieceLength = Run.getPieceLength(piece);
+        var pieceLength = this.getPieceLength(piece);
         if (pos + pieceLength > start) {
           if (pieceLength === 1) {
             emit(piece);
@@ -217,7 +191,7 @@ export class Run implements IRun,IFormatting {
 
   static getTextChar(text:string|Array<string>, offset:number) {
     var result:string;
-    Run.getSubText(function (c) {
+    this.getSubText(function (c) {
       result = c
     }, text, offset, 1);
     return result;

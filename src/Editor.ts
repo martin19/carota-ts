@@ -5,7 +5,7 @@ import {CNode} from "./Node";
 import {PositionedWord} from "./PositionedWord";
 import {IFormattingMap} from "./Run";
 import {Input} from "./Input";
-import {Run} from "./Run";
+import {CharacterRun} from "./CharacterRun";
 
 export interface EditorOptions {
   canvas : HTMLCanvasElement;
@@ -35,7 +35,7 @@ export class Editor {
   nextKeyboardX:number;
   selectDragStart:number;
   focusChar:number;
-  richClipboard:Array<Run>;
+  richClipboard:Array<CharacterRun>;
   plainClipboard:string;
   toggles:{[n:number]:string};
   verticalAlignment:string;

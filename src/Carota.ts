@@ -6,7 +6,7 @@ import {Text} from "./Text";
 import {Rect} from "./Rect";
 import {Editor} from "./Editor";
 import {html} from "./Html";
-import {Run} from "./Run";
+import {CharacterRun} from "./CharacterRun";
 import {EngineData} from "./import/EngineData";
 
 export var carota = {
@@ -14,7 +14,7 @@ export var carota = {
   Editor: Editor,
   Doc: CarotaDoc,
   Dom: Dom,
-  Run : Run,
+  Run : CharacterRun,
   Html: html,
   Frame: Frame,
   Text: Text,

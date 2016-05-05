@@ -4,6 +4,7 @@ import {Rect} from "./Rect";
 import {CarotaDoc} from "./Doc";
 import {Word} from "./Word";
 import {Frame} from "./Frame";
+import {Paragraph} from "./Paragraph";
 
 /*  A Line is returned by the wrap function. It contains an array of PositionedWord objects that are
  all on the same physical line in the wrapped text.
@@ -24,7 +25,7 @@ export class Line extends CNode {
   positionedWords:Array<PositionedWord>;
   actualWidth:number;
   type:string;
-  frame:Frame;
+  paragraph:Paragraph;
   left:number;
   width:number;
   baseline:number;
@@ -32,14 +33,14 @@ export class Line extends CNode {
   descent:number;
   align:string;
 
-  constructor(frame:Frame, left:number, width:number, baseline:number, ascent:number, descent:number, words:Array<Word>, ordinal:number) {
+  constructor(paragraph:Paragraph, left:number, width:number, baseline:number, ascent:number, descent:number, words:Array<Word>, ordinal:number) {
     super();
     this.type = 'line';
     var self = this;
 
     var align = words[0].align();
 
-    this.frame = frame;
+    this.paragraph = paragraph;
     this.left = left;
     this.width = width;
     this.baseline = baseline;
@@ -98,10 +99,19 @@ export class Line extends CNode {
   }
 
   parent() {
-    return this.frame;
+    return this.paragraph;
   }
 
   children() {
     return this.positionedWords;
+  }
+
+  /**
+   * Gets content as plaintext.
+   */
+  plainText() {
+    return this.positionedWords.map((w : PositionedWord)=>{
+      return w.plainText();
+    }).join("");
   }
 }

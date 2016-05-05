@@ -1,6 +1,6 @@
 import {Per} from "./Per";
 import {IFormattingMap} from "./Run";
-import {Run} from "./Run";
+import {CharacterRun} from "./CharacterRun";
 
 var tag = function (name:string, formattingProperty:string) {
   return function (node:Node, formatting:IFormattingMap) {
@@ -149,10 +149,10 @@ export class html {
       root = html;
     }
 
-    var result:Array<Run> = [], inSpace = true;
-    var cons = new Per<Run>(Run.consolidate()).into(result);
+    var result:Array<CharacterRun> = [], inSpace = true;
+    var cons = new Per<CharacterRun>(CharacterRun.consolidate()).into(result);
     var emit = function (text:string, formatting:IFormattingMap) {
-      cons.submit(new Run(text, formatting));
+      cons.submit(new CharacterRun(text, formatting));
     };
     var dealWithSpaces = function (text:string, formatting:IFormattingMap) {
       text = text.replace(/\n+\s*/g, ' ');
@@ -176,7 +176,7 @@ export class html {
       if (node.nodeType == 3) {
         dealWithSpaces(node.nodeValue, formatting);
       } else {
-        formatting = Run.cloneFormatting(formatting);
+        formatting = CharacterRun.cloneFormatting(formatting);
 
         //var classNames = node.attributes['class'];
         var classNames = node.attributes.getNamedItem("class");

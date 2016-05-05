@@ -244,8 +244,7 @@
       });
       var exampleEditor = editor.getDoc();
 
-      // Set up our custom inline - a smiley emoji
-      var smiley = document.querySelector('#smiley img');
+      window.editor = editor;
 
       // Setting up the button so user can insert a smiley
       /*carota.Dom.handleEvent(document.querySelector('#smiley'), 'click', function () {
@@ -314,7 +313,6 @@
             italic: false,
             underline: false,
             strikeout: false,
-            align: "left",
             script: "normal",
             color: "black",
             undo: function () {
@@ -323,7 +321,6 @@
             redo: function () {
               exampleEditor.performUndo(true);
             },
-            valign: "top",
             wrap : true,
             origin : "center",
             baselines : false
@@ -331,7 +328,7 @@
 
           var gui = new dat.GUI();
 
-          var f1 = gui.addFolder("Formatting");
+          var f1 = gui.addFolder("Character");
           var cOrigin = f1.add(textBoxOptions, "origin", ["topleft","center","bottomright"]);
           var cWrap = f1.add(textBoxOptions, "wrap");
           var cBaselines = f1.add(textBoxOptions,"baselines");
@@ -342,18 +339,13 @@
           cFormatting.push(f1.add(textBoxOptions, "italic").listen());
           cFormatting.push(f1.add(textBoxOptions, "underline").listen());
           cFormatting.push(f1.add(textBoxOptions, "strikeout").listen());
-          cFormatting.push(f1.add(textBoxOptions, "align", ["left", "center", "right", "justify"]).listen());
           cFormatting.push(f1.add(textBoxOptions, "script", ["normal", "super", "sub"]).listen());
           cFormatting.push(f1.add(textBoxOptions, "color", ["black", "red", "green", "blue", "orange"]).listen());
-          var cValign = f1.add(textBoxOptions, "valign", ["top", "middle", "bottom"]);
           cFormatting.forEach(function (c) {
             c.onFinishChange(function (value) {
               var range = exampleEditor.selectedRange();
-              range.setFormatting(this.property, value);
+              range.setCharacterFormatting(this.property, value);
             });
-          });
-          cValign.onFinishChange(function (value) {
-            exampleEditor.setVerticalAlignment(value);
           });
           cWrap.onFinishChange(function(value) {
             exampleEditor.setWrap(value);
@@ -369,15 +361,39 @@
             editor.setPaintBaselines(value);
           });
 
-          var f2 = gui.addFolder("Undo/Redo");
-          f2.add(textBoxOptions, "undo");
-          f2.add(textBoxOptions, "redo");
+          var paragraphOptions = {
+            align: "left",
+            marginLeft : 0,
+            marginTop : 0,
+            marginRight : 0,
+            marginBottom : 0,
+            hyphenate : false
+          };
+
+          var f2 = gui.addFolder("Paragraph");
+          var cParagraph = [];
+          cParagraph.push(f2.add(paragraphOptions, "align", ["left","center","right","justifyLastLeft","justifyLastCentered","justifyLastRight","justifyAll"]).listen());
+          cParagraph.push(f2.add(paragraphOptions,"marginLeft").min(-50).max(50).listen());
+          cParagraph.push(f2.add(paragraphOptions,"marginTop").min(-50).max(50).listen());
+          cParagraph.push(f2.add(paragraphOptions,"marginRight").min(-50).max(50).listen());
+          cParagraph.push(f2.add(paragraphOptions,"marginBottom").min(-50).max(50).listen());
+          cParagraph.push(f2.add(paragraphOptions,"hyphenate").listen());
+          cParagraph.forEach(function(c){
+            c.onFinishChange(function(value){
+              var range = exampleEditor.selectedRange();
+              range.setParagraphFormatting(this.property, value);
+            });
+          });
+
+          var f3 = gui.addFolder("Undo/Redo");
+          f3.add(textBoxOptions, "undo");
+          f3.add(textBoxOptions, "redo");
 
           // When the selected range coordinates change, update the control
           exampleEditor.selectionChanged.on(function (data) {
             cFormatting.forEach(function(c){
               var id = c.property;
-              var formatting = data.getFormatting();
+              var formatting = data.getCharacterFormatting();
               var val = id in formatting ? formatting[id] : carota.Run.defaultFormatting[id];
               if(val === carota.Run.multipleValues) {
                 //indeterminate
@@ -399,14 +415,14 @@
           f2.open();
 
           var gui2 = new dat.GUI();
-          var f3 = gui2.addFolder("Position");
-          var cCx = f3.add(textBoxPosition,"cx").min(0).max(500);
-          var cCy = f3.add(textBoxPosition,"cy").min(0).max(500);
-          var cAlpha = f3.add(textBoxPosition,"alpha").min(0).max(Math.PI*2);
-          var cW = f3.add(textBoxPosition,"w").min(0).max(500);
-          var cH = f3.add(textBoxPosition,"h").min(0).max(500);
-          var cSx = f3.add(textBoxPosition,"sx").min(-5).max(5);
-          var cSy = f3.add(textBoxPosition,"sy").min(-5).max(5);
+          var f4 = gui2.addFolder("Position");
+          var cCx = f4.add(textBoxPosition,"cx").min(0).max(500);
+          var cCy = f4.add(textBoxPosition,"cy").min(0).max(500);
+          var cAlpha = f4.add(textBoxPosition,"alpha").min(0).max(Math.PI*2);
+          var cW = f4.add(textBoxPosition,"w").min(0).max(500);
+          var cH = f4.add(textBoxPosition,"h").min(0).max(500);
+          var cSx = f4.add(textBoxPosition,"sx").min(-5).max(5);
+          var cSy = f4.add(textBoxPosition,"sy").min(-5).max(5);
 
           cCx.onChange(function(value){
             editor.setPosition(value, editor.getPosition().y);
@@ -430,7 +446,7 @@
             editor.setScale(editor.getScale().x, value);
           });
 
-          f3.open();
+          f4.open();
         },
         updateUndo: function () {
           //undo.disabled = !exampleEditor.canUndo(false);

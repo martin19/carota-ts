@@ -4,7 +4,7 @@ import {Range} from "./Range";
 import {Character} from "./Characters";
 import {ICode} from "./Part";
 import {IRange} from "./Range";
-import {Run} from "./Run";
+import {CharacterRun, ICharacterFormatting} from "./CharacterRun";
 
 export interface ICoords {
   text : Character;
@@ -60,15 +60,21 @@ export class Word {
    * Width of the whole word (including trailing space) in pixels.
    */
   width:number;
+  /**
+   * Length of word in characters (non-space section length + space section length)
+   */
   length:number;
+  /**
+   * True if word is "End of file".
+   */
   eof:boolean;
 
   constructor(coords:ICoords) {
-    var text:((p:(r:Run)=>void)=>void)|Array<Run>,
-      space:((p:(r:Run)=>void)=>void)|Array<Run>;
+    var text:((p:(r:CharacterRun)=>void)=>void)|Array<CharacterRun>,
+      space:((p:(r:CharacterRun)=>void)=>void)|Array<CharacterRun>;
     if (!coords) {
       // special end-of-document marker, mostly like a newline with no formatting
-      text = [new Run('\n',{})];
+      text = [new CharacterRun('\n',{})];
       space = [];
     } else {
       text = coords.text.cut(coords.spaces);
@@ -120,7 +126,7 @@ export class Word {
    */
   align() {
     var first = this.text.parts[0];
-    return first ? first.run.formatting.align : 'left';
+    return first ? (<ICharacterFormatting>first.run.formatting).align : 'left';
   }
 
   /**
@@ -128,7 +134,7 @@ export class Word {
    * @param emit
    * @param range
    */
-  runs(emit:(p:Run)=>void, range?:IRange) {
+  runs(emit:(p:CharacterRun)=>void, range?:IRange) {
     var start = range && range.start || 0,
       end = range && range.end;
     if (typeof end !== 'number') {
@@ -167,9 +173,9 @@ export class Word {
 }
 
 
-var section = function (runEmitter:((p:(r:Run)=>void)=>void)|Array<Run>) {
+var section = function (runEmitter:((p:(r:CharacterRun)=>void)=>void)|Array<CharacterRun>) {
   var s:ISection = {
-    parts: new Per(runEmitter).map(function (p:Run) {
+    parts: new Per(runEmitter).map(function (p:CharacterRun) {
       return new Part(p);
     }).all(),
     ascent: 0,
@@ -184,8 +190,8 @@ var section = function (runEmitter:((p:(r:Run)=>void)=>void)|Array<Run>) {
     s.descent = Math.max(s.descent, p.descent);
     s.lineHeight = Math.max(s.lineHeight, p.lineHeight);
     s.width += p.width;
-    s.length += Run.getPieceLength(p.run.text);
-    s.plainText += Run.getPiecePlainText(p.run.text);
+    s.length += CharacterRun.getPieceLength(p.run.text);
+    s.plainText += CharacterRun.getPiecePlainText(p.run.text);
   });
   return s;
 };

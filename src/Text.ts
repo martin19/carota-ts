@@ -1,5 +1,5 @@
-import {IFormatting} from "./Run";
-import {Run} from "./Run";
+import {ICharacterFormatting} from "./CharacterRun";
+import {CharacterRun} from "./CharacterRun";
 
 export interface ITextMeasurement {
   ascent : number;
@@ -16,12 +16,12 @@ export class Text {
    * @param run
    * @return {string}
    */
-  static getFontString(run:Run) {
+  static getFontString(run:CharacterRun) {
 
-    var size = (run && run.formatting.size) || Run.defaultFormatting.size;
+    var size = (run && (<ICharacterFormatting>run.formatting).size) || CharacterRun.defaultFormatting.size;
 
     if (run) {
-      switch (run.formatting.script) {
+      switch ((<ICharacterFormatting>run.formatting).script) {
         case 'super':
         case 'sub':
           size *= 0.8;
@@ -29,10 +29,10 @@ export class Text {
       }
     }
 
-    return (run && run.formatting.italic ? 'italic ' : '') +
-      (run && run.formatting.bold ? 'bold ' : '') + ' ' +
+    return (run && (<ICharacterFormatting>run.formatting).italic ? 'italic ' : '') +
+      (run && (<ICharacterFormatting>run.formatting).bold ? 'bold ' : '') + ' ' +
       size + 'pt ' +
-      ((run && run.formatting.font) || Run.defaultFormatting.font);
+      ((run && (<ICharacterFormatting>run.formatting).font) || CharacterRun.defaultFormatting.font);
   }
 
   /**
@@ -40,8 +40,8 @@ export class Text {
    * @param ctx
    * @param run
    */
-  static applyRunStyle(ctx:CanvasRenderingContext2D, run:Run) {
-    ctx.fillStyle = (run && run.formatting.color) || Run.defaultFormatting.color;
+  static applyRunStyle(ctx:CanvasRenderingContext2D, run:CharacterRun) {
+    ctx.fillStyle = (run && (<ICharacterFormatting>run.formatting).color) || CharacterRun.defaultFormatting.color;
     ctx.font = Text.getFontString(run);
   };
 
@@ -55,14 +55,14 @@ export class Text {
    * @param run
    * @return {string}
    */
-  static getRunStyle(run:Run) {
+  static getRunStyle(run:CharacterRun) {
     var parts = [
       'font: ', Text.getFontString(run),
-      '; color: ', ((run && run.formatting.color) || Run.defaultFormatting.color)
+      '; color: ', ((run && (<ICharacterFormatting>run.formatting).color) || CharacterRun.defaultFormatting.color)
     ];
 
     if (run) {
-      switch (run.formatting.script) {
+      switch ((<ICharacterFormatting>run.formatting).script) {
         case 'super':
           parts.push('; vertical-align: super');
           break;
@@ -71,9 +71,9 @@ export class Text {
           break;
       }
 
-      if(run.formatting.lineHeight) {
-        if(run.formatting.lineHeight !== "auto") {
-          parts.push("; line-height:"+run.formatting.lineHeight + "px");
+      if((<ICharacterFormatting>run.formatting).lineHeight) {
+        if((<ICharacterFormatting>run.formatting).lineHeight !== "auto") {
+          parts.push("; line-height:"+(<ICharacterFormatting>run.formatting).lineHeight + "px");
         }
       }
     }
@@ -205,14 +205,14 @@ export class Text {
 
   static cachedMeasureText:(text:string,style:string)=>ITextMeasurement;
 
-  static measure(str:string, formatting:Run) {
+  static measure(str:string, formatting:CharacterRun) {
     return Text.cachedMeasureText(str, Text.getRunStyle(formatting));
   };
 
-  static draw(ctx:CanvasRenderingContext2D, str:string, formatting:Run, left:number, baseline:number, width:number, ascent:number, descent:number) {
+  static draw(ctx:CanvasRenderingContext2D, str:string, formatting:CharacterRun, left:number, baseline:number, width:number, ascent:number, descent:number) {
     Text.prepareContext(ctx);
     Text.applyRunStyle(ctx, formatting);
-    switch (formatting.formatting.script) {
+    switch ((<ICharacterFormatting>formatting.formatting).script) {
       case 'super':
         baseline -= (ascent * (1/3));
         break;
@@ -221,10 +221,10 @@ export class Text {
         break;
     }
     ctx.fillText(str === '\n' ? Text.enter : str, left, baseline);
-    if (formatting.formatting.underline) {
+    if ((<ICharacterFormatting>formatting.formatting).underline) {
       ctx.fillRect(left, 1 + baseline, width, 1);
     }
-    if (formatting.formatting.strikeout) {
+    if ((<ICharacterFormatting>formatting.formatting).strikeout) {
       ctx.fillRect(left, 1 + baseline - (ascent/2), width, 1);
     }
   };

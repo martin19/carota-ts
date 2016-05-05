@@ -3,8 +3,10 @@ import {CarotaDoc} from "./Doc";
 import {CNode} from "./Node";
 import {Part} from "./Part";
 import {IFormattingMap} from "./Run";
-import {IFormatting} from "./Run";
-import {Run} from "./Run";
+import {ICharacterFormatting} from "./CharacterRun";
+import {CharacterRun} from "./CharacterRun";
+import {Paragraph} from "./Paragraph";
+import {ParagraphRun} from "./ParagraphRun";
 
 export interface IRange {
   start? : number,
@@ -61,7 +63,7 @@ export class Range implements IRange{
    * @param text
    * @returns {number}
    */
-  setText(text:Array<Run>|string) {
+  setText(text:Array<CharacterRun>|string) {
     return this.doc.splice(this.start, this.end, text);
   }
 
@@ -69,27 +71,36 @@ export class Range implements IRange{
    * Emits the range's runs.
    * @param emit
    */
-  runs(emit:(r:Run)=>void) {
+  runs(emit:(r:CharacterRun)=>void) {
     this.doc.runs(emit, this);
   };
 
+  /**
+   * Emits the range's paragraphRuns.
+   * @param emit
+   */
+  paragraphRuns(emit:(p:ParagraphRun)=>void) {
+    //TODO:
+    //this.doc.paragraphRuns(emit, this);
+  }
+  
   /**
    * Returns the range's contents as plain text.
    * @returns {string}
    */
   plainText():string {
-    return new Per(this.runs, this).map(Run.getPlainText).all().join('');
+    return new Per(this.runs, this).map(CharacterRun.getPlainText).all().join('');
   };
 
-  save():Array<Run> {
-    return new Per(this.runs, this).per(Run.consolidate()).all();
+  save():Array<CharacterRun> {
+    return new Per(this.runs, this).per(CharacterRun.consolidate()).all();
   };
 
   /**
-   *
+   * Returns the character formatting for this range.
    * @returns {IFormattingMap}
    */
-  getFormatting():IFormatting {
+  getCharacterFormatting():ICharacterFormatting {
     var range = this;
     if (range.start === range.end) {
       var pos = range.start;
@@ -102,8 +113,8 @@ export class Range implements IRange{
       range.end = pos + 1;
     }
 
-    var formatting = Run.cloneFormatting(Run.defaultFormatting);
-    var lastRun = new Per(range.runs, range).reduce(Run.merge).last();
+    var formatting = CharacterRun.cloneFormatting(CharacterRun.defaultFormatting);
+    var lastRun = new Per(range.runs, range).reduce(CharacterRun.merge).last();
     if(lastRun) {
       var specificFormatting:IFormattingMap = lastRun.formatting;
       for(var prop in specificFormatting) {
@@ -115,20 +126,39 @@ export class Range implements IRange{
     return formatting;
   };
 
-  setFormatting(attribute:string, value:string|boolean) {
+  /**
+   * Set CharacterFormatting "attribute" to value.
+   * @param attribute
+   * @param value
+   */
+  setCharacterFormatting(attribute:string, value:string|boolean) {
     var range:Range = this;
-    if (attribute === 'align') {
-      // Special case: expand selection to surrounding paragraphs
-      range = range.doc.paragraphRange(range.start, range.end);
-    }
     if (range.start === range.end) {
       range.doc.modifyInsertFormatting(attribute, value);
     } else {
       var saved = range.save();
       var template:IFormattingMap = {};
       template[attribute] = value;
-      Run.format(saved, <IFormatting>template);
+      CharacterRun.format(saved, <ICharacterFormatting>template);
       range.setText(saved);
     }
   };
+
+  /**
+   * Sets ParageaphFormatting "attribute" to value.
+   * @param attribute
+   * @param value
+   */
+  setParagraphFormatting(attribute:string, value:string|boolean|number) {
+    var range:Range = this;
+    if(range.start === range.end) {
+      //TODO: modify insert formatting
+      throw "ParagraphInsertFormatting cannot be modified yet.";
+    } else {
+      range.paragraphRuns((paragraphRun:ParagraphRun)=>{
+        //TODO:
+        //paragraph
+      });
+    }
+  }
 }

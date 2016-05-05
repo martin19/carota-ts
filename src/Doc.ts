@@ -9,12 +9,13 @@ import {Range} from "./Range";
 import {Rect} from "./Rect";
 import {ICode} from "./Part";
 import {IRange} from "./Range";
-import {IFormatting} from "./Run";
+import {ICharacterFormatting} from "./CharacterRun";
 import {ICoords} from "./Word";
-import {Run} from "./Run";
+import {CharacterRun} from "./CharacterRun";
 import {IFormattingMap} from "./Run";
 import {Line} from "./Line";
 import {PositionedChar} from "./PositionedChar";
+import {Paragraph} from "./Paragraph";
 
 export interface ISelection {
   start : number;
@@ -98,7 +99,7 @@ export class CarotaDoc extends CNode {
     this.load([]);
   }
 
-  load(runs:Array<Run>, takeFocus?:boolean) {
+  load(runs:Array<CharacterRun>, takeFocus?:boolean) {
     var self = this;
     this.undo = [];
     this.redo = [];
@@ -115,9 +116,9 @@ export class CarotaDoc extends CNode {
     this.frame = null;
     try {
       if(this.wrap) {
-        this.frame = new Per(this.words).per(Frame.wrap(0, 0, this._width, 0, this)).first();
+        this.frame = new Per(this.words).per(Frame.layout(0, 0, this._width, 0, this)).first();
       } else {
-        this.frame = new Per(this.words).per(Frame.noWrap(0, 0, 0, this)).first();
+        //this.frame = new Per(this.words).per(Frame.noWrap(0, 0, 0, this)).first();
       }
     } catch (x) {
       console.error(x);
@@ -150,42 +151,12 @@ export class CarotaDoc extends CNode {
     return this.documentRange().save();
   }
 
-  paragraphRange(start:number, end:number) {
-    var i:number;
-
-    // find the character after the nearest breaker before start
-    var startInfo = this.wordContainingOrdinal(start);
-    start = 0;
-    if (startInfo && !isBreaker(startInfo.word)) {
-      for (i = startInfo.index; i > 0; i--) {
-        if (isBreaker(this.words[i - 1])) {
-          start = this.wordOrdinal(i);
-          break;
-        }
-      }
-    }
-
-    // find the nearest breaker after end
-    var endInfo = this.wordContainingOrdinal(end);
-    end = this.frame.length - 1;
-    if (endInfo && !isBreaker(endInfo.word)) {
-      for (i = endInfo.index; i < this.words.length; i++) {
-        if (isBreaker(this.words[i])) {
-          end = this.wordOrdinal(i);
-          break;
-        }
-      }
-    }
-
-    return this.range(start, end);
-  }
-
   /**
    * Insert/Replace selection with new text (string or Array of runs.)
    * @param text
    * @param takeFocus
    */
-  insert(text:string|Array<Run>, takeFocus?:boolean) {
+  insert(text:string|Array<CharacterRun>, takeFocus?:boolean) {
     this.select(this.selection.end + this.selectedRange().setText(text), null, takeFocus);
   }
 
@@ -203,11 +174,11 @@ export class CarotaDoc extends CNode {
    * Applies the insertFormatting to an array of runs.
    * @param text
    */
-  applyInsertFormatting(text:Array<Run>) {
+  applyInsertFormatting(text:Array<CharacterRun>) {
     var formatting = this.nextInsertFormatting;
     var insertFormattingProperties = Object.keys(formatting);
     if (insertFormattingProperties.length) {
-      text.forEach(function (run:Run) {
+      text.forEach(function (run:CharacterRun) {
         insertFormattingProperties.forEach(function (property) {
           (<IFormattingMap>run.formatting)[property] = formatting[property];
         });
@@ -268,7 +239,7 @@ export class CarotaDoc extends CNode {
    * @param emit
    * @param range
    */
-  runs(emit:(p:Run)=>void, range:IRange) {
+  runs(emit:(p:CharacterRun)=>void, range:IRange) {
     var start = this.wordContainingOrdinal(Math.max(0, range.start)),
       end = this.wordContainingOrdinal(Math.min(range.end, this.frame.length - 1));
     if (start.index === end.index) {
@@ -292,7 +263,7 @@ export class CarotaDoc extends CNode {
    * @param count
    * @param runs
    */
-  spliceWordsWithRuns(wordIndex:number, count:number, runs:Array<Run>) {
+  spliceWordsWithRuns(wordIndex:number, count:number, runs:Array<CharacterRun>) {
     var self = this;
 
     var newWords = new Per(characters(runs))
@@ -315,8 +286,8 @@ export class CarotaDoc extends CNode {
    * @param text
    * @returns {number}
    */
-  splice(start:number, end:number, text:Array<Run>|string) {
-    var text_:Array<Run>;
+  splice(start:number, end:number, text:Array<CharacterRun>|string) {
+    var text_:Array<CharacterRun>;
     if (typeof text === 'string') {
       var sample = Math.max(0, start - 1);
       var sampleRun = new Per<IRange>({start: sample, end: sample + 1})
@@ -328,7 +299,7 @@ export class CarotaDoc extends CNode {
         run.text = text;
         text_.push(run);
       } else {
-        text_.push(new Run(text,{}));
+        text_.push(new CharacterRun(text,{}));
       }
     } else {
       text_ = text;
@@ -339,7 +310,7 @@ export class CarotaDoc extends CNode {
     var startWord = this.wordContainingOrdinal(start),
       endWord = this.wordContainingOrdinal(end);
 
-    var prefix:Array<Run>;
+    var prefix:Array<CharacterRun>;
     if (start === startWord.ordinal) {
       if (startWord.index > 0 && !isBreaker(this.words[startWord.index - 1])) {
         startWord.index--;
@@ -354,7 +325,7 @@ export class CarotaDoc extends CNode {
         .all();
     }
 
-    var suffix:Array<Run>;
+    var suffix:Array<CharacterRun>;
     if (end === endWord.ordinal) {
       if ((end === this.frame.length - 1) || isBreaker(endWord.word)) {
         suffix = [];
@@ -371,7 +342,7 @@ export class CarotaDoc extends CNode {
     var oldLength = this.frame.length;
 
     this.spliceWordsWithRuns(startWord.index, (endWord.index - startWord.index) + 1,
-      new Per(prefix).concat(text_).concat(suffix).per(Run.consolidate()).all());
+      new Per(prefix).concat(text_).concat(suffix).per(CharacterRun.consolidate()).all());
 
     return this.frame ? (this.frame.length - oldLength) : 0;
   }
@@ -450,18 +421,11 @@ export class CarotaDoc extends CNode {
   }
 
   drawBaselines(ctx:CanvasRenderingContext2D, viewport:Rect) {
-    ctx.strokeStyle = "black";
-    this.frame.lines.forEach((line:Line)=>{
-      var b = line.bounds(true);
-      if(viewport.contains(line.left,line.baseline) && viewport.contains(line.left+line.width, line.baseline)) {
-        ctx.beginPath();
-        ctx.moveTo(b.l, line.baseline);
-        ctx.lineTo(b.r, line.baseline);
-        ctx.stroke();
-      }
+    this.frame.paragraphs.forEach((p:Paragraph)=>{
+      p.drawBaselines(ctx, viewport);  
     });
   }
-
+  
   drawSelection(ctx:CanvasRenderingContext2D, hasFocus:boolean, viewport:Rect) {
     if (this.selection.end === this.selection.start) {
       if (this.selectionJustChanged || hasFocus && this.caretVisible) {
@@ -489,11 +453,11 @@ export class CarotaDoc extends CNode {
   notifySelectionChanged(takeFocus?:boolean) {
     // When firing selectionChanged, we pass a function can be used
     // to obtain the formatting, as this highly likely to be needed
-    var cachedFormatting:IFormatting = null;
+    var cachedFormatting:ICharacterFormatting = null;
     var self = this;
     var getFormatting = function () {
       if (!cachedFormatting) {
-        cachedFormatting = self.selectedRange().getFormatting();
+        cachedFormatting = self.selectedRange().getCharacterFormatting();
       }
       return cachedFormatting;
     };

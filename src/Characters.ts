@@ -1,3 +1,4 @@
+import {CharacterRun} from "./CharacterRun";
 import {Run} from "./Run";
 
 function compatible(a:Character, b:Character) {
@@ -11,7 +12,7 @@ export class Character {
   /**
    * Array of runs this character lives in.
    */
-  _runs:Array<Run>;
+  _runs:Array<CharacterRun>;
   /**
    * The run number this character lives in.
    */
@@ -25,11 +26,11 @@ export class Character {
    */
   char:string;
 
-  constructor(runArray:Array<Run>, run:number, offset:number) {
+  constructor(runArray:Array<CharacterRun>, run:number, offset:number) {
     this._runs = runArray;
     this._run = run;
     this._offset = offset;
-    this.char = run >= runArray.length ? null : Run.getTextChar(runArray[run].text, offset);
+    this.char = run >= runArray.length ? null : CharacterRun.getTextChar(runArray[run].text, offset);
   }
 
   equals(other:Character) {
@@ -40,14 +41,14 @@ export class Character {
   cut(upTo:Character) {
     compatible(this, upTo);
     var self = this;
-    return function (eachRun:(r:Run)=>void) {
+    return function (eachRun:(r:CharacterRun)=>void) {
       for (var runIndex = self._run; runIndex <= upTo._run; runIndex++) {
         var run = self._runs[runIndex];
         if (run) {
           var start = (runIndex === self._run) ? self._offset : 0;
-          var stop = (runIndex === upTo._run) ? upTo._offset : Run.getTextLength(run.text);
+          var stop = (runIndex === upTo._run) ? upTo._offset : CharacterRun.getTextLength(run.text);
           if (start < stop) {
-            Run.getSubText(function (piece) {
+            CharacterRun.getSubText(function (piece) {
               var pieceRun = run.clone();
               pieceRun.text = piece;
               eachRun(pieceRun);
@@ -65,9 +66,9 @@ export class Character {
  * @param n
  * @returns {Character}
  */
-function firstNonEmpty(runArray:Array<Run>, n:number) {
+function firstNonEmpty(runArray:Array<CharacterRun>, n:number) {
   for (; n < runArray.length; n++) {
-    if (Run.getTextLength(runArray[n].text) != 0) {
+    if (CharacterRun.getTextLength(runArray[n].text) != 0) {
       return new Character(runArray, n, 0);
     }
   }
@@ -79,11 +80,11 @@ function firstNonEmpty(runArray:Array<Run>, n:number) {
  * @param runArray
  * @returns {function(function(Character): void): undefined}
  */
-export var characters = function (runArray:Array<Run>) {
+export var characters = function (runArray:Array<CharacterRun>) {
   return function (emit:(c:Character)=>void) {
     var c = firstNonEmpty(runArray, 0);
     while (!emit(c) && (c.char !== null)) {
-      c = (c._offset + 1 < Run.getTextLength(runArray[c._run].text))
+      c = (c._offset + 1 < CharacterRun.getTextLength(runArray[c._run].text))
         ? new Character(runArray, c._run, c._offset + 1)
         : firstNonEmpty(runArray, c._run + 1);
     }
