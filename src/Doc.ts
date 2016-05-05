@@ -7,13 +7,11 @@ import {Split} from "./Split";
 import {LiteEvent} from "./LiteEvent";
 import {Range} from "./Range";
 import {Rect} from "./Rect";
-import {ICode} from "./Part";
 import {IRange} from "./Range";
 import {ICharacterFormatting} from "./CharacterRun";
 import {ICoords} from "./Word";
 import {CharacterRun} from "./CharacterRun";
 import {IFormattingMap} from "./Run";
-import {Line} from "./Line";
 import {PositionedChar} from "./PositionedChar";
 import {Paragraph} from "./Paragraph";
 

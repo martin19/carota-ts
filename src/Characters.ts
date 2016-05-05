@@ -1,5 +1,4 @@
 import {CharacterRun} from "./CharacterRun";
-import {Run} from "./Run";
 
 function compatible(a:Character, b:Character) {
   if (a._runs !== b._runs) {

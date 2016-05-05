@@ -31,8 +31,8 @@ export interface ICode {
 }
 
 /**
- * A Part is a section of a word with its own run, because a Word can span the
- * boundaries between runs, so it may have several parts in its text or space
+ * A Part is a section of a word with its own CharacterRun, because a Word can span the
+ * boundaries between CharacterRuns, so it may have several parts in its text or space
  * arrays.
  */
 export class Part {

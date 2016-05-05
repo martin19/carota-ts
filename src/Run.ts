@@ -97,6 +97,10 @@ export class Run {
     }
   }
 
+  /**
+   * Consolidate subsequent runs if formatting matches.
+   * @returns {function(function(Run): void, Run): void}
+   */
   static consolidate() {
     var current:Run;
     return (emit:(p:Run)=>void, run:Run)=> {

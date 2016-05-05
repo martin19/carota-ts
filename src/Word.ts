@@ -1,8 +1,6 @@
 import {Per} from "./Per";
 import {Part} from "./Part";
-import {Range} from "./Range";
 import {Character} from "./Characters";
-import {ICode} from "./Part";
 import {IRange} from "./Range";
 import {CharacterRun, ICharacterFormatting} from "./CharacterRun";
 
