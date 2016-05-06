@@ -21,6 +21,44 @@ export interface ISelection {
   end : number;
 }
 
+interface IWordPointer {
+  /**
+   * The word pointed to.
+   */
+  word : Word;
+  /**
+   * The ordinal value of the start of the word.
+   */
+  ordinal : number;
+  /**
+   * The index of the word in the words array.
+   */
+  index: number;
+  /**
+   * The offset into the word.
+   */
+  offset : number;
+}
+
+interface IParagraphPointer {
+  /**
+   * The paragraph pointed to.
+   */
+  paragraph : Paragraph;
+  /**
+   * The ordinal number of the start of the paragraph.
+   */
+  ordinal : number;
+  /**
+   * The index of the paragraph in the paragraphs_ array.
+   */
+  index: number;
+  /**
+   * The offset into the paragraph.
+   */
+  offset : number;
+}
+
 var makeEditCommand = function(doc:CarotaDoc, start:number, count:number, words:Array<Word>) {
   var selStart = doc.selection.start, selEnd = doc.selection.end;
   return function(log:(f1:(f2:()=>void)=>void)=>void) {
@@ -215,12 +253,7 @@ export class CarotaDoc extends CNode {
    */
   wordContainingOrdinal(ordinal:number) {
     // could rewrite to be faster using binary search over this.wordOrdinal
-    var result : {
-      word : Word;
-      ordinal : number;
-      index: number;
-      offset : number;
-    };
+    var result : IWordPointer;
     var pos = 0;
     this.words.some(function (word:Word, i:number) {
       if (ordinal >= pos && ordinal < (pos + word.length)) {
@@ -243,12 +276,7 @@ export class CarotaDoc extends CNode {
    * @returns {Paragraph}
    */
   paragraphContainingOrdinal(ordinal:number) {
-    var result : {
-      paragraph : Paragraph;
-      ordinal : number;  //ordinal of paragraph start
-      index: number;     //paragraph's index
-      offset : number;   //offset inside paragraph
-    };
+    var result : IParagraphPointer;
 
     //compute ordinal, index and offset
     var pos = 0;
@@ -298,32 +326,12 @@ export class CarotaDoc extends CNode {
     var start = this.paragraphContainingOrdinal(Math.max(0, range.start)),
       end = this.paragraphContainingOrdinal(Math.min(range.end, this.frame.length - 1));
 
-    function createPartialParagraph(options : { paragraph : Paragraph, startOffset? : number, endOffset? : number}) {
-      var paragraph = options.paragraph.clone();
-      paragraph.clearRuns();
-      var runs:Array<Run> = [];
-      var cons = new Per<Run>(Run.consolidate()).into(runs);
-      start.paragraph.runs((r:Run)=>{
-        cons.submit(r);
-      },{
-        start: options.startOffset,
-        end: options.endOffset
-      });
-      paragraph.addRuns(runs);
-      return paragraph;
-    }
-    
     if (start.index === end.index) {
-      var paragraph = createPartialParagraph({
-        paragraph : start.paragraph,
-        startOffset: start.offset,
-        endOffset: end.offset
-      });
-      emit(paragraph);
+      emit(start.paragraph.partialParagraph({ start : start.offset, end : end.offset }));
     } else {
-      emit(createPartialParagraph({paragraph : start.paragraph, startOffset:start.offset}));
+      emit(start.paragraph.partialParagraph({ start : start.offset}));
       for (var n = start.index + 1; n < end.index; n++) { emit(this._paragraphs[n]); }
-      emit(createPartialParagraph({paragraph : end.paragraph, endOffset:end.offset}));
+      emit(end.paragraph.partialParagraph({ end : end.offset }));
     }
   }
 
@@ -357,23 +365,23 @@ export class CarotaDoc extends CNode {
    * @param text - text to splice
    * @returns {number}
    */
-  splice(start:number, end:number, text:Array<Run>|string) {
+  splice(start:number, end:number, text:Array<Paragraph>|string) {
     var text_:Array<Run>;
     if (typeof text === 'string') {
+      //If plaintext is entered, try to create a sampleRun by cloning the first run after "start"
       var sample = Math.max(0, start - 1);
-      var sampleRun = new Per<IRange>({start: sample, end: sample + 1})
-        .per(this.runs, this)
-        .first();
+      var sampleRun = new Per({start: sample, end: sample + 1}).per(this.runs, this).first();
       text_ = [];
       if(sampleRun) {
         var run = sampleRun.clone();
         run.text = text;
         text_.push(run);
       } else {
-        //TODO: support splice with string parameter
+        //If sampleRun could not be created, create a run with empty formatting.
         text_.push(new Run(text,{},null));
       }
     } else {
+      //If rich-text is entered, set text to the entered rich-text content.
       text_ = text;
     }
 

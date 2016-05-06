@@ -1,6 +1,7 @@
 import {Run} from "./Run";
 import {IFormattingMap} from "./Run";
 import {IRange} from "./Range";
+import {Per} from "./Per";
 enum ParagraphAlignment {
   left,
   center,
@@ -84,6 +85,28 @@ export class Paragraph {
     var p = new Paragraph(this.formatting);
     p.addRuns(this.runs_);
     return p;
+  }
+
+  /**
+   * Creates a partial paragraph from this by consolidating runs within range
+   * @param range
+   * @returns {Paragraph}
+   */
+  partialParagraph(range?:IRange) {
+    var paragraph = this.clone();
+    paragraph.clearRuns();
+    var runs:Array<Run> = [];
+
+    //TODO: why does this not work?
+    //new Per(range).per(this.runs, this).per(Run.consolidate()).into(runs);
+
+    var cons = new Per<Run>(Run.consolidate()).into(runs);
+    new Per(range).per(this.runs, this).forEach((r:Run)=>{
+      cons.submit(r);
+    });
+
+    paragraph.addRuns(runs);
+    return paragraph;
   }
 
   /**
