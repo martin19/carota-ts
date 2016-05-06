@@ -46,7 +46,8 @@ export class Run {
   text : string|Array<string>;
   formatting : IFormattingMap;
 
-  constructor(text:string|Array<string>, formatting : IFormattingMap) {
+  constructor(text:string|Array<string>, formatting : IFormattingMap, parent:Paragraph) {
+    this.parent = parent;
     this.text = text;
     this.formatting = Run.cloneFormatting(formatting);
   }
@@ -68,7 +69,7 @@ export class Run {
   }
 
   clone() {
-    return new Run(this.text, this.formatting);
+    return new Run(this.text, this.formatting, this.parent);
   }
 
   static merge(run1:Run|Array<Run>, run2?:Run):Run {
@@ -79,6 +80,9 @@ export class Run {
       return this.merge(Array.prototype.slice.call(arguments, 0));
     }
     if(run1 instanceof Run && run2 instanceof Run) {
+      if(run1.parent !== run2.parent) {
+        throw "Cannot merge runs of different paragraphs."
+      }
       var mergedFormatting:IFormattingMap = {};
       this.formattingKeys.forEach(function (key) {
         if (key in run1.formatting || key in run2.formatting) {
@@ -89,8 +93,9 @@ export class Run {
           }
         }
       });
+      return new this("",mergedFormatting, run1.parent);
     }
-    return new this("",mergedFormatting);
+    throw "Unexpected control flow in Run.merge.";
   }
 
   /**

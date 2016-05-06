@@ -23,12 +23,21 @@ export interface ISection {
    * Descent (distance from baseline to bottom) for whole section
    */
   descent: number;
+  /**
+   * line height of section.
+   */
   lineHeight:number;
   /**
    * Width of the whole section
    */
   width: number;
+  /**
+   * length of section in characters.
+   */
   length: number;
+  /**
+   * Section as plaintext.
+   */
   plainText: string;
 }
 
@@ -53,6 +62,9 @@ export class Word {
    *  Descent (distance from baseline to bottom) for whole word
    */
   descent:number;
+  /**
+   * Line height of word.
+   */
   lineHeight:number;
   /**
    * Width of the whole word (including trailing space) in pixels.
@@ -72,7 +84,7 @@ export class Word {
       space:((p:(r:Run)=>void)=>void)|Array<Run>;
     if (!coords) {
       // special end-of-document marker, mostly like a newline with no formatting
-      text = [new Run('\n',{})];
+      text = [new Run('\n',{},null)];
       space = [];
     } else {
       text = coords.text.cut(coords.spaces);

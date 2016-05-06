@@ -3,6 +3,7 @@ import {CarotaDoc} from "./Doc";
 import {Rect} from "./Rect";
 import {Input} from "./Input";
 import {Run} from "./Run";
+import {Paragraph} from "./Paragraph";
 
 export interface EditorOptions {
   canvas : HTMLCanvasElement;
@@ -32,7 +33,7 @@ export class Editor {
   nextKeyboardX:number;
   selectDragStart:number;
   focusChar:number;
-  richClipboard:Array<Run>;
+  richClipboard:Array<Paragraph>;
   plainClipboard:string;
   toggles:{[n:number]:string};
   verticalAlignment:string;

@@ -289,10 +289,11 @@
       var load = function (selector) {
         var html = document.querySelector(selector);
         if (html) {
-          var runs = carota.Html.parse(html, {
+          var paragraphs = carota.Html.parse(html, {
             carota: {color: 'orange', bold: true, size: 14}
           });
-          exampleEditor.load(runs);
+          console.log(paragraphs);
+          exampleEditor.load(paragraphs);
         }
       };
 
@@ -393,7 +394,7 @@
           exampleEditor.selectionChanged.on(function (data) {
             cFormatting.forEach(function(c){
               var id = c.property;
-              var formatting = data.getCharacterFormatting();
+              var formatting = data.getFormatting();
               var val = id in formatting ? formatting[id] : carota.Run.defaultFormatting[id];
               if(val === carota.Run.multipleValues) {
                 //indeterminate

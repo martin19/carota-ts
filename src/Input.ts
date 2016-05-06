@@ -3,6 +3,7 @@ import {Dom} from "./Dom";
 import {Editor} from "./Editor";
 import {CNode} from "./Node";
 import {Run} from "./Run";
+import {Paragraph} from "./Paragraph";
 
 export class Input {
   editor : Editor;
@@ -108,7 +109,7 @@ export class Input {
   };
 
   onInput() {
-    var newText:string|Array<Run> = this.editor.textArea.value;
+    var newText:string|Array<Paragraph> = this.editor.textArea.value;
     if (this.editor.textAreaContent != newText) {
       this.editor.textAreaContent = '';
       this.editor.textArea.value = '';

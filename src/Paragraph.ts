@@ -1,5 +1,6 @@
 import {Run} from "./Run";
 import {IFormattingMap} from "./Run";
+import {IRange} from "./Range";
 enum ParagraphAlignment {
   left,
   center,
@@ -32,9 +33,102 @@ export class Paragraph {
     hyphenate : false
   };
 
+  /**
+   * The formatting of this paragraph.
+   */
   formatting : IFormattingMap;
-  runs : Array<Run>;
+  /**
+   * The runs contained in this Paragraph.
+   */
+  runs_ : Array<Run>;
+  /**
+   * Length of this paragraph in characters.
+   */
+  length : number;
 
-  constructor() {
+  /**
+   * Creates a new Paragraph.
+   * @param formatting
+   */
+  constructor(formatting?:IFormattingMap) {
+    this.formatting = typeof formatting !== "undefined" ? formatting : {};
+    this.runs_ = [];
+    this.length = 0;
+  }
+
+  /**
+   * Append a run to this paragraph.
+   * @param run
+   */
+  addRun(run:Run) {
+    this.runs_.push(run);
+    this.length += run.text.length;
+  }
+
+  /**
+   * Append runs to this paragraph.
+   * @param runs
+   */
+  addRuns(runs:Array<Run>) {
+    runs.forEach((r:Run)=>{
+      this.addRun(r);
+    });
+  }
+
+  clearRuns() {
+    this.runs_ = [];
+    this.length = 0;
+  }
+
+  clone() {
+    var p = new Paragraph(this.formatting);
+    p.addRuns(this.runs_);
+    return p;
+  }
+
+  /**
+   * Emits this paragraph's runs within a given Range (or the full paragraph if no range is given.)
+   * @param emit
+   * @param range - absolute or relative to paragraph start?
+   */
+  runs(emit:(p:Run)=>void, range?:IRange) {
+    var start = range && range.start || 0,
+      end = range && range.end;
+    if (typeof end !== 'number') {
+      end = Number.MAX_VALUE;
+    }
+    this.runs_.some((run:Run)=>{
+      if (start >= end || end <= 0) {
+        return true;
+      }
+      var text = run.text;
+      if(typeof text === "string") {
+        if (start <= 0 && end >= text.length) {
+          emit(run);
+        } else if (start < text.length) {
+          var pieceRun = run.clone();
+          var firstChar = Math.max(0, start);
+          pieceRun.text = text.substr(
+            firstChar,
+            Math.min(text.length, end - firstChar)
+          );
+          emit(pieceRun);
+        }
+        start -= text.length;
+        end -= text.length;
+      } else {
+        if (start <= 0 && end >= 1) {
+          emit(run);
+        }
+        start--;
+        end--;
+      }
+    });
+  }
+
+  static runs(emit:(p:Run)=>void, paragraph:Paragraph) {
+    paragraph.runs_.forEach((r:Run)=>{
+      emit(r)
+    });
   }
 }

@@ -14,6 +14,7 @@ import {Run} from "./Run";
 import {IFormattingMap} from "./Run";
 import {PositionedChar} from "./PositionedChar";
 import {PositionedParagraph} from "./PositionedParagraph";
+import {Paragraph} from "./Paragraph";
 
 export interface ISelection {
   start : number;
@@ -75,6 +76,7 @@ export class CarotaDoc extends CNode {
   undo : Array<(f1:(f2:()=>void)=>void)=>void>;
   redo : Array<(f1:(f2:()=>void)=>void)=>void>;
   words : Array<Word>;
+  _paragraphs : Array<Paragraph>;
   _wordOrdinals:Array<number>;
   frame : Frame;
   nextInsertFormatting:{[s:string]:string|boolean|number};
@@ -97,11 +99,14 @@ export class CarotaDoc extends CNode {
     this.load([]);
   }
 
-  load(runs:Array<Run>, takeFocus?:boolean) {
+  load(paragraphs:Array<Paragraph>, takeFocus?:boolean) {
     var self = this;
     this.undo = [];
     this.redo = [];
     this._wordOrdinals = [];
+
+    this._paragraphs = paragraphs;
+    var runs = new Per(paragraphs).per(Paragraph.runs).all();
     this.words = new Per(characters(runs)).per(Split()).map(function (w:ICoords) {
       return new Word(w);
     }).all();
@@ -154,7 +159,7 @@ export class CarotaDoc extends CNode {
    * @param text
    * @param takeFocus
    */
-  insert(text:string|Array<Run>, takeFocus?:boolean) {
+  insert(text:string|Array<Paragraph>, takeFocus?:boolean) {
     this.select(this.selection.end + this.selectedRange().setText(text), null, takeFocus);
   }
 
@@ -233,6 +238,36 @@ export class CarotaDoc extends CNode {
   }
 
   /**
+   * Returns a paragraph containing the word that contains the character with ordinal number "ordinal".
+   * @param ordinal
+   * @returns {Paragraph}
+   */
+  paragraphContainingOrdinal(ordinal:number) {
+    var result : {
+      paragraph : Paragraph;
+      ordinal : number;  //ordinal of paragraph start
+      index: number;     //paragraph's index
+      offset : number;   //offset inside paragraph
+    };
+
+    //compute ordinal, index and offset
+    var pos = 0;
+    this._paragraphs.some((p:Paragraph, i : number)=>{
+      if(ordinal >= pos && ordinal <= (pos + p.length)) {
+        result = {
+          paragraph : p,
+          ordinal : pos,
+          index : i,
+          offset: ordinal - pos
+        };
+        return true;
+      }
+      pos += p.length;
+    });
+    return result;
+  }
+
+  /**
    * Emits this document's runs within a given Range (or the complete document if no Range is given.)
    * @param emit
    * @param range
@@ -251,6 +286,44 @@ export class CarotaDoc extends CNode {
         this.words[n].runs(emit);
       }
       end.word.runs(emit, {end: end.offset});
+    }
+  }
+
+  /**
+   * Emits this document's paragraphs within a given range (or the complete document if no Range is given.)
+   * @param emit
+   * @param range
+   */
+  paragraphs(emit:(p:Paragraph)=>void, range:IRange) {
+    var start = this.paragraphContainingOrdinal(Math.max(0, range.start)),
+      end = this.paragraphContainingOrdinal(Math.min(range.end, this.frame.length - 1));
+
+    function createPartialParagraph(options : { paragraph : Paragraph, startOffset? : number, endOffset? : number}) {
+      var paragraph = options.paragraph.clone();
+      paragraph.clearRuns();
+      var runs:Array<Run> = [];
+      var cons = new Per<Run>(Run.consolidate()).into(runs);
+      start.paragraph.runs((r:Run)=>{
+        cons.submit(r);
+      },{
+        start: options.startOffset,
+        end: options.endOffset
+      });
+      paragraph.addRuns(runs);
+      return paragraph;
+    }
+    
+    if (start.index === end.index) {
+      var paragraph = createPartialParagraph({
+        paragraph : start.paragraph,
+        startOffset: start.offset,
+        endOffset: end.offset
+      });
+      emit(paragraph);
+    } else {
+      emit(createPartialParagraph({paragraph : start.paragraph, startOffset:start.offset}));
+      for (var n = start.index + 1; n < end.index; n++) { emit(this._paragraphs[n]); }
+      emit(createPartialParagraph({paragraph : end.paragraph, endOffset:end.offset}));
     }
   }
 
@@ -279,9 +352,9 @@ export class CarotaDoc extends CNode {
 
   /**
    * Splice/connect/glue a range of characters with a string/Array of runs
-   * @param start
-   * @param end
-   * @param text
+   * @param start - start index of range to splice
+   * @param end - end index of range to splice
+   * @param text - text to splice
    * @returns {number}
    */
   splice(start:number, end:number, text:Array<Run>|string) {
@@ -297,7 +370,8 @@ export class CarotaDoc extends CNode {
         run.text = text;
         text_.push(run);
       } else {
-        text_.push(new Run(text,{}));
+        //TODO: support splice with string parameter
+        text_.push(new Run(text,{},null));
       }
     } else {
       text_ = text;
@@ -305,8 +379,8 @@ export class CarotaDoc extends CNode {
 
     this.applyInsertFormatting(text_);
 
-    var startWord = this.wordContainingOrdinal(start),
-      endWord = this.wordContainingOrdinal(end);
+    var startWord = this.wordContainingOrdinal(start);
+    var endWord = this.wordContainingOrdinal(end);
 
     var prefix:Array<Run>;
     if (start === startWord.ordinal) {

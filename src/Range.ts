@@ -4,6 +4,7 @@ import {CNode} from "./Node";
 import {IFormattingMap} from "./Run";
 import {ICharacterFormatting} from "./Run";
 import {Run} from "./Run";
+import {Paragraph} from "./Paragraph";
 
 export interface IRange {
   start? : number,
@@ -60,7 +61,7 @@ export class Range implements IRange{
    * @param text
    * @returns {number}
    */
-  setText(text:Array<Run>|string) {
+  setText(text:Array<Paragraph>|string) {
     return this.doc.splice(this.start, this.end, text);
   }
 
@@ -73,6 +74,14 @@ export class Range implements IRange{
   };
 
   /**
+   * Emits the range's paragraphs.
+   * @param emit
+   */
+  paragraphs(emit:(p:Paragraph)=>void) {
+    this.doc.paragraphs(emit, this);
+  }
+
+  /**
    * Returns the range's contents as plain text.
    * @returns {string}
    */
@@ -80,8 +89,32 @@ export class Range implements IRange{
     return new Per(this.runs, this).map(Run.getPlainText).all().join('');
   };
 
-  save():Array<Run> {
-    return new Per(this.runs, this).per(Run.consolidate()).all();
+  /**
+   * Save an array of runs by consolidating.
+   */
+  save():Array<Paragraph> {
+    var paragraphs = new Per(this.paragraphs, this).all();
+
+    //consolidate runs in paragraphs and remove paragraph reference
+    var consolidatedParagraphs = paragraphs.map((p:Paragraph)=>{
+      var runs:Array<Run> = [];
+      var cons = new Per<Run>(Run.consolidate()).map((r:Run)=>{ delete r.parent; return r; }).into(runs);
+      p.runs((r:Run)=>{
+        cons.submit(r);
+      });
+      p.clearRuns();
+      p.addRuns(runs);
+      return p;
+    });
+    
+    return consolidatedParagraphs;
+    //this.doc.paragraphs
+    //return new Per(this.runs, this).map((r:Run)=>{
+    //  var flatRun = r.clone();
+    //  flatRun.parent = null;
+    //  return flatRun;
+    //}).all();
+    //return new Per(this.runs, this).per(Run.consolidate()).all();
   };
 
   /**

@@ -1,6 +1,7 @@
 import {Per} from "./Per";
 import {IFormattingMap} from "./Run";
 import {Run} from "./Run";
+import {Paragraph} from "./Paragraph";
 
 type INodeHandler = (node:HTMLElement, formatting:IFormattingMap)=>void;
 
@@ -151,19 +152,15 @@ export class html {
       root = html;
     }
 
-    var characterRuns:Array<Run> = [];
-    //var paragraphRuns:Array<ParagraphRun> = [];
+    var runs:Array<Run> = [];
+    var currentParagraph:Paragraph = new Paragraph();
+    var paragraphs:Array<Paragraph> = [];
 
     var inSpace = true;
-    var cons = new Per<Run>(Run.consolidate()).into(characterRuns);
+    var cons = new Per<Run>(Run.consolidate()).into(runs);
     var emitRun = (text:string, formatting:IFormattingMap) => {
-      cons.submit(new Run(text, formatting));
+      cons.submit(new Run(text, formatting, currentParagraph));
     };
-
-    //var consParagraph = new Per<ParagraphRun>(ParagraphRun.consolidate()).into(paragraphRuns);
-    //var emitPRun = (text:string, formatting:IFormattingMap) => {
-    //  cons.submit(new ParagraphRun(text, formatting));
-    //};
 
     var dealWithSpaces = function (text:string, formatting:IFormattingMap) {
       text = text.replace(/\n+\s*/g, ' ');
@@ -212,12 +209,20 @@ export class html {
         }
         if (isNewLine[node.nodeName]) {
           emitRun('\n', formatting);
+          // Add runs to current paragraph, append paragraph to list of paragraphs and 
+          // create new paragraph.
+          currentParagraph.addRuns(runs);
+          paragraphs.push(currentParagraph);
+          currentParagraph = new Paragraph();
+          runs = [];
+          cons = new Per<Run>(Run.consolidate()).into(runs);
+          
           inSpace = true;
         }
       }
     }
 
     recurse(root, {});
-    return characterRuns;
+    return paragraphs;
   }
 }
