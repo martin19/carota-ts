@@ -1,4 +1,4 @@
-import {Run, IFormattingMap} from "./Run";
+import {RunBase, IFormattingMap} from "./RunBase";
 
 enum ParagraphAlignment {
   left,
@@ -20,7 +20,7 @@ export interface IParagraphFormatting {
 }
 
 
-export class ParagraphRun extends Run {
+export class ParagraphRun extends RunBase {
   static formattingKeys:Array<string> = ["align","marginLeft","marginRight","marginTop","marginBottom","hyphenate"];
 
   static defaultFormatting:IParagraphFormatting = {

@@ -1,5 +1,5 @@
-import {ICharacterFormatting} from "./CharacterRun";
-import {CharacterRun} from "./CharacterRun";
+import {ICharacterFormatting} from "./Run";
+import {Run} from "./Run";
 
 export interface ITextMeasurement {
   ascent : number;
@@ -16,9 +16,9 @@ export class Text {
    * @param run
    * @return {string}
    */
-  static getFontString(run:CharacterRun) {
+  static getFontString(run:Run) {
 
-    var size = (run && (<ICharacterFormatting>run.formatting).size) || CharacterRun.defaultFormatting.size;
+    var size = (run && (<ICharacterFormatting>run.formatting).size) || Run.defaultFormatting.size;
 
     if (run) {
       switch ((<ICharacterFormatting>run.formatting).script) {
@@ -32,7 +32,7 @@ export class Text {
     return (run && (<ICharacterFormatting>run.formatting).italic ? 'italic ' : '') +
       (run && (<ICharacterFormatting>run.formatting).bold ? 'bold ' : '') + ' ' +
       size + 'pt ' +
-      ((run && (<ICharacterFormatting>run.formatting).font) || CharacterRun.defaultFormatting.font);
+      ((run && (<ICharacterFormatting>run.formatting).font) || Run.defaultFormatting.font);
   }
 
   /**
@@ -40,8 +40,8 @@ export class Text {
    * @param ctx
    * @param run
    */
-  static applyRunStyle(ctx:CanvasRenderingContext2D, run:CharacterRun) {
-    ctx.fillStyle = (run && (<ICharacterFormatting>run.formatting).color) || CharacterRun.defaultFormatting.color;
+  static applyRunStyle(ctx:CanvasRenderingContext2D, run:Run) {
+    ctx.fillStyle = (run && (<ICharacterFormatting>run.formatting).color) || Run.defaultFormatting.color;
     ctx.font = Text.getFontString(run);
   };
 
@@ -55,10 +55,10 @@ export class Text {
    * @param run
    * @return {string}
    */
-  static getRunStyle(run:CharacterRun) {
+  static getRunStyle(run:Run) {
     var parts = [
       'font: ', Text.getFontString(run),
-      '; color: ', ((run && (<ICharacterFormatting>run.formatting).color) || CharacterRun.defaultFormatting.color)
+      '; color: ', ((run && (<ICharacterFormatting>run.formatting).color) || Run.defaultFormatting.color)
     ];
 
     if (run) {
@@ -205,11 +205,11 @@ export class Text {
 
   static cachedMeasureText:(text:string,style:string)=>ITextMeasurement;
 
-  static measure(str:string, formatting:CharacterRun) {
+  static measure(str:string, formatting:Run) {
     return Text.cachedMeasureText(str, Text.getRunStyle(formatting));
   };
 
-  static draw(ctx:CanvasRenderingContext2D, str:string, formatting:CharacterRun, left:number, baseline:number, width:number, ascent:number, descent:number) {
+  static draw(ctx:CanvasRenderingContext2D, str:string, formatting:Run, left:number, baseline:number, width:number, ascent:number, descent:number) {
     Text.prepareContext(ctx);
     Text.applyRunStyle(ctx, formatting);
     switch ((<ICharacterFormatting>formatting.formatting).script) {

@@ -4,10 +4,10 @@ import {Part} from "./Part";
 import {Rect} from "./Rect";
 import {Line} from "./Line";
 import {Word} from "./Word";
-import {CharacterRun} from "./CharacterRun";
+import {Run} from "./Run";
 import {PositionedChar} from "./PositionedChar";
 
-var newLineWidth = function (run:CharacterRun) {
+var newLineWidth = function (run:Run) {
   return Text.measure(Text.enter, run).width;
 };
 
@@ -96,7 +96,7 @@ export class PositionedWord extends CNode {
       var cache:Array<PositionedChar> = [];
       var x = 0, self = this, ordinal = this.ordinal;
       this.parts(function (wordPart:Part) {
-        CharacterRun.pieceCharacters(function (char) {
+        Run.pieceCharacters(function (char) {
           var charRun = wordPart.run.clone();
           charRun.text = char;
           var p = new Part(charRun);

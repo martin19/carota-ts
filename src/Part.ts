@@ -2,11 +2,11 @@ import {Text} from "./Text";
 import {ITextMeasurement} from "./Text";
 import {CNode} from "./Node";
 import {Word} from "./Word";
-import {ICharacterFormatting} from "./CharacterRun";
-import {CharacterRun} from "./CharacterRun";
+import {ICharacterFormatting} from "./Run";
+import {Run} from "./Run";
 
 var defaultInline = {
-  measure: function (formatting:CharacterRun) {
+  measure: function (formatting:Run) {
     var text_:ITextMeasurement = Text.measure('?', formatting);
     return {
       width: text_.width + 4,
@@ -25,8 +25,8 @@ var defaultInline = {
 
 export interface ICode {
   measure : (p:any) => ITextMeasurement;
-  draw : (ctx:CanvasRenderingContext2D, x:number, y:number, width:number, ascent:number, descent:number, formatting:CharacterRun) => void;
-  block?: (left:number, top:number, width:number, ordinal:number, parent:CNode, formatting:CharacterRun) => (w:Word)=>CNode;
+  draw : (ctx:CanvasRenderingContext2D, x:number, y:number, width:number, ascent:number, descent:number, formatting:Run) => void;
+  block?: (left:number, top:number, width:number, ordinal:number, parent:CNode, formatting:Run) => (w:Word)=>CNode;
   eof? : boolean;
 }
 
@@ -39,7 +39,7 @@ export class Part {
   /**
    *  Run being measured.
    */
-  run:CharacterRun;
+  run:Run;
   /**
    * True if this part only contain a newline (\n). This will be
    * the only Part in the Word, and this is the only way newlines
@@ -60,7 +60,7 @@ export class Part {
   descent:number;
   lineHeight:number;
 
-  constructor(run:CharacterRun) {
+  constructor(run:Run) {
     var m : ITextMeasurement, isNewLine : boolean;
     if (typeof run.text === 'string') {
       isNewLine = (run.text.length === 1) && (run.text[0] === '\n');

@@ -8,12 +8,12 @@ import {LiteEvent} from "./LiteEvent";
 import {Range} from "./Range";
 import {Rect} from "./Rect";
 import {IRange} from "./Range";
-import {ICharacterFormatting} from "./CharacterRun";
+import {ICharacterFormatting} from "./Run";
 import {ICoords} from "./Word";
-import {CharacterRun} from "./CharacterRun";
-import {IFormattingMap} from "./Run";
+import {Run} from "./Run";
+import {IFormattingMap} from "./RunBase";
 import {PositionedChar} from "./PositionedChar";
-import {Paragraph} from "./Paragraph";
+import {PositionedParagraph} from "./PositionedParagraph";
 
 export interface ISelection {
   start : number;
@@ -97,7 +97,7 @@ export class CarotaDoc extends CNode {
     this.load([]);
   }
 
-  load(runs:Array<CharacterRun>, takeFocus?:boolean) {
+  load(runs:Array<Run>, takeFocus?:boolean) {
     var self = this;
     this.undo = [];
     this.redo = [];
@@ -154,7 +154,7 @@ export class CarotaDoc extends CNode {
    * @param text
    * @param takeFocus
    */
-  insert(text:string|Array<CharacterRun>, takeFocus?:boolean) {
+  insert(text:string|Array<Run>, takeFocus?:boolean) {
     this.select(this.selection.end + this.selectedRange().setText(text), null, takeFocus);
   }
 
@@ -172,11 +172,11 @@ export class CarotaDoc extends CNode {
    * Applies the insertFormatting to an array of runs.
    * @param text
    */
-  applyInsertFormatting(text:Array<CharacterRun>) {
+  applyInsertFormatting(text:Array<Run>) {
     var formatting = this.nextInsertFormatting;
     var insertFormattingProperties = Object.keys(formatting);
     if (insertFormattingProperties.length) {
-      text.forEach(function (run:CharacterRun) {
+      text.forEach(function (run:Run) {
         insertFormattingProperties.forEach(function (property) {
           (<IFormattingMap>run.formatting)[property] = formatting[property];
         });
@@ -237,7 +237,7 @@ export class CarotaDoc extends CNode {
    * @param emit
    * @param range
    */
-  runs(emit:(p:CharacterRun)=>void, range:IRange) {
+  runs(emit:(p:Run)=>void, range:IRange) {
     var start = this.wordContainingOrdinal(Math.max(0, range.start)),
       end = this.wordContainingOrdinal(Math.min(range.end, this.frame.length - 1));
     if (start.index === end.index) {
@@ -261,7 +261,7 @@ export class CarotaDoc extends CNode {
    * @param count
    * @param runs
    */
-  spliceWordsWithRuns(wordIndex:number, count:number, runs:Array<CharacterRun>) {
+  spliceWordsWithRuns(wordIndex:number, count:number, runs:Array<Run>) {
     var self = this;
 
     var newWords = new Per(characters(runs))
@@ -284,8 +284,8 @@ export class CarotaDoc extends CNode {
    * @param text
    * @returns {number}
    */
-  splice(start:number, end:number, text:Array<CharacterRun>|string) {
-    var text_:Array<CharacterRun>;
+  splice(start:number, end:number, text:Array<Run>|string) {
+    var text_:Array<Run>;
     if (typeof text === 'string') {
       var sample = Math.max(0, start - 1);
       var sampleRun = new Per<IRange>({start: sample, end: sample + 1})
@@ -297,7 +297,7 @@ export class CarotaDoc extends CNode {
         run.text = text;
         text_.push(run);
       } else {
-        text_.push(new CharacterRun(text,{}));
+        text_.push(new Run(text,{}));
       }
     } else {
       text_ = text;
@@ -308,7 +308,7 @@ export class CarotaDoc extends CNode {
     var startWord = this.wordContainingOrdinal(start),
       endWord = this.wordContainingOrdinal(end);
 
-    var prefix:Array<CharacterRun>;
+    var prefix:Array<Run>;
     if (start === startWord.ordinal) {
       if (startWord.index > 0 && !isBreaker(this.words[startWord.index - 1])) {
         startWord.index--;
@@ -323,7 +323,7 @@ export class CarotaDoc extends CNode {
         .all();
     }
 
-    var suffix:Array<CharacterRun>;
+    var suffix:Array<Run>;
     if (end === endWord.ordinal) {
       if ((end === this.frame.length - 1) || isBreaker(endWord.word)) {
         suffix = [];
@@ -340,7 +340,7 @@ export class CarotaDoc extends CNode {
     var oldLength = this.frame.length;
 
     this.spliceWordsWithRuns(startWord.index, (endWord.index - startWord.index) + 1,
-      new Per(prefix).concat(text_).concat(suffix).per(CharacterRun.consolidate()).all());
+      new Per(prefix).concat(text_).concat(suffix).per(Run.consolidate()).all());
 
     return this.frame ? (this.frame.length - oldLength) : 0;
   }
@@ -419,7 +419,7 @@ export class CarotaDoc extends CNode {
   }
 
   drawBaselines(ctx:CanvasRenderingContext2D, viewport:Rect) {
-    this.frame.paragraphs.forEach((p:Paragraph)=>{
+    this.frame.paragraphs.forEach((p:PositionedParagraph)=>{
       p.drawBaselines(ctx, viewport);  
     });
   }

@@ -5,12 +5,12 @@ import {Line} from "./Line";
 import {Word} from "./Word";
 import {ICode} from "./Part";
 import {NoWrap} from "./LayouterParagraph2";
-import {Paragraph} from "./Paragraph";
+import {PositionedParagraph} from "./PositionedParagraph";
 import {LayouterFrame} from "./LayouterFrame";
 
 export class Frame extends CNode {
   type:string;
-  paragraphs:Array<Paragraph>;
+  paragraphs:Array<PositionedParagraph>;
   _parent:CNode;
   _bounds : Rect;
   height:number;
@@ -51,7 +51,7 @@ export class Frame extends CNode {
     var layouter = LayouterFrame(left, top, width, ordinal, frame_);
     var length = 0, height = 0;
     return (emit:(f:Frame)=>void, word:Word) => {
-      if(layouter((p:Paragraph)=>{
+      if(layouter((p:PositionedParagraph)=>{
         paragraphs.push(p);
         length += p.length;
         height += p.height;
@@ -66,7 +66,7 @@ export class Frame extends CNode {
   bounds() {
     var left = Number.MAX_VALUE, top = Number.MAX_VALUE, right = -Number.MAX_VALUE, bottom = -Number.MAX_VALUE;
     if (this.paragraphs.length) {
-      this.paragraphs.forEach((paragraph:Paragraph)=> {
+      this.paragraphs.forEach((paragraph:PositionedParagraph)=> {
         var b = paragraph.bounds();
         left = Math.min(left, b.l);
         top = Math.min(top, b.t);
@@ -81,7 +81,7 @@ export class Frame extends CNode {
   actualWidth() {
     if (!this._actualWidth) {
       var result = 0;
-      this.paragraphs.forEach((p:Paragraph)=>{
+      this.paragraphs.forEach((p:PositionedParagraph)=>{
         if (typeof p.actualWidth === 'number') {
           result = Math.max(result, p.actualWidth);
         }
@@ -100,7 +100,7 @@ export class Frame extends CNode {
   }
   
   draw(ctx:CanvasRenderingContext2D, viewPort:Rect) {
-    this.paragraphs.forEach((p:Paragraph)=> {
+    this.paragraphs.forEach((p:PositionedParagraph)=> {
       p.draw(ctx, viewPort);
     });
   }

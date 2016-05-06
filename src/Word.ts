@@ -2,7 +2,7 @@ import {Per} from "./Per";
 import {Part} from "./Part";
 import {Character} from "./Characters";
 import {IRange} from "./Range";
-import {CharacterRun, ICharacterFormatting} from "./CharacterRun";
+import {Run, ICharacterFormatting} from "./Run";
 
 export interface ICoords {
   text : Character;
@@ -68,11 +68,11 @@ export class Word {
   eof:boolean;
 
   constructor(coords:ICoords) {
-    var text:((p:(r:CharacterRun)=>void)=>void)|Array<CharacterRun>,
-      space:((p:(r:CharacterRun)=>void)=>void)|Array<CharacterRun>;
+    var text:((p:(r:Run)=>void)=>void)|Array<Run>,
+      space:((p:(r:Run)=>void)=>void)|Array<Run>;
     if (!coords) {
       // special end-of-document marker, mostly like a newline with no formatting
-      text = [new CharacterRun('\n',{})];
+      text = [new Run('\n',{})];
       space = [];
     } else {
       text = coords.text.cut(coords.spaces);
@@ -132,7 +132,7 @@ export class Word {
    * @param emit
    * @param range
    */
-  runs(emit:(p:CharacterRun)=>void, range?:IRange) {
+  runs(emit:(p:Run)=>void, range?:IRange) {
     var start = range && range.start || 0,
       end = range && range.end;
     if (typeof end !== 'number') {
@@ -171,9 +171,9 @@ export class Word {
 }
 
 
-var section = function (runEmitter:((p:(r:CharacterRun)=>void)=>void)|Array<CharacterRun>) {
+var section = function (runEmitter:((p:(r:Run)=>void)=>void)|Array<Run>) {
   var s:ISection = {
-    parts: new Per(runEmitter).map(function (p:CharacterRun) {
+    parts: new Per(runEmitter).map(function (p:Run) {
       return new Part(p);
     }).all(),
     ascent: 0,
@@ -188,8 +188,8 @@ var section = function (runEmitter:((p:(r:CharacterRun)=>void)=>void)|Array<Char
     s.descent = Math.max(s.descent, p.descent);
     s.lineHeight = Math.max(s.lineHeight, p.lineHeight);
     s.width += p.width;
-    s.length += CharacterRun.getPieceLength(p.run.text);
-    s.plainText += CharacterRun.getPiecePlainText(p.run.text);
+    s.length += Run.getPieceLength(p.run.text);
+    s.plainText += Run.getPiecePlainText(p.run.text);
   });
   return s;
 };

@@ -3,9 +3,9 @@ import {CNode} from "./Node";
 import {Rect} from "./Rect";
 import {PositionedWord} from "./PositionedWord";
 import {Part} from "./Part";
-import {CharacterRun} from "./CharacterRun";
+import {Run} from "./Run";
 
-var newLineWidth = function (run:CharacterRun) {
+var newLineWidth = function (run:Run) {
   return Text.measure(Text.enter, run).width;
 };
 

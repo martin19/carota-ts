@@ -4,7 +4,7 @@ import {Word} from "./Word";
 import {ICode} from "./Part";
 import {CarotaDoc} from "./Doc";
 import {Frame} from "./Frame";
-import {Paragraph} from "./Paragraph";
+import {PositionedParagraph} from "./PositionedParagraph";
 import {LayouterParagraph} from "./LayouterParagraph";
 
 /**
@@ -20,29 +20,29 @@ import {LayouterParagraph} from "./LayouterParagraph";
  * @param width - width of parent Frame in pixels.
  * @param ordinal - ordinal value of first character.
  * @param parent - parent Frame.
- * @returns {function(function(Paragraph): (boolean|void), Word): boolean|void}
+ * @returns {function(function(PositionedParagraph): (boolean|void), Word): boolean|void}
  * @constructor
  */
 export var LayouterFrame = function (left:number, top:number, width:number, ordinal:number, parent:Frame) {
 
   var quit:boolean|void;
   var lastNewLineHeight = 0;
-  var layouter:(emit:(p:Paragraph)=>void, word:Word)=>void|boolean;
+  var layouter:(emit:(p:PositionedParagraph)=>void, word:Word)=>void|boolean;
   var y = top;
   
-  layouter = Paragraph.layout(left, top, width, ordinal, parent);
+  layouter = PositionedParagraph.layout(left, top, width, ordinal, parent);
 
-  return function (emit:(p:Paragraph)=>boolean|void, word:Word) {
+  return function (emit:(p:PositionedParagraph)=>boolean|void, word:Word) {
     if(word.eof) {
       quit = true;
     }
-    layouter((p:Paragraph)=> { 
+    layouter((p:PositionedParagraph)=> { 
       ordinal += p.length;
       y += p.height;
       emit(p); 
     }, word);
     if (word.isNewLine()) {
-      layouter = Paragraph.layout(left, y, width, ordinal, parent);
+      layouter = PositionedParagraph.layout(left, y, width, ordinal, parent);
     }
     return quit;
   }

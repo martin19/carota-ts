@@ -6,7 +6,7 @@ import {Rect} from "./Rect";
 import {LayouterParagraph} from "./LayouterParagraph";
 import {IParagraphFormatting, ParagraphRun} from "./ParagraphRun";
 
-export class Paragraph extends CNode {
+export class PositionedParagraph extends CNode {
   frame : Frame;
   lines : Array<Line>;
   top : number;
@@ -45,16 +45,16 @@ export class Paragraph extends CNode {
    * @param width - width of frame in pixels
    * @param ordinal - ordinal number of first character in frame
    * @param parent - parent node of frame (the document node)
-   * @return {function(function(Paragraph): void, Word): boolean}
+   * @return {function(function(PositionedParagraph): void, Word): boolean}
    */
   static layout(left:number, top:number, width:number, ordinal:number, parent:Frame) {
     var length = 0;
     var height = 0;
-    var paragraph_ = new Paragraph(parent, left, top, width, ordinal);
+    var paragraph_ = new PositionedParagraph(parent, left, top, width, ordinal);
     var lines = paragraph_.lines;
     var layouter = LayouterParagraph(left, top, width, ordinal, paragraph_);
 
-    return (emit:(p:Paragraph)=>void, word:Word) => {
+    return (emit:(p:PositionedParagraph)=>void, word:Word) => {
 
       if (layouter(function (line:number|Line) {
           if (typeof line === 'number') {

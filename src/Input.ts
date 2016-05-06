@@ -1,9 +1,9 @@
 import {PositionedWord} from "./PositionedWord";
 import {Dom} from "./Dom";
-import {IFormattingMap} from "./Run";
+import {IFormattingMap} from "./RunBase";
 import {Editor} from "./Editor";
 import {CNode} from "./Node";
-import {CharacterRun} from "./CharacterRun";
+import {Run} from "./Run";
 import {LiteEvent} from "./LiteEvent";
 
 export class Input {
@@ -110,7 +110,7 @@ export class Input {
   };
 
   onInput() {
-    var newText:string|Array<CharacterRun> = this.editor.textArea.value;
+    var newText:string|Array<Run> = this.editor.textArea.value;
     if (this.editor.textAreaContent != newText) {
       this.editor.textAreaContent = '';
       this.editor.textArea.value = '';

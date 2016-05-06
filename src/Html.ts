@@ -1,9 +1,12 @@
 import {Per} from "./Per";
-import {IFormattingMap} from "./Run";
-import {CharacterRun} from "./CharacterRun";
+import {IFormattingMap} from "./RunBase";
+import {Run} from "./Run";
+import {ParagraphRun} from "./ParagraphRun";
+
+type INodeHandler = (node:HTMLElement, formatting:IFormattingMap)=>void;
 
 var tag = function (name:string, formattingProperty:string) {
-  return function (node:Node, formatting:IFormattingMap) {
+  return (node:HTMLElement, formatting:IFormattingMap)=> {
     if (node.nodeName === name) {
       formatting[formattingProperty] = true;
     }
@@ -11,7 +14,7 @@ var tag = function (name:string, formattingProperty:string) {
 };
 
 var value = function (type:string, styleProperty:string, formattingProperty:string, transformValue?:(p:string|number|boolean)=>string|number|boolean) {
-  return function (node:HTMLElement, formatting:IFormattingMap) {
+  return (node:HTMLElement, formatting:IFormattingMap) =>{
 
     //var val = node[type] && node[type][styleProperty];
     var val:string|number|boolean = null;
@@ -79,7 +82,7 @@ var headings:{[s:string]:number} = {
   H5: 12
 };
 
-var handlers = [
+var handlers:Array<INodeHandler> = [
   tag('B', 'bold'),
   tag('STRONG', 'bold'),
   tag('I', 'italic'),
@@ -149,11 +152,20 @@ export class html {
       root = html;
     }
 
-    var result:Array<CharacterRun> = [], inSpace = true;
-    var cons = new Per<CharacterRun>(CharacterRun.consolidate()).into(result);
-    var emit = function (text:string, formatting:IFormattingMap) {
-      cons.submit(new CharacterRun(text, formatting));
+    var characterRuns:Array<Run> = [];
+    //var paragraphRuns:Array<ParagraphRun> = [];
+
+    var inSpace = true;
+    var cons = new Per<Run>(Run.consolidate()).into(characterRuns);
+    var emitRun = (text:string, formatting:IFormattingMap) => {
+      cons.submit(new Run(text, formatting));
     };
+
+    //var consParagraph = new Per<ParagraphRun>(ParagraphRun.consolidate()).into(paragraphRuns);
+    //var emitPRun = (text:string, formatting:IFormattingMap) => {
+    //  cons.submit(new ParagraphRun(text, formatting));
+    //};
+
     var dealWithSpaces = function (text:string, formatting:IFormattingMap) {
       text = text.replace(/\n+\s*/g, ' ');
       var fullLength = text.length;
@@ -169,14 +181,14 @@ export class html {
         inSpace = true;
         text += ' ';
       }
-      emit(text, formatting);
+      emitRun(text, formatting);
     };
 
-    function recurse(node:Node, formatting:IFormattingMap) {
+    function recurse(node:HTMLElement, formatting:IFormattingMap) {
       if (node.nodeType == 3) {
         dealWithSpaces(node.nodeValue, formatting);
       } else {
-        formatting = CharacterRun.cloneFormatting(formatting);
+        formatting = Run.cloneFormatting(formatting);
 
         //var classNames = node.attributes['class'];
         var classNames = node.attributes.getNamedItem("class");
@@ -191,22 +203,22 @@ export class html {
           })
         }
 
-        handlers.forEach(function (handler) {
+        handlers.forEach((handler:INodeHandler)=> {
           handler(node, formatting);
         });
         if (node.childNodes) {
           for (var n = 0; n < node.childNodes.length; n++) {
-            recurse(node.childNodes[n], formatting);
+            recurse(node.childNodes[n] as HTMLElement, formatting);
           }
         }
         if (isNewLine[node.nodeName]) {
-          emit('\n', formatting);
+          emitRun('\n', formatting);
           inSpace = true;
         }
       }
     }
 
     recurse(root, {});
-    return result;
+    return characterRuns;
   }
 }

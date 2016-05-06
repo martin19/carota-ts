@@ -3,9 +3,9 @@ import {CarotaDoc} from "./Doc";
 import {Rect} from "./Rect";
 import {CNode} from "./Node";
 import {PositionedWord} from "./PositionedWord";
-import {IFormattingMap} from "./Run";
+import {IFormattingMap} from "./RunBase";
 import {Input} from "./Input";
-import {CharacterRun} from "./CharacterRun";
+import {Run} from "./Run";
 
 export interface EditorOptions {
   canvas : HTMLCanvasElement;
@@ -35,7 +35,7 @@ export class Editor {
   nextKeyboardX:number;
   selectDragStart:number;
   focusChar:number;
-  richClipboard:Array<CharacterRun>;
+  richClipboard:Array<Run>;
   plainClipboard:string;
   toggles:{[n:number]:string};
   verticalAlignment:string;

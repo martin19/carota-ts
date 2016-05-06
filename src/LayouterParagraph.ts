@@ -4,7 +4,7 @@ import {Word} from "./Word";
 import {ICode} from "./Part";
 import {CarotaDoc} from "./Doc";
 import {Frame} from "./Frame";
-import {Paragraph} from "./Paragraph";
+import {PositionedParagraph} from "./PositionedParagraph";
 /**
  * A stateful transformer function that accepts words and emits lines. If the first word
  * is too wide, it will overhang; if width is zero or negative, there will be one word on
@@ -14,7 +14,7 @@ import {Paragraph} from "./Paragraph";
  *
  * Returns a stream of line objects, each containing an array of positionedWord objects.
  */
-export var LayouterParagraph = function (left:number, top:number, width:number, ordinal:number, parent:Paragraph) {
+export var LayouterParagraph = function (left:number, top:number, width:number, ordinal:number, parent:PositionedParagraph) {
 
   var lineBuffer:Array<Word> = [],
     lineWidth = 0,
