@@ -4,7 +4,7 @@ import {Frame} from "./Frame";
 import {Word} from "./Word";
 import {Rect} from "./Rect";
 import {LayouterParagraph} from "./LayouterParagraph";
-import {IParagraphFormatting, ParagraphRun} from "./ParagraphRun";
+import {IParagraphFormatting, Paragraph} from "./Paragraph";
 
 export class PositionedParagraph extends CNode {
   frame : Frame;
@@ -34,7 +34,7 @@ export class PositionedParagraph extends CNode {
     this.height = 0;
     this.actualWidth = width;
     this.ordinal = ordinal;
-    this.formatting = ParagraphRun.defaultFormatting;
+    this.formatting = Paragraph.defaultFormatting;
     this.lines = [];
   }
   

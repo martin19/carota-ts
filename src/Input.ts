@@ -1,10 +1,8 @@
 import {PositionedWord} from "./PositionedWord";
 import {Dom} from "./Dom";
-import {IFormattingMap} from "./RunBase";
 import {Editor} from "./Editor";
 import {CNode} from "./Node";
 import {Run} from "./Run";
-import {LiteEvent} from "./LiteEvent";
 
 export class Input {
   editor : Editor;

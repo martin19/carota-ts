@@ -1,5 +1,5 @@
-import {RunBase, IFormattingMap} from "./RunBase";
-
+import {Run} from "./Run";
+import {IFormattingMap} from "./Run";
 enum ParagraphAlignment {
   left,
   center,
@@ -20,7 +20,7 @@ export interface IParagraphFormatting {
 }
 
 
-export class ParagraphRun extends RunBase {
+export class Paragraph {
   static formattingKeys:Array<string> = ["align","marginLeft","marginRight","marginTop","marginBottom","hyphenate"];
 
   static defaultFormatting:IParagraphFormatting = {
@@ -32,7 +32,9 @@ export class ParagraphRun extends RunBase {
     hyphenate : false
   };
 
-  constructor(text:string|Array<string>, formatting:IFormattingMap) {
-    super(text, formatting);
+  formatting : IFormattingMap;
+  runs : Array<Run>;
+
+  constructor() {
   }
 }

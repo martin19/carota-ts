@@ -11,7 +11,7 @@ import {IRange} from "./Range";
 import {ICharacterFormatting} from "./Run";
 import {ICoords} from "./Word";
 import {Run} from "./Run";
-import {IFormattingMap} from "./RunBase";
+import {IFormattingMap} from "./Run";
 import {PositionedChar} from "./PositionedChar";
 import {PositionedParagraph} from "./PositionedParagraph";
 

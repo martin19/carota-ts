@@ -1,7 +1,6 @@
 import {Per} from "./Per";
-import {IFormattingMap} from "./RunBase";
+import {IFormattingMap} from "./Run";
 import {Run} from "./Run";
-import {ParagraphRun} from "./ParagraphRun";
 
 type INodeHandler = (node:HTMLElement, formatting:IFormattingMap)=>void;
 

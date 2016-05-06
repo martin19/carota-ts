@@ -1,9 +1,6 @@
 import {Dom} from "./Dom";
 import {CarotaDoc} from "./Doc";
 import {Rect} from "./Rect";
-import {CNode} from "./Node";
-import {PositionedWord} from "./PositionedWord";
-import {IFormattingMap} from "./RunBase";
 import {Input} from "./Input";
 import {Run} from "./Run";
 

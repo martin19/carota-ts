@@ -1,12 +1,9 @@
 import {Per} from "./Per";
 import {CarotaDoc} from "./Doc";
 import {CNode} from "./Node";
-import {Part} from "./Part";
-import {IFormattingMap} from "./RunBase";
+import {IFormattingMap} from "./Run";
 import {ICharacterFormatting} from "./Run";
 import {Run} from "./Run";
-import {PositionedParagraph} from "./PositionedParagraph";
-import {ParagraphRun} from "./ParagraphRun";
 
 export interface IRange {
   start? : number,
@@ -75,16 +72,6 @@ export class Range implements IRange{
     this.doc.runs(emit, this);
   };
 
-  /**
-   * Emits the range's paragraphRuns.
-   * @param emit
-   */
-  paragraphRuns(emit:(p:ParagraphRun)=>void) {
-    //TODO:
-    //this.doc.paragraphRuns(emit, this);
-    throw "not implemented";
-  }
-  
   /**
    * Returns the range's contents as plain text.
    * @returns {string}
