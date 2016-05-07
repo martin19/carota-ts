@@ -177,6 +177,7 @@ export class Paragraph {
     };
   }
 
+  //TODO: remove
   static runs(emit:(p:Run)=>void, paragraph:Paragraph) {
     paragraph.runs_.forEach((r:Run)=>{
       emit(r)
