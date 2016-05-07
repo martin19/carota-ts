@@ -81,7 +81,7 @@ export class Run {
     }
     if(run1 instanceof Run && run2 instanceof Run) {
       if(run1.parent !== run2.parent) {
-        throw "Cannot merge runs of different paragraphs."
+        //throw "Cannot merge runs of different paragraphs."
       }
       var mergedFormatting:IFormattingMap = {};
       Run.formattingKeys.forEach(function (key) {

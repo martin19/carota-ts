@@ -326,7 +326,7 @@ export class CarotaDoc extends CNode {
     //compute ordinal, index and offset
     var pos = 0;
     this._paragraphs.some((p:Paragraph, i : number)=>{
-      if(ordinal >= pos && ordinal <= (pos + p.length)) {
+      if(ordinal >= pos && ordinal < (pos + p.length)) {
         result = {
           paragraph : p,
           ordinal : pos,
@@ -444,6 +444,18 @@ export class CarotaDoc extends CNode {
     //Get old WordPointers for start and end
     var startWordPtr = this.wordContainingOrdinal(start);
     var endWordPtr = this.wordContainingOrdinal(end);
+
+    //Include previous word and omit next word if breaker
+    if (start === startWordPtr.ordinal) {
+      if (startWordPtr.index > 0 && !isBreaker(this.words[startWordPtr.index - 1])) {
+        startWordPtr = this.wordContainingOrdinal(this.wordOrdinal(startWordPtr.index-1));
+      }
+    }
+    if (end === endWordPtr.ordinal) {
+      if ((end === this.frame.length - 1) || isBreaker(endWordPtr.word)) {
+        endWordPtr = this.wordContainingOrdinal(this.wordOrdinal(endWordPtr.index-1))
+      }
+    }
 
     //Get ParagraphPointers for start and end
     var startParagraphPtr = this.paragraphContainingOrdinal(start);
@@ -578,7 +590,7 @@ export class CarotaDoc extends CNode {
         var caret = this.getCaretCoords(this.selection.start);
         if (caret && viewport.contains(caret.l, caret.t) && viewport.contains(caret.r, caret.b)) {
           ctx.save();
-          ctx.fillStyle = 'black';
+          ctx.fillStyle = 'red';
           caret.fill(ctx);
           ctx.restore();
         }
