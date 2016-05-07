@@ -59,15 +59,19 @@ interface IParagraphPointer {
   offset : number;
 }
 
-var makeEditCommand = function(doc:CarotaDoc, start:number, count:number, words:Array<Word>) {
+var makeEditCommand = function(doc:CarotaDoc, startWord:number, wordCount:number, words:Array<Word>,
+  startParagraph : number, paragraphCount:number, paragraphs:Array<Paragraph>) {
   var selStart = doc.selection.start, selEnd = doc.selection.end;
   return function(log:(f1:(f2:()=>void)=>void)=>void) {
     doc._wordOrdinals = [];
 
-    var oldWords = doc.words.splice(start,count);
-    doc.words = doc.words.slice(0,start).concat(words).concat(doc.words.slice(start));
-
-    log(makeEditCommand(doc, start, words.length, oldWords));
+    var oldParagraphs = doc._paragraphs.splice(startParagraph, paragraphCount);
+    doc._paragraphs = doc._paragraphs.slice(0,startParagraph).concat(paragraphs).concat(doc._paragraphs.slice(startParagraph));
+    
+    var oldWords = doc.words.splice(startWord,wordCount);
+    doc.words = doc.words.slice(0,startWord).concat(words).concat(doc.words.slice(startWord));
+    
+    log(makeEditCommand(doc, startWord, words.length, oldWords, startParagraph, paragraphs.length, oldParagraphs));
     doc._nextSelection = { start: selStart, end: selEnd };
   };
 };
@@ -336,13 +340,16 @@ export class CarotaDoc extends CNode {
   }
 
   /**
-   * Splice/connect/glue given a start word by index, count of words, and an Array of runs. 
-   * Creates an array of new Words.
+   * Splice/connect/glue given a start word by index, wordCount of words, and an Array of runs.
    * @param wordIndex
-   * @param count
+   * @param wordCount
    * @param runs
+   * @param paragraphIndex
+   * @param paragraphCount
+   * @param paragraphs
    */
-  spliceWordsWithRuns(wordIndex:number, count:number, runs:Array<Run>) {
+  spliceWordsWithRuns(wordIndex:number, wordCount:number, runs:Array<Run>,
+    paragraphIndex:number, paragraphCount:number, newParagraphs:Array<Paragraph>) {
     var self = this;
 
     var newWords = new Per(characters(runs))
@@ -354,18 +361,18 @@ export class CarotaDoc extends CNode {
       .all();
 
     this.transaction(function (log) {
-      makeEditCommand(self, wordIndex, count, newWords)(log);
+      makeEditCommand(self, wordIndex, wordCount, newWords, paragraphIndex, paragraphCount, newParagraphs)(log);
     });
   }
 
   /**
    * Splice/connect/glue a range of characters with a string/Array of runs
-   * @param start - start index of range to splice
-   * @param end - end index of range to splice
+   * @param start - start ordinal of range to splice
+   * @param end - end ordinal of range to splice
    * @param text - text to splice
    * @returns {number}
    */
-  splice(start:number, end:number, text:Array<Paragraph>|string) {
+  /*splice(start:number, end:number, text:Array<Paragraph>|string) {
     var text_:Array<Run>;
     if (typeof text === 'string') {
       //If plaintext is entered, try to create a sampleRun by cloning the first run after "start"
@@ -392,17 +399,19 @@ export class CarotaDoc extends CNode {
 
     var prefix:Array<Run>;
     if (start === startWord.ordinal) {
+      //if start is at beginning of startWord
       if (startWord.index > 0 && !isBreaker(this.words[startWord.index - 1])) {
+        //if startWord is NOT first word, set prefix to runs of previousWord
         startWord.index--;
         var previousWord = this.words[startWord.index];
         prefix = new Per({}).per(previousWord.runs, previousWord).all();
       } else {
+        //if startWord is first word or breaker, set empty prefix
         prefix = [];
       }
     } else {
-      prefix = new Per({end: startWord.offset})
-        .per(startWord.word.runs, startWord.word)
-        .all();
+      //if start is in middle of startWord, prefix is start of startWord
+      prefix = new Per({end: startWord.offset}).per(startWord.word.runs, startWord.word).all();
     }
 
     var suffix:Array<Run>;
@@ -414,15 +423,100 @@ export class CarotaDoc extends CNode {
         suffix = new Per({}).per(endWord.word.runs, endWord.word).all();
       }
     } else {
-      suffix = new Per({start: endWord.offset})
-        .per(endWord.word.runs, endWord.word)
-        .all();
+      suffix = new Per({start: endWord.offset}).per(endWord.word.runs, endWord.word).all();
     }
 
     var oldLength = this.frame.length;
 
     this.spliceWordsWithRuns(startWord.index, (endWord.index - startWord.index) + 1,
       new Per(prefix).concat(text_).concat(suffix).per(Run.consolidate()).all());
+
+    return this.frame ? (this.frame.length - oldLength) : 0;
+  }*/
+
+  /**
+   * Splice/connect/glue a range of characters with a string/Array of Paragraphs
+   * @param start - start ordinal of range to splice
+   * @param end - end ordinal of range to splice
+   * @param text - text to splice
+   * @returns {number}
+   */
+  splice(start:number, end:number, text:Array<Paragraph>|string) {
+    var text_:Array<Paragraph>;
+    if (typeof text === 'string') {
+      //If plaintext is entered, try to create a sampleRun by cloning the first run after "start"
+      var sample = Math.max(0, start - 1);
+      var sampleRun = new Per({start: sample, end: sample + 1}).per(this.runs, this).first();
+      text_ = [];
+      if (sampleRun) {
+        var run = sampleRun.clone();
+        run.text = text;
+        text_ = [new Paragraph()];
+        text_[0].addRun(run);
+      } else {
+        //If sampleRun could not be created, create a run with empty formatting.
+        text_ = [new Paragraph()];
+        text_[0].addRun(new Run(text, {}, null));
+      }
+    } else {
+      //If rich-text is entered, set text to the entered rich-text content.
+      text_ = text;
+    }
+    var textLength_ = 0;
+    text_.forEach((p:Paragraph)=>{
+      textLength_+=p.length;
+    });
+
+    //this.applyInsertFormatting(text_);
+
+    //Get old WordPointers for start and end
+    var startWordPtr = this.wordContainingOrdinal(start);
+    var endWordPtr = this.wordContainingOrdinal(end);
+
+    //Get ParagraphPointers for start and end
+    var startParagraphPtr = this.paragraphContainingOrdinal(start);
+    var endParagraphPtr = this.paragraphContainingOrdinal(end);
+
+    //Constitute array of new Paragraphs
+    var startParagraph = startParagraphPtr.paragraph;
+    var endParagraph = endParagraphPtr.paragraph;
+    var newParagraphs:Array<Paragraph> = [startParagraph.partialParagraph({end : startParagraphPtr.offset})]
+      .concat(text_)
+      .concat([endParagraph.partialParagraph({start : endParagraphPtr.offset})]);
+
+    //Consolidate new Paragraphs
+    var consolidatedNewParagraphs:Array<Paragraph> = [];
+    var cons = new Per(Paragraph.consolidate()).into(consolidatedNewParagraphs);
+    new Per(newParagraphs).forEach((p:Paragraph)=>cons.submit(p));
+
+    //Consolidate runs in consolidatedNewParagraphs
+    consolidatedNewParagraphs.forEach((p:Paragraph)=>{
+      var runs:Array<Run> = [];
+      var consRuns = new Per(Run.consolidate()).into(runs);
+      new Per(p.runs,p).forEach((r:Run)=>consRuns.submit(r));
+      p.clearRuns();
+      p.addRuns(runs);
+    });
+
+    var textLengthDiff = textLength_ - (end-start);
+
+    //Get new Runs from consolidated new paragraphs.
+    var newRuns:Array<Run> = [];
+    //start of start word relative to startParagraphPtr
+    var startOrdinal = startWordPtr.ordinal - startParagraphPtr.ordinal;
+    //end of end word relative to startParagraphPtr
+    var endOrdinal = textLengthDiff + endWordPtr.ordinal + endWordPtr.word.length - startParagraphPtr.ordinal;
+    consolidatedNewParagraphs.forEach((p:Paragraph, i : number)=>{
+      newRuns = newRuns.concat( new Per({start:startOrdinal, end:endOrdinal }).per(p.runs,p).all() );
+      startOrdinal = Math.max(startOrdinal - p.length, 0);
+      endOrdinal = Math.max(endOrdinal - p.length, 0);
+    });
+
+    var oldLength = this.frame.length;
+
+    this.spliceWordsWithRuns(startWordPtr.index, (endWordPtr.index - startWordPtr.index) + 1, newRuns,
+      startParagraphPtr.index, (endParagraphPtr.index - startParagraphPtr.index) + 1, consolidatedNewParagraphs
+    );
 
     return this.frame ? (this.frame.length - oldLength) : 0;
   }

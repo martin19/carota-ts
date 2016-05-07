@@ -63,7 +63,7 @@ export class Run {
   }
 
   static sameFormatting(run1:Run, run2:Run) {
-    return this.formattingKeys.every(function (key:string) {
+    return Run.formattingKeys.every(function (key:string) {
       return (run1.formatting)[key] === (run2.formatting)[key];
     });
   }
@@ -84,7 +84,7 @@ export class Run {
         throw "Cannot merge runs of different paragraphs."
       }
       var mergedFormatting:IFormattingMap = {};
-      this.formattingKeys.forEach(function (key) {
+      Run.formattingKeys.forEach(function (key) {
         if (key in run1.formatting || key in run2.formatting) {
           if ((run1.formatting)[key] === (run2.formatting)[key]) {
             mergedFormatting[key] = (run1.formatting)[key];
@@ -93,7 +93,7 @@ export class Run {
           }
         }
       });
-      return new this("",mergedFormatting, run1.parent);
+      return new Run("",mergedFormatting, run1.parent);
     }
     throw "Unexpected control flow in Run.merge.";
   }

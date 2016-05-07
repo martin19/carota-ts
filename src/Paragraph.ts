@@ -62,6 +62,7 @@ export class Paragraph {
    * @param run
    */
   addRun(run:Run) {
+    run.parent = this;
     this.runs_.push(run);
     this.length += run.text.length;
   }
@@ -110,6 +111,17 @@ export class Paragraph {
   }
 
   /**
+   * Checks if the paragraph ends with a newline character.
+   * @returns {boolean}
+   */
+  endsWithNewLine() {
+    if(this.runs_ && this.runs_.length) {
+      return this.runs_[this.runs_.length-1].text.slice(-1) == "\n";
+    }
+    return false;
+  }
+
+  /**
    * Emits this paragraph's runs within a given Range (or the full paragraph if no range is given.)
    * @param emit
    * @param range - absolute or relative to paragraph start?
@@ -147,6 +159,22 @@ export class Paragraph {
         end--;
       }
     });
+  }
+
+  /**
+   * Consolidate subsequent paragraphs if there is no newline at end.
+   * @returns {function(function(Run): void, Run): void}
+   */
+  static consolidate() {
+    var current:Paragraph;
+    return (emit:(p:Paragraph)=>void, paragraph:Paragraph)=> {
+      if ((!current) || current.endsWithNewLine()) {
+        current = paragraph.clone();
+        emit(current);
+      } else {
+        current.addRuns(paragraph.runs_);
+      }
+    };
   }
 
   static runs(emit:(p:Run)=>void, paragraph:Paragraph) {

@@ -26,7 +26,7 @@
 
     #examplePersistence {
       position: absolute;
-      top: 50%;
+      top: 40px;
       width: 50%;
       right: 0;
       bottom: 40px;
@@ -412,8 +412,6 @@
             sx : 1.0,
             sy : 1.0
           };
-          f1.open();
-          f2.open();
 
           var gui2 = new dat.GUI();
           var f4 = gui2.addFolder("Position");
@@ -447,7 +445,9 @@
             editor.setScale(editor.getScale().x, value);
           });
 
-          f4.open();
+          //f1.open();
+          //f2.open();
+          //f4.open();
         },
         updateUndo: function () {
           //undo.disabled = !exampleEditor.canUndo(false);

@@ -98,12 +98,13 @@ export class Range implements IRange{
     //consolidate runs in paragraphs and remove paragraph reference
     var consolidatedParagraphs = paragraphs.map((p:Paragraph)=>{
       var runs:Array<Run> = [];
-      var cons = new Per<Run>(Run.consolidate()).map((r:Run)=>{ delete r.parent; return r; }).into(runs);
+      var cons = new Per<Run>(Run.consolidate()).into(runs);
       p.runs((r:Run)=>{
         cons.submit(r);
       });
       p.clearRuns();
       p.addRuns(runs);
+      p.runs_.forEach((r:Run)=>{ delete r.parent; });
       return p;
     });
     
