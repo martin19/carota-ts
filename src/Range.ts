@@ -159,9 +159,15 @@ export class Range implements IRange{
       range.doc.modifyInsertFormatting(attribute, value);
     } else {
       var saved = range.save();
-      var template:IFormattingMap = {};
-      template[attribute] = value;
-      Run.format(saved, <ICharacterFormatting>template);
+      var formatting:IFormattingMap = {};
+      formatting[attribute] = value;
+
+      saved.forEach((p:Paragraph)=>{
+        new Per(p.runs, p).forEach((r:Run)=>{
+          Run.format(r, <ICharacterFormatting>formatting);
+        });
+      });
+      
       range.setText(saved);
     }
   };

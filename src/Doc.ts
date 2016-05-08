@@ -194,13 +194,11 @@ export class CarotaDoc extends CNode {
     if (!this.frame) {
       console.error('A bug somewhere has produced an invalid state - rolling back');
       this.performUndo();
-    } /*
-      TODO: what is this used for? causes an error when deleting the last character
-      else if (this._nextSelection) {
+    } else if (this._nextSelection) {
       var next = this._nextSelection;
       this._nextSelection = null;
       this.select(next.start, next.end);
-    }*/
+    }
   }
 
   range(start:number, end:number) {
@@ -263,7 +261,7 @@ export class CarotaDoc extends CNode {
     if (index < this.words.length) {
       var cached = this._wordOrdinals.length;
       if (cached < (index + 1)) {
-        var o = cached > 0 ? this._wordOrdinals[cached - 1] : 0;
+        var o = cached > 0 ? this._wordOrdinals[cached - 1] + this.words[cached-1].length: 0;
         for (var n = cached; n <= index; n++) {
           this._wordOrdinals[n] = o;
           o += this.words[n].length;
@@ -281,7 +279,7 @@ export class CarotaDoc extends CNode {
     if(index < this._paragraphs.length) {
       var cached = this._paragraphOrdinals.length;
       if(cached < (index + 1)) {
-        var o = cached > 0 ? this._paragraphOrdinals[cached -1] : 0;
+        var o = cached > 0 ? this._paragraphOrdinals[cached -1] + this._paragraphs[cached-1].length: 0;
         for(var n = cached; n <= index; n++) {
           this._paragraphOrdinals[n] = o;
           o += this._paragraphs[n].length;
@@ -368,10 +366,14 @@ export class CarotaDoc extends CNode {
    * @param range
    */
   paragraphs(emit:(p:Paragraph)=>void, range:IRange) {
+    //TODO: -2 because the eof marker is not contained in the last paragraph.
+    //Don't know how to handle this, maybe we should add it there - this fixes the
+    //immediate problem of not finding the last paragraph when no range is given.
     var start = this.paragraphContainingOrdinal(Math.max(0, range.start)),
       end = this.paragraphContainingOrdinal(Math.min(range.end, this.frame.length - 1));
 
     if (start.index === end.index) {
+      //TODO: another off by one candidate
       emit(start.paragraph.partialParagraph({ start : start.offset, end : end.offset }));
     } else {
       emit(start.paragraph.partialParagraph({ start : start.offset}));
@@ -453,7 +455,10 @@ export class CarotaDoc extends CNode {
     }
     if (end === endWordPtr.ordinal) {
       if ((end === this.frame.length - 1) || isBreaker(endWordPtr.word)) {
-        endWordPtr = this.wordContainingOrdinal(this.wordOrdinal(endWordPtr.index-1))
+        var previousWord = this.wordContainingOrdinal(this.wordOrdinal(endWordPtr.index-1))
+        if(previousWord) {
+          endWordPtr = previousWord;
+        }
       }
     }
 

@@ -177,7 +177,9 @@ export class html {
         inSpace = true;
         text += ' ';
       }
-      emitRun(text, formatting);
+      if(text.length>0) {
+        emitRun(text, formatting);
+      }
     };
 
     function recurse(node:HTMLElement, formatting:IFormattingMap) {
