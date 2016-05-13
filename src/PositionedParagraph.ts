@@ -77,7 +77,6 @@ export class PositionedParagraph extends CNode {
           }
         }, word)) {
         pp.length = length;
-        //pp.height = height + spaceAfter + ((spaceBefore > 0) ? spaceBefore : 0);
         pp.height = height;
         emit(pp);
         return true;

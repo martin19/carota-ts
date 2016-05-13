@@ -206,7 +206,7 @@ export class Range implements IRange{
     for(var i = start.index; i <= end.index; i++) {
       this.doc._paragraphs[i].formatting[attribute] = value;
     }
-    var extendedRange = new Range(this.doc, start.ordinal, end.ordinal + this.doc._paragraphs[end.index].length);
+    var extendedRange = new Range(this.doc, start.ordinal, end.ordinal + this.doc._paragraphs[end.index].length-1);
     var saved = extendedRange.save();
     extendedRange.setText(saved);
   }

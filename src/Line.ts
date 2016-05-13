@@ -69,6 +69,11 @@ export class Line extends CNode {
     });
     actualWidth -= words[words.length - 1].space.width;
 
+    var last = words[words.length-1].isNewLine();
+    if(last && align == "justifyLastLeft") align = "left";
+    if(last && align == "justifyLastCentered") align = "center";
+    if(last && align == "justifyLastRight") align = "right";
+
     var x = 0, spacing = 0;
     if (actualWidth < width) {
       switch (align) {
@@ -81,8 +86,11 @@ export class Line extends CNode {
         case "center":
           x = (width - actualWidth) / 2;
           break;
+        case "justifyLastLeft":
+        case "justifyLastCentered":
+        case "justifyLastRight":
         case "justifyAll":
-          if (words.length > 1 && !words[words.length - 1].isNewLine()) {
+          if (words.length > 1) {
             spacing = (width - actualWidth) / (words.length - 1);
           }
         break;
