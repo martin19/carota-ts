@@ -103,6 +103,7 @@ export class Range implements IRange{
 
     //consolidate runs in paragraphs and remove paragraph reference
     var consolidatedParagraphs = paragraphs.map((p:Paragraph)=>{
+      p = p.clone();
       var runs:Array<Run> = [];
       var cons = new Per<Run>(Run.consolidate()).into(runs);
       p.runs((r:Run)=>{
@@ -203,11 +204,13 @@ export class Range implements IRange{
     var start = this.doc.paragraphContainingOrdinal(this.start),
       end = this.doc.paragraphContainingOrdinal(this.end);
 
-    for(var i = start.index; i <= end.index; i++) {
-      this.doc._paragraphs[i].formatting[attribute] = value;
-    }
-    var extendedRange = new Range(this.doc, start.ordinal, end.ordinal + this.doc._paragraphs[end.index].length-1);
+    var extendedRange = new Range(this.doc, start.ordinal, end.ordinal + this.doc._paragraphs[end.index].length);
     var saved = extendedRange.save();
+
+    saved.forEach((p:Paragraph)=>{
+      p.formatting[attribute] = value;
+    });
+
     extendedRange.setText(saved);
   }
 }

@@ -85,7 +85,7 @@ var makeEditCommand = function(doc:CarotaDoc, startWord:number, wordCount:number
         word.space.parts.forEach((part:Part)=>{ part.run.parent = p; });
       }
     });
-    
+
     log(makeEditCommand(doc, startWord, words.length, oldWords, startParagraph, paragraphs.length, oldParagraphs));
     doc._nextSelection = { start: selStart, end: selEnd };
   };
@@ -459,7 +459,7 @@ export class CarotaDoc extends CNode {
     }
     if (end === endWordPtr.ordinal) {
       if ((end === this.frame.length - 1) || isBreaker(endWordPtr.word)) {
-        var previousWord = this.wordContainingOrdinal(this.wordOrdinal(endWordPtr.index-1))
+        var previousWord = this.wordContainingOrdinal(this.wordOrdinal(endWordPtr.index-1));
         if(previousWord) {
           endWordPtr = previousWord;
         }

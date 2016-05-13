@@ -237,10 +237,10 @@
       var canvas = document.querySelector("#exampleCanvas");
       var editor = new carota.Editor({
         canvas: canvas,
-        x : 200,
-        y : 200,
-        w : 200,
-        h : 200
+        x : 400,
+        y : 400,
+        w : 400,
+        h : 500
       });
       var exampleEditor = editor.getDoc();
 
@@ -365,20 +365,22 @@
           var paragraphOptions = {
             align: "left",
             marginLeft : 0,
-            marginTop : 0,
             marginRight : 0,
-            marginBottom : 0,
+            spaceBefore : 0,
+            spaceAfter : 0,
             hyphenate : false
           };
 
           var f2 = gui.addFolder("Paragraph");
           var cParagraph = [];
-          cParagraph.push(f2.add(paragraphOptions, "align", ["left","center","right","justifyLastLeft","justifyLastCentered","justifyLastRight","justifyAll"]).listen());
+          var optionAlign = f2.add(paragraphOptions, "align", ["left","center","right","justifyLastLeft","justifyLastCentered","justifyLastRight","justifyAll"]);
+          cParagraph.push(optionAlign.listen());
           cParagraph.push(f2.add(paragraphOptions,"marginLeft").min(-50).max(50).listen());
-          cParagraph.push(f2.add(paragraphOptions,"marginTop").min(-50).max(50).listen());
           cParagraph.push(f2.add(paragraphOptions,"marginRight").min(-50).max(50).listen());
-          cParagraph.push(f2.add(paragraphOptions,"marginBottom").min(-50).max(50).listen());
+          cParagraph.push(f2.add(paragraphOptions,"spaceBefore").min(-50).max(50).listen());
+          cParagraph.push(f2.add(paragraphOptions,"spaceAfter").min(-50).max(50).listen());
           cParagraph.push(f2.add(paragraphOptions,"hyphenate").listen());
+
           cParagraph.forEach(function(c){
             c.onFinishChange(function(value){
               var range = exampleEditor.selectedRange();
@@ -392,6 +394,7 @@
 
           // When the selected range coordinates change, update the control
           exampleEditor.selectionChanged.on(function (data) {
+            //set CharacterFormatting UI
             cFormatting.forEach(function(c){
               var id = c.property;
               var formatting = data.getFormatting();
@@ -400,6 +403,17 @@
                 //indeterminate
               }
               textBoxOptions[id] = val;
+            });
+            //set ParagraphFormatting UI
+            cParagraph.forEach(function(c){
+              var id=c.property;
+              var range = exampleEditor.selectedRange();
+              var formatting = range.getParagraphFormatting();
+              var val = id in formatting ? formatting[id] : carota.Paragraph.defaultFormatting[id];
+              if(val === carota.Paragraph.multipleValues) {
+                //indeterminate
+              }
+              paragraphOptions[id] = val;
             });
           });
 

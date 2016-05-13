@@ -78,8 +78,10 @@ export class Paragraph {
   }
 
   clone() {
-    var p = new Paragraph(this.formatting);
-    p.addRuns(this.runs_);
+    var p = new Paragraph(Paragraph.cloneFormatting(this.formatting));
+    this.runs_.forEach((r:Run)=>{
+      p.addRun(r.clone());
+    });
     return p;
   }
 
@@ -199,17 +201,29 @@ export class Paragraph {
 
 
   /**
-   * Consolidate subsequent paragraphs if there is no newline at end.
+   * Consolidate subsequent partial/unterminated paragraphs.
+   * If paragraph is not terminated, formatting is applied
+   * from terminated paragraph.
    * @returns {function(function(Run): void, Run): void}
    */
   static consolidate() {
     var current:Paragraph;
     return (emit:(p:Paragraph)=>void, paragraph:Paragraph)=> {
-      if ((!current) || current.endsWithNewLine()) {
-        current = paragraph.clone();
-        emit(current);
+      if(!current) {
+        if(!paragraph.endsWithNewLine()) {
+          current = paragraph.clone();
+        } else {
+          emit(paragraph);
+        }
       } else {
-        current.addRuns(paragraph.runs_);
+        if (paragraph.endsWithNewLine()) {
+          current.addRuns(paragraph.runs_);
+          current.formatting = Paragraph.cloneFormatting(paragraph.formatting);
+          emit(current);
+          current = null;
+        } else {
+          current.addRuns(paragraph.runs_);
+        }
       }
     };
   }
