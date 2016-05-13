@@ -29,8 +29,9 @@ export var LayouterFrame = function (left:number, top:number, width:number, ordi
   var lastNewLineHeight = 0;
   var layouter:(emit:(p:PositionedParagraph)=>void, word:Word)=>void|boolean;
   var y = top;
+  var paragraphIndex = 0;
   
-  layouter = PositionedParagraph.layout(left, top, width, ordinal, parent);
+  layouter = PositionedParagraph.layout(left, top, width, ordinal, parent, parent._parent._paragraphs[paragraphIndex]);
 
   return function (emit:(p:PositionedParagraph)=>boolean|void, word:Word) {
     if(word.eof) {
@@ -42,7 +43,8 @@ export var LayouterFrame = function (left:number, top:number, width:number, ordi
       emit(p); 
     }, word);
     if (word.isNewLine()) {
-      layouter = PositionedParagraph.layout(left, y, width, ordinal, parent);
+      paragraphIndex++;
+      layouter = PositionedParagraph.layout(left, y, width, ordinal, parent, parent._parent._paragraphs[paragraphIndex]);
     }
     return quit;
   }

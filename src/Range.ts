@@ -17,6 +17,12 @@ export class Range implements IRange{
   start:number;
   end:number;
 
+  /**
+   * Create a Range spanning characters from start to end.
+   * @param doc - the document
+   * @param start - start ordinal
+   * @param end - end ordinal
+   */
   constructor(doc:CarotaDoc, start:number, end:number) {
     this.doc = doc;
     this.start = start;
@@ -178,16 +184,14 @@ export class Range implements IRange{
    * @param value
    */
   setParagraphFormatting(attribute:string, value:string|boolean|number) {
-    throw "not implemented.";
-    // var range:Range = this;
-    // if(range.start === range.end) {
-    //   //TODO: modify insert formatting
-    //   throw "ParagraphInsertFormatting cannot be modified yet.";
-    // } else {
-    //   range.paragraphRuns((paragraphRun:ParagraphRun)=>{
-    //     //TODO:
-    //     //paragraph
-    //   });
-    // }
+    var start = this.doc.paragraphContainingOrdinal(this.start),
+      end = this.doc.paragraphContainingOrdinal(this.end);
+
+    for(var i = start.index; i <= end.index; i++) {
+      this.doc._paragraphs[i].formatting[attribute] = value;
+    }
+    var extendedRange = new Range(this.doc, start.ordinal, end.ordinal + this.doc._paragraphs[end.index].length);
+    var saved = extendedRange.save();
+    extendedRange.setText(saved);
   }
 }

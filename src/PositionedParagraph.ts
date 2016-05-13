@@ -45,14 +45,27 @@ export class PositionedParagraph extends CNode {
    * @param width - width of frame in pixels
    * @param ordinal - ordinal number of first character in frame
    * @param parent - parent node of frame (the document node)
+   * @param paragraph - the paragraph to be positioned.
    * @return {function(function(PositionedParagraph): void, Word): boolean}
    */
-  static layout(left:number, top:number, width:number, ordinal:number, parent:Frame) {
+  static layout(left:number, top:number, width:number, ordinal:number, parent:Frame, paragraph:Paragraph) {
     var length = 0;
     var height = 0;
-    var paragraph_ = new PositionedParagraph(parent, left, top, width, ordinal);
-    var lines = paragraph_.lines;
-    var layouter = LayouterParagraph(left, top, width, ordinal, paragraph_);
+    var marginLeft = 0, marginRight = 0, spaceBefore = 0, spaceAfter = 0;
+    var pp = new PositionedParagraph(parent, left, top, width, ordinal);
+    if(paragraph) {
+      pp.formatting = paragraph.formatting as IParagraphFormatting;
+      marginLeft = pp.formatting.marginLeft || 0;
+      marginRight = pp.formatting.marginRight || 0;
+      spaceBefore = pp.formatting.spaceBefore || 0;
+      spaceAfter = pp.formatting.spaceAfter || 0;
+      pp.left = left + marginLeft;
+      pp.top = top + spaceBefore;
+      pp.width = width - (marginLeft + marginRight);
+    }
+    var lines = pp.lines;
+
+    var layouter = LayouterParagraph(pp.left, pp.top, pp.width, ordinal, pp);
 
     return (emit:(p:PositionedParagraph)=>void, word:Word) => {
 
@@ -65,16 +78,16 @@ export class PositionedParagraph extends CNode {
             lines.push(line);
           }
         }, word)) {
-        paragraph_.length = length;
-        paragraph_.height = height;
-        emit(paragraph_);
+        pp.length = length;
+        pp.height = height + spaceAfter + spaceBefore;
+        emit(pp);
         return true;
       }
     };
   }
 
   bounds() {
-    return new Rect(this.left, this.top, this.width, this.height);    
+    return new Rect(this.left, this.top, this.width, this.height);
   }
 
   parent() {

@@ -2,35 +2,28 @@ import {Run} from "./Run";
 import {IFormattingMap} from "./Run";
 import {IRange} from "./Range";
 import {Per} from "./Per";
-enum ParagraphAlignment {
-  left,
-  center,
-  right,
-  justifyLastLeft,
-  justifyLastCentered,
-  justifyLastRight,
-  justifyAll
-}
+
+export type ParagraphAlignment = "left"|"center"|"right"|"justifyLastLeft"|"justifyLastCentered"|"justifyLastRight"|"justifyAll";
 
 export interface IParagraphFormatting {
   align:ParagraphAlignment,
   marginLeft : number,
   marginRight : number,
-  marginTop : number,
-  marginBottom : number,
+  spaceBefore : number,
+  spaceAfter : number,
   hyphenate : boolean
 }
 
 
 export class Paragraph {
-  static formattingKeys:Array<string> = ["align","marginLeft","marginRight","marginTop","marginBottom","hyphenate"];
+  static formattingKeys:Array<string> = ["align","marginLeft","marginRight","spaceBefore","spaceAfter","hyphenate"];
 
   static defaultFormatting:IParagraphFormatting = {
-    align:ParagraphAlignment.left,
+    align:"left",
     marginLeft : 0,
     marginRight : 0,
-    marginTop : 0,
-    marginBottom : 0,
+    spaceBefore : 0,
+    spaceAfter : 0,
     hyphenate : false
   };
 

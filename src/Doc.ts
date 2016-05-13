@@ -603,12 +603,19 @@ export class CarotaDoc extends CNode {
     } else {
       ctx.save();
       ctx.fillStyle = hasFocus ? 'rgba(0, 100, 200, 0.3)' : 'rgba(160, 160, 160, 0.3)';
+      ctx.beginPath();
       this.selectedRange().parts(function (part:CNode) {
         var b = part.bounds();
-        if(viewport.contains(b.l,b.t) && viewport.contains(b.r,b.b)) {
-          part.bounds().fill(ctx);
+        //if(viewport.contains(b.l,b.t) && viewport.contains(b.r,b.b)) {
+        if(viewport.t <= b.t && viewport.b >= b.b) {
+          ctx.moveTo(b.l, b.t);
+          ctx.lineTo(b.r, b.t);
+          ctx.lineTo(b.r, b.b);
+          ctx.lineTo(b.l, b.b);
+          ctx.closePath();
         }
       }.bind(this));
+      ctx.fill();
       ctx.restore();
     }
   }

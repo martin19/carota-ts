@@ -24,6 +24,11 @@ export var NoWrap = function (left:number, top:number, ordinal:number, parent:Po
     lastNewLineHeight = 0,
     y = top;
 
+  /**
+   * Stores a word in the lineBuffer, updates lineWidth, maxAscent, maxDescent, maxLineHeight
+   * @param word - the word to store.
+   * @param emit - the emit function is called once a newLine is found.
+   */
   var store = function (word:Word, emit:(p:Line|number)=>boolean|void) {
     lineBuffer.push(word);
     lineWidth += word.width;
@@ -36,6 +41,10 @@ export var NoWrap = function (left:number, top:number, ordinal:number, parent:Po
     }
   };
 
+  /**
+   * Create a new Line object from lineBuffer and send it.
+   * @param emit
+   */
   var send = function (emit:(p:Line|number)=>boolean|void) {
     if (quit || lineBuffer.length === 0) {
       return;
@@ -76,11 +85,9 @@ export var NoWrap = function (left:number, top:number, ordinal:number, parent:Po
     lineWidth = maxAscent = maxDescent = maxLineHeight = 0;
   };
 
-  return function (emit:(p:Line|number)=>boolean|void, inputWord:Word) {
-    if (inputWord.eof) {
-
-      store(inputWord, emit);
-
+  return function (emit:(p:Line|number)=>boolean|void, word:Word) {
+    if (word.eof) {
+      store(word, emit);
       if (!lineBuffer.length) {
         emit(y + lastNewLineHeight - top);
       } else {
@@ -90,7 +97,7 @@ export var NoWrap = function (left:number, top:number, ordinal:number, parent:Po
       quit = true;
     } else {
       lastNewLineHeight = 0;
-      store(inputWord, emit);
+      store(word, emit);
     }
     return quit;
   };

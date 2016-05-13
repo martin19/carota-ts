@@ -18,14 +18,27 @@ export class CNode {
     return null;
   }
 
+  /**
+   * Returns the first child of this CNode.
+   * @returns {CNode}
+   */
   first() {
     return this.children()[0];
   }
 
+  /**
+   * Returns the last child of this CNode.
+   * @returns {CNode}
+   */
   last() {
     return this.children()[this.children().length - 1];
   }
 
+  /**
+   * Returns the next siblings youngest first descendant.
+   * the
+   * @returns {CNode}
+   */
   next() {
     var self:CNode = this;
     for (; ;) {
@@ -49,6 +62,11 @@ export class CNode {
     }
   }
 
+  /**
+   * Returns the previous sibling of this CNode, or if this has no previous sibling,
+   * the parent's last child.
+   * @returns {CNode}
+   */
   previous():CNode {
     var parent = this.parent();
     if (!parent) {
@@ -103,6 +121,7 @@ export class CNode {
         }
       }
     });
+
     if (!found) {
       found = this.last();
       while (found) {

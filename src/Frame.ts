@@ -7,16 +7,17 @@ import {ICode} from "./Part";
 import {NoWrap} from "./LayouterParagraph2";
 import {PositionedParagraph} from "./PositionedParagraph";
 import {LayouterFrame} from "./LayouterFrame";
+import {CarotaDoc} from "./Doc";
 
 export class Frame extends CNode {
   type:string;
   paragraphs:Array<PositionedParagraph>;
-  _parent:CNode;
+  _parent:CarotaDoc;
   _bounds : Rect;
   height:number;
   _actualWidth:number;
 
-  constructor(parent:CNode, ordinal : number) {
+  constructor(parent:CarotaDoc, ordinal : number) {
     super();
     this.type = 'frame';
     this.paragraphs = [];
@@ -45,7 +46,7 @@ export class Frame extends CNode {
    * @param parent - parent node of frame (the document node)
    * @return {function(function(Frame): void, Word): boolean}
    */
-  static layout(left:number, top:number, width:number, ordinal:number, parent:CNode) {
+  static layout(left:number, top:number, width:number, ordinal:number, parent:CarotaDoc) {
     var frame_ = new Frame(parent, ordinal);
     var paragraphs = frame_.paragraphs;
     var layouter = LayouterFrame(left, top, width, ordinal, frame_);
@@ -59,6 +60,7 @@ export class Frame extends CNode {
         //TODO: stupid fix, eof should not be emitted , see carota.js
         frame_.length = length - 1;
         frame_.height = height;
+        frame_.actualWidth()
         emit(frame_);
       }
     };

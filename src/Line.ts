@@ -1,44 +1,57 @@
 import {CNode} from "./Node";
 import {PositionedWord} from "./PositionedWord";
 import {Rect} from "./Rect";
-import {CarotaDoc} from "./Doc";
 import {Word} from "./Word";
-import {Frame} from "./Frame";
 import {PositionedParagraph} from "./PositionedParagraph";
+import {ParagraphAlignment} from "./Paragraph";
 
-/*  A Line is returned by the wrap function. It contains an array of PositionedWord objects that are
- all on the same physical line in the wrapped text.
-
- It has a width (which is actually the same for all lines returned by the same wrap). It also has
- coordinates for baseline, ascent and descent. The ascent and descent have the maximum values of
- the individual words' ascent and descent coordinates.
-
- It has methods:
-
- draw(ctx, x, y)
- - Draw all the words in the line applying the specified (x, y) offset.
- bounds()
- - Returns a Rect for the bounding box.
+/**
+ * A Line is returned by the wrap function. It contains an array of PositionedWord objects that are
+ * all on the same physical line in the wrapped text.
  */
-
 export class Line extends CNode {
-  positionedWords:Array<PositionedWord>;
-  actualWidth:number;
   type:string;
+  /**
+   * The positionedWords this Line contains.
+   */
+  positionedWords:Array<PositionedWord>;
+  /**
+   * Actual width of the PositionedWords inside this Line.
+   */
+  actualWidth:number;
+  /**
+   * The parent PositionedParagraph object.
+   */
   paragraph:PositionedParagraph;
+  /**
+   * Left coordinate of the line.
+   */
   left:number;
+  /**
+   * width - the same for all lines returned by the same wrap.
+   */
   width:number;
+  /**
+   * The baseline y coordinate of this Line.
+   */
   baseline:number;
+  /**
+   * Ascent of the line (top - baseline).
+   */
   ascent:number;
+  /**
+   * Descent of the line (baseline - bottom).
+   */
   descent:number;
-  align:string;
+  /**
+   * Alignment of the PositionedWords inside the Line.
+   */
+  align:ParagraphAlignment;
 
   constructor(paragraph:PositionedParagraph, left:number, width:number, baseline:number, ascent:number, descent:number, words:Array<Word>, ordinal:number) {
     super();
     this.type = 'line';
     var self = this;
-
-    var align = words[0].align();
 
     this.paragraph = paragraph;
     this.left = left;
@@ -47,8 +60,8 @@ export class Line extends CNode {
     this.ascent = ascent;
     this.descent = descent;
     this.ordinal = ordinal;
+    var align = this.paragraph.formatting.align;
     this.align = align;
-
 
     var actualWidth = 0;
     words.forEach(function (word) {
@@ -59,17 +72,22 @@ export class Line extends CNode {
     var x = 0, spacing = 0;
     if (actualWidth < width) {
       switch (align) {
-        case 'right':
+        case "left":
+          x = 0;
+          break;
+        case "right":
           x = width - actualWidth;
           break;
-        case 'center':
+        case "center":
           x = (width - actualWidth) / 2;
           break;
-        case 'justify':
+        case "justifyAll":
           if (words.length > 1 && !words[words.length - 1].isNewLine()) {
             spacing = (width - actualWidth) / (words.length - 1);
           }
-          break;
+        break;
+        default:
+          x = 0;
       }
     }
 
@@ -84,6 +102,11 @@ export class Line extends CNode {
     this.length = ordinal - this.ordinal;
   }
 
+  /**
+   * Returns a Rect for the bounding box.
+   * @param minimal
+   * @returns {Rect}
+   */
   bounds(minimal?:boolean) {
     if (minimal) {
       var firstWord = this.first().bounds(),
@@ -94,8 +117,7 @@ export class Line extends CNode {
         (lastWord.l + lastWord.w) - firstWord.l,
         this.ascent + this.descent);
     }
-    return new Rect(this.left, this.baseline - this.ascent,
-      this.width, this.ascent + this.descent);
+    return new Rect(this.left, this.baseline - this.ascent, this.width, this.ascent + this.descent);
   }
 
   parent() {

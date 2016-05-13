@@ -1,9 +1,5 @@
 import {Line} from "./Line";
-import {CNode} from "./Node";
 import {Word} from "./Word";
-import {ICode} from "./Part";
-import {CarotaDoc} from "./Doc";
-import {Frame} from "./Frame";
 import {PositionedParagraph} from "./PositionedParagraph";
 /**
  * A stateful transformer function that accepts words and emits lines. If the first word
@@ -50,9 +46,9 @@ export var LayouterParagraph = function (left:number, top:number, width:number, 
     if (quit || lineBuffer.length === 0) {
       return;
     }
-
+    
     if(y == top) {
-      var l = new Line(parent, left, width, y + maxAscent, maxAscent, maxDescent, lineBuffer, ordinal);
+      var l = new Line(parent, left, width,  y + maxAscent, maxAscent, maxDescent, lineBuffer, ordinal);
     } else {
       var l = new Line(parent, left, width, y + maxLineHeight - maxDescent, maxAscent, maxDescent, lineBuffer, ordinal);
     }
