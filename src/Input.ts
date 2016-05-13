@@ -124,6 +124,10 @@ export class Input {
     var editor = this.editor;
     editor.nextKeyboardX = null;
 
+    //Note: this prevents the event being propagated to the textarea
+    //which causes trouble e.g for CTRL+Z
+    var handled = false;
+
     if (!selecting) {
       editor.keyboardSelect = 0;
     } else if (!editor.keyboardSelect) {
@@ -185,16 +189,19 @@ export class Input {
       case 90: // Z undo
         if (ctrlKey) {
           editor.doc.performUndo();
+          handled = true;
         }
         break;
       case 89: // Y undo
         if (ctrlKey) {
           editor.doc.performUndo(true);
+          handled = true;
         }
         break;
       case 65: // A select all
         if (ctrlKey) {
           editor.selectAll();
+          handled = true;
         }
         break;
       case 67: // C - copy to clipboard
@@ -207,7 +214,7 @@ export class Input {
         break;
     }
 
-    return false;
+    return handled;
   };
 
   updateTextArea() {
