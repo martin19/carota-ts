@@ -11,6 +11,8 @@ export interface ITextMeasurement {
 
 export class Text {
 
+  static ctxMeasure:CanvasRenderingContext2D = document.createElement("canvas").getContext("2d");
+
   /**
    * Returns a font CSS/Canvas string based on the settings in a run
    * @param run
@@ -157,7 +159,10 @@ export class Text {
       block.style.verticalAlign = 'bottom';
       result.height = (block.offsetTop);
       result.descent = result.height - result.ascent;
-      result.width = span.offsetWidth;
+      Text.ctxMeasure.font = style.split(";")[0].replace("font:","");
+      result.width = Text.ctxMeasure.measureText(text_).width;
+
+
       //if formatting contains line-height, apply this - otherwise, lineHeight is measured height
       if(style.indexOf("line-height")>-1) {
         result.lineHeight = lineHeight;
