@@ -422,15 +422,19 @@ export class CarotaDoc extends CNode {
       var sample = Math.max(0, start - 1);
       var sampleRun = new Per({start: sample, end: sample + 1}).per(this.runs, this).first();
       text_ = [];
-      if (sampleRun) {
-        var run = sampleRun.clone();
-        run.text = text;
-        text_ = [new Paragraph()];
-        text_[0].addRun(run);
-      } else {
+      if(!sampleRun) {
         //If sampleRun could not be created, create a run with empty formatting.
-        text_ = [new Paragraph()];
-        text_[0].addRun(new Run(text, {}, null));
+        sampleRun = new Run(text, {}, null)
+      }
+      if (sampleRun) {
+        var paragraphText = text.split("\n");
+        paragraphText.forEach((t:string, i : number)=>{
+          var run = sampleRun.clone();
+          run.text = t + ((i != paragraphText.length-1) ? "\n" : "");
+          var p = new Paragraph();
+          p.addRun(run);
+          text_.push(p)
+        });
       }
     } else {
       //If rich-text is entered, set text to the entered rich-text content.
