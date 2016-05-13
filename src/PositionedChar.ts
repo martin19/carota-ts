@@ -49,10 +49,10 @@ export class PositionedChar extends CNode {
     return this;
   }
 
-  byCoordinate(x:number, y:number):CNode {
+  byCoordinate(x:number, y:number):CNode[] {
     if (x <= this.bounds().center().x) {
-      return this;
+      return [this];
     }
-    return this.next();
+    return [this.next()];
   }
 }

@@ -57,10 +57,8 @@ export class PositionedParagraph extends CNode {
       pp.formatting = paragraph.formatting as IParagraphFormatting;
       marginLeft = pp.formatting.marginLeft || 0;
       marginRight = pp.formatting.marginRight || 0;
-      spaceBefore = pp.formatting.spaceBefore || 0;
-      spaceAfter = pp.formatting.spaceAfter || 0;
       pp.left = left + marginLeft;
-      pp.top = top + spaceBefore;
+      pp.top = top;
       pp.width = width - (marginLeft + marginRight);
     }
     var lines = pp.lines;
@@ -79,7 +77,8 @@ export class PositionedParagraph extends CNode {
           }
         }, word)) {
         pp.length = length;
-        pp.height = height + spaceAfter + spaceBefore;
+        //pp.height = height + spaceAfter + ((spaceBefore > 0) ? spaceBefore : 0);
+        pp.height = height;
         emit(pp);
         return true;
       }

@@ -110,33 +110,46 @@ export class CNode {
     return found;
   }
 
-  byCoordinate(x:number, y:number):CNode {
-    var found:CNode;
+  /**
+   * Find closest child node by coordinate.
+   * @param x
+   * @param y
+   * @returns {CNode}
+   */
+  byCoordinate(x:number, y:number):CNode[] {
+    var found:Array<CNode>;
+    var foundNodes:Array<CNode> = [];
+
+    function dist2(a:{x:number, y:number},b:{x:number, y:number}) {
+      return (a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y);
+    }
+
     this.children().some(function (child) {
       var b = child.bounds();
       if (b.contains(x, y)) {
         found = child.byCoordinate(x, y);
         if (found) {
-          return true;
+          foundNodes = foundNodes.concat(found);
+          //return true;
         }
       }
     });
 
-    if (!found) {
-      found = this.last();
-      while (found) {
-        var next = found.last();
+    foundNodes.sort((n1:CNode,n2:CNode)=>{
+      return dist2(n1.center(),{x:x,y:y}) < dist2(n2.center(),{x:x,y:y}) ? -1 : 1;
+    });
+
+    if (foundNodes.length == 0) {
+      foundNodes.push(this.last());
+      while (foundNodes[0]) {
+        var next = foundNodes[0].last();
         if (!next) {
           break;
         }
-        found = next;
-      }
-      var foundNext = found.next();
-      if (foundNext && foundNext.block) {
-        found = foundNext;
+        foundNodes[0] = next;
       }
     }
-    return found;
+    return foundNodes;
   }
 
   draw(ctx:CanvasRenderingContext2D, viewport?:Rect) {
@@ -150,6 +163,10 @@ export class CNode {
     return (p && (p.type === type ? p : p.parentOfType(type)));
   }
 
+  /**
+   * Get bounding box of this CNode.
+   * @returns {Rect}
+   */
   bounds() {
     var l = this._left, t = this._top, r = 0, b = 0;
     this.children().forEach(function (child) {
@@ -160,6 +177,14 @@ export class CNode {
       b = Math.max(b, cb.t + cb.h);
     });
     return new Rect(l, t, r - l, b - t);
+  }
+
+  /**
+   * Get Center of bounding box.
+   * @returns {{x: number, y: number}}
+   */
+  center() {
+    return this.bounds().center();
   }
 }
 

@@ -30,8 +30,9 @@ export var LayouterFrame = function (left:number, top:number, width:number, ordi
   var layouter:(emit:(p:PositionedParagraph)=>void, word:Word)=>void|boolean;
   var y = top;
   var paragraphIndex = 0;
-  
-  layouter = PositionedParagraph.layout(left, top, width, ordinal, parent, parent._parent._paragraphs[paragraphIndex]);
+
+  var paragraphs = parent._parent._paragraphs;
+  layouter = PositionedParagraph.layout(left, y, width, ordinal, parent, paragraphs[paragraphIndex]);
 
   return function (emit:(p:PositionedParagraph)=>boolean|void, word:Word) {
     if(word.eof) {
@@ -43,8 +44,17 @@ export var LayouterFrame = function (left:number, top:number, width:number, ordi
       emit(p); 
     }, word);
     if (word.isNewLine()) {
+
+      var spaceBefore = 0;
+      if(paragraphs[paragraphIndex]) {
+        spaceBefore += paragraphs[paragraphIndex].formatting["spaceAfter"]||0;
+      }
       paragraphIndex++;
-      layouter = PositionedParagraph.layout(left, y, width, ordinal, parent, parent._parent._paragraphs[paragraphIndex]);
+      if(paragraphs[paragraphIndex]) {
+        spaceBefore += paragraphs[paragraphIndex].formatting["spaceBefore"]||0;
+      }
+      y+=spaceBefore;
+      layouter = PositionedParagraph.layout(left, y, width, ordinal, parent, paragraphs[paragraphIndex]);
     }
     return quit;
   }

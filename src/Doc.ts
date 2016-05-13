@@ -569,19 +569,19 @@ export class CarotaDoc extends CNode {
     }
   }
 
-  byCoordinate(x:number, y:number) {
-    var ordinal = this.frame.byCoordinate(x, y).ordinal;
-    var caret = this.getCaretCoords(ordinal);
-    while (caret.b <= y && ordinal < (this.frame.length - 1)) {
-      ordinal++;
-      caret = this.getCaretCoords(ordinal);
-    }
-    while (caret.t >= y && ordinal > 0) {
-      ordinal--;
-      caret = this.getCaretCoords(ordinal);
-    }
-    return this.byOrdinal(ordinal);
-  }
+  // byCoordinate(x:number, y:number) {
+  //   var ordinal = this.frame.byCoordinate(x, y).ordinal;
+  //   var caret = this.getCaretCoords(ordinal);
+  //   while (caret.b <= y && ordinal < (this.frame.length - 1)) {
+  //     ordinal++;
+  //     caret = this.getCaretCoords(ordinal);
+  //   }
+  //   while (caret.t >= y && ordinal > 0) {
+  //     ordinal--;
+  //     caret = this.getCaretCoords(ordinal);
+  //   }
+  //   return this.byOrdinal(ordinal);
+  // }
 
   drawBaselines(ctx:CanvasRenderingContext2D, viewport:Rect) {
     this.frame.paragraphs.forEach((p:PositionedParagraph)=>{

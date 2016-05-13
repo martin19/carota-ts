@@ -67,7 +67,7 @@ export class Input {
       var xC = (xT4) * b.w;
       var yC = (yT4) * b.h;
 
-      handler(this.editor.doc.byCoordinate(xC, yC));
+      handler(this.editor.doc.byCoordinate(xC, yC)[0]||this.editor.doc.frame);
 
 
     });
