@@ -124,7 +124,7 @@ export class CNode {
       return (a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y);
     }
 
-    this.children().some(function (child) {
+    this.children().forEach((child:CNode)=> {
       var b = child.bounds();
       if (b.contains(x, y)) {
         found = child.byCoordinate(x, y);

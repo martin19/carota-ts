@@ -72,12 +72,18 @@ export class Run {
     return new Run(this.text, this.formatting, this.parent);
   }
 
+  /**
+   * Merge runs formatting into single run.
+   * @param run1
+   * @param run2
+   * @returns {Run}
+   */
   static merge(run1:Run|Array<Run>, run2?:Run):Run {
     if (arguments.length === 1) {
       return Array.isArray(run1) ? run1.reduce(Run.merge) : run1;
     }
     if (arguments.length > 2) {
-      return this.merge(Array.prototype.slice.call(arguments, 0));
+      return Run.merge(Array.prototype.slice.call(arguments, 0));
     }
     if(run1 instanceof Run && run2 instanceof Run) {
       if(run1.parent !== run2.parent) {

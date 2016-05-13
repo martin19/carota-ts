@@ -4,7 +4,7 @@ import {CNode} from "./Node";
 import {IFormattingMap} from "./Run";
 import {ICharacterFormatting} from "./Run";
 import {Run} from "./Run";
-import {Paragraph} from "./Paragraph";
+import {Paragraph, IParagraphFormatting} from "./Paragraph";
 
 export interface IRange {
   start? : number,
@@ -115,13 +115,6 @@ export class Range implements IRange{
     });
     
     return consolidatedParagraphs;
-    //this.doc.paragraphs
-    //return new Per(this.runs, this).map((r:Run)=>{
-    //  var flatRun = r.clone();
-    //  flatRun.parent = null;
-    //  return flatRun;
-    //}).all();
-    //return new Per(this.runs, this).per(Run.consolidate()).all();
   };
 
   /**
@@ -173,11 +166,34 @@ export class Range implements IRange{
           Run.format(r, <ICharacterFormatting>formatting);
         });
       });
-      
+
       range.setText(saved);
     }
   };
 
+  /**
+   * Returns the paragraph formatting for this range.
+   * @returns {IParagraphFormatting}
+   */
+  getParagraphFormatting():IParagraphFormatting {
+    var start = this.doc.paragraphContainingOrdinal(this.start),
+      end = this.doc.paragraphContainingOrdinal(this.end);
+
+    var paragraphs = this.doc._paragraphs.slice(start.index,end.index+1);
+
+    var formatting = Paragraph.cloneFormatting(Paragraph.defaultFormatting);
+    var lastParagraph = new Per(paragraphs).reduce(Paragraph.merge).last();
+    if(lastParagraph) {
+      var specificFormatting:IFormattingMap = lastParagraph.formatting;
+      for(var prop in specificFormatting) {
+        if(specificFormatting.hasOwnProperty(prop)) {
+          formatting[prop] = specificFormatting[prop]
+        }
+      }
+    }
+    return formatting as IParagraphFormatting;
+  }
+  
   /**
    * Sets ParagraphFormatting "attribute" to value.
    * @param attribute

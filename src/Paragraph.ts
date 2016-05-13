@@ -27,6 +27,8 @@ export class Paragraph {
     hyphenate : false
   };
 
+  static multipleValues = {};
+
   /**
    * The formatting of this paragraph.
    */
@@ -153,6 +155,48 @@ export class Paragraph {
       }
     });
   }
+
+  // TODO: copied from Run.cloneFormatting - refactor?
+  static cloneFormatting(formattingMap:IFormattingMap) {
+    var clone:IFormattingMap = {};
+    for (var i in formattingMap) {
+      if (formattingMap.hasOwnProperty(i)) {
+        clone[i] = formattingMap[i];
+      }
+    }
+    return clone;
+  }
+
+  /**
+   * Merge runs formatting into single run.
+   * TODO: forked from Run.merge - refactor?
+   * @param p1
+   * @param p2
+   * @returns {Paragraph}
+   */
+  static merge(p1:Paragraph|Array<Paragraph>, p2?:Paragraph):Paragraph {
+    if (arguments.length === 1) {
+      return Array.isArray(p1) ? p1.reduce(Paragraph.merge) : p1;
+    }
+    if (arguments.length > 2) {
+      return Paragraph.merge(Array.prototype.slice.call(arguments, 0));
+    }
+    if(p1 instanceof Paragraph && p2 instanceof Paragraph) {
+      var mergedFormatting:IFormattingMap = {};
+      Paragraph.formattingKeys.forEach(function (key) {
+        if (key in p1.formatting || key in p2.formatting) {
+          if ((p1.formatting)[key] === (p2.formatting)[key]) {
+            mergedFormatting[key] = (p1.formatting)[key];
+          } else {
+            mergedFormatting[key] = Paragraph.multipleValues;
+          }
+        }
+      });
+      return new Paragraph(mergedFormatting);
+    }
+    throw "Unexpected control flow in Run.merge.";
+  }
+
 
   /**
    * Consolidate subsequent paragraphs if there is no newline at end.
