@@ -101,6 +101,10 @@ var handlers:Array<INodeHandler> = [
     var m = size.match(/^([\d\.]+)pt$/);
     return m ? parseFloat(m[1]) : 10
   }),
+  styleValue('letter-spacing','letterSpacing', function(letterSpacing:string) {
+    var m =  letterSpacing.match(/^([\d\.]+)em$/);
+    return m ? parseFloat(m[1]) : 0
+  }),
   styleValue('textAlign', 'align', checkAlign),
   function (node:Node, formatting:IFormattingMap) {
     if (node.nodeName === 'SUB') {

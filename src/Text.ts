@@ -58,13 +58,15 @@ export class Text {
    * @return {string}
    */
   static getRunStyle(run:Run) {
-    var parts = [
-      'font: ', Text.getFontString(run),
-      '; color: ', ((run && (<ICharacterFormatting>run.formatting).color) || Run.defaultFormatting.color)
-    ];
-
+    var parts = [];
     if (run) {
-      switch ((<ICharacterFormatting>run.formatting).script) {
+      var formatting = <ICharacterFormatting>run.formatting;
+
+      parts.push('font: ' + Text.getFontString(run));
+
+      parts.push('; color: ' + (formatting.color || Run.defaultFormatting.color));
+
+      switch (formatting.script) {
         case 'super':
           parts.push('; vertical-align: super');
           break;
@@ -73,10 +75,14 @@ export class Text {
           break;
       }
 
-      if((<ICharacterFormatting>run.formatting).lineHeight) {
-        if((<ICharacterFormatting>run.formatting).lineHeight !== "auto") {
-          parts.push("; line-height:"+(<ICharacterFormatting>run.formatting).lineHeight + "px");
+      if(formatting.lineHeight) {
+        if(formatting.lineHeight !== "auto") {
+          parts.push("; line-height:"+formatting.lineHeight + "px");
         }
+      }
+
+      if(formatting.letterSpacing) {
+        parts.push("; letter-spacing:"+formatting.letterSpacing + "em");
       }
     }
 
@@ -149,7 +155,9 @@ export class Text {
       };
 
       span.setAttribute('style', style);
-      var lineHeight = parseFloat(span.style.lineHeight.replace(/"px"/,""));
+      var lineHeight = parseFloat(span.style.lineHeight.replace("px",""));
+      var letterSpacing = parseFloat(span.style.letterSpacing.replace("em",""));
+      var fontSize = parseFloat(span.style.fontSize.replace("pt",""));
       span.style.lineHeight = "normal";
 
       span.innerHTML = '';
@@ -160,8 +168,12 @@ export class Text {
       result.height = (block.offsetTop);
       result.descent = result.height - result.ascent;
       Text.ctxMeasure.font = style.split(";")[0].replace("font:","");
-      result.width = Text.ctxMeasure.measureText(text_).width + 5*(text_.length-1);
-
+      //if formatting contains letter spacing, respect in width computation
+      if(letterSpacing) {
+        result.width = Text.ctxMeasure.measureText(text_).width + ((text_.length) * letterSpacing * fontSize);
+      } else {
+        result.width = Text.ctxMeasure.measureText(text_).width;
+      }
 
       //if formatting contains line-height, apply this - otherwise, lineHeight is measured height
       if(style.indexOf("line-height")>-1) {
@@ -230,10 +242,14 @@ export class Text {
     if(str === '\n') {
       ctx.fillText(Text.enter, left, baseline);
     } else {
-      for(var i = 0; i < str.length; i++) {
-        var measurement = Text.measure(str[i], formatting);
-        ctx.fillText(str[i], left, baseline);
-        left += measurement.width + 5;
+      if(formatting.formatting["letterSpacing"]===0) {
+        ctx.fillText(str, left, baseline);
+      } else {
+        for(var i = 0; i < str.length; i++) {
+          var measurement = Text.measure(str[i], formatting);
+          ctx.fillText(str[i], left, baseline);
+          left += measurement.width;
+        }
       }
     }
 
