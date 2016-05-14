@@ -170,7 +170,7 @@ export class Text {
       Text.ctxMeasure.font = style.split(";")[0].replace("font:","");
       //if formatting contains letter spacing, respect in width computation
       if(letterSpacing) {
-        result.width = Text.ctxMeasure.measureText(text_).width + ((text_.length) * letterSpacing * fontSize);
+        result.width = Text.ctxMeasure.measureText(text_).width + ((text_.length) * letterSpacing * (fontSize * 96 / 72));
       } else {
         result.width = Text.ctxMeasure.measureText(text_).width;
       }
