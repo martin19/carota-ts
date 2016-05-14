@@ -160,7 +160,7 @@ export class Text {
       result.height = (block.offsetTop);
       result.descent = result.height - result.ascent;
       Text.ctxMeasure.font = style.split(";")[0].replace("font:","");
-      result.width = Text.ctxMeasure.measureText(text_).width;
+      result.width = Text.ctxMeasure.measureText(text_).width + 5*(text_.length-1);
 
 
       //if formatting contains line-height, apply this - otherwise, lineHeight is measured height
@@ -225,7 +225,18 @@ export class Text {
         baseline += (descent / 2);
         break;
     }
-    ctx.fillText(str === '\n' ? Text.enter : str, left, baseline);
+    //ctx.fillText(str === '\n' ? Text.enter : str, left, baseline);
+
+    if(str === '\n') {
+      ctx.fillText(Text.enter, left, baseline);
+    } else {
+      for(var i = 0; i < str.length; i++) {
+        var measurement = Text.measure(str[i], formatting);
+        ctx.fillText(str[i], left, baseline);
+        left += measurement.width + 5;
+      }
+    }
+
     if ((<ICharacterFormatting>formatting.formatting).underline) {
       ctx.fillRect(left, 1 + baseline, width, 1);
     }

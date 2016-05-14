@@ -310,6 +310,7 @@
           var textBoxOptions = {
             font: "serif",
             size: 8,
+            tracking : 0,
             bold: false,
             italic: false,
             underline: false,
@@ -336,6 +337,7 @@
           var cFormatting = [];
           cFormatting.push(f1.add(textBoxOptions, "font", ["serif", "sans-serif", "monospace", "cursive", "fantasy"]).listen());
           cFormatting.push(f1.add(textBoxOptions, "size", [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 30, 36, 72]).listen());
+          cFormatting.push(f1.add(textBoxOptions, "tracking").min(-200).max(200).listen());
           cFormatting.push(f1.add(textBoxOptions, "bold").listen());
           cFormatting.push(f1.add(textBoxOptions, "italic").listen());
           cFormatting.push(f1.add(textBoxOptions, "underline").listen());

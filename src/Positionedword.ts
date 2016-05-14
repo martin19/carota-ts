@@ -105,6 +105,7 @@ export class PositionedWord extends CNode {
           ordinal++;
         }, wordPart.run.text);
       });
+
       // Last character is artificially widened to match the length of the
       // word taking into account (align === 'justify')
       var lastChar = cache[cache.length - 1];

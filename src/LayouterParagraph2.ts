@@ -1,9 +1,5 @@
 import {Line} from "./Line";
-import {CNode} from "./Node";
 import {Word} from "./Word";
-import {ICode} from "./Part";
-import {CarotaDoc} from "./Doc";
-import {Frame} from "./Frame";
 import {PositionedParagraph} from "./PositionedParagraph";
 /**
  * A stateful transformer function that accepts words and emits lines.

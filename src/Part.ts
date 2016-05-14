@@ -5,30 +5,6 @@ import {Word} from "./Word";
 import {ICharacterFormatting} from "./Run";
 import {Run} from "./Run";
 
-var defaultInline = {
-  measure: function (formatting:Run) {
-    var text_:ITextMeasurement = Text.measure('?', formatting);
-    return {
-      width: text_.width + 4,
-      ascent: text_.width + 2,
-      descent: text_.width + 2
-    };
-  },
-  draw: function (ctx:CanvasRenderingContext2D, x:number, y:number, width:number, ascent:number, descent:number) {
-    ctx.fillStyle = 'silver';
-    ctx.fillRect(x, y - ascent, width, ascent + descent);
-    ctx.strokeRect(x, y - ascent, width, ascent + descent);
-    ctx.fillStyle = 'black';
-    ctx.fillText('?', x + 2, y);
-  }
-};
-
-export interface ICode {
-  measure : (p:any) => ITextMeasurement;
-  draw : (ctx:CanvasRenderingContext2D, x:number, y:number, width:number, ascent:number, descent:number, formatting:Run) => void;
-  block?: (left:number, top:number, width:number, ordinal:number, parent:CNode, formatting:Run) => (w:Word)=>CNode;
-  eof? : boolean;
-}
 
 /**
  * A Part is a section of a word with its own CharacterRun, because a Word can span the
