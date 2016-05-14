@@ -44,11 +44,19 @@ export class Line extends CNode {
    */
   descent:number;
   /**
+   * Ascent of the line (top - baseline) (before applying character scaling.)
+   */
+  ascentUnscaled:number;
+  /**
+   * Descent of the line (baseline - bottom) (before applying character scaling.)
+   */
+  descentUnscaled:number;
+  /**
    * Alignment of the PositionedWords inside the Line.
    */
   align:ParagraphAlignment;
 
-  constructor(paragraph:PositionedParagraph, left:number, width:number, baseline:number, ascent:number, descent:number, words:Array<Word>, ordinal:number) {
+  constructor(paragraph:PositionedParagraph, left:number, width:number, baseline:number, ascent:number, descent:number, ascentUnscaled:number, descentUnscaled:number, words:Array<Word>, ordinal:number) {
     super();
     this.type = 'line';
     var self = this;
@@ -59,6 +67,8 @@ export class Line extends CNode {
     this.baseline = baseline;
     this.ascent = ascent;
     this.descent = descent;
+    this.ascentUnscaled = ascentUnscaled;
+    this.descentUnscaled = descentUnscaled;
     this.ordinal = ordinal;
     var align = this.paragraph.formatting.align;
     this.align = align;

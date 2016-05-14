@@ -3,9 +3,11 @@ import {Run} from "./Run";
 
 export interface ITextMeasurement {
   ascent : number;
+  descent : number;
+  ascentUnscaled : number;
+  descentUnscaled : number;
   height? : number;
   lineHeight? : number;
-  descent : number;
   width : number;
 }
 
@@ -58,7 +60,7 @@ export class Text {
    * @return {string}
    */
   static getRunStyle(run:Run) {
-    var parts = [];
+    var parts:Array<string> = [];
     if (run) {
       var formatting = <ICharacterFormatting>run.formatting;
 
@@ -76,13 +78,21 @@ export class Text {
       }
 
       if(formatting.lineHeight) {
-        if(formatting.lineHeight !== "auto") {
+        if(formatting.lineHeight !== -1) {
           parts.push("; line-height:"+formatting.lineHeight + "px");
         }
       }
 
       if(formatting.letterSpacing) {
         parts.push("; letter-spacing:"+formatting.letterSpacing + "em");
+      }
+
+      if(formatting.verticalScaling) {
+        parts.push("; vertical-scaling"+formatting.verticalScaling);
+      }
+
+      if(formatting.horizontalScaling) {
+        parts.push("; horizontal-scaling"+formatting.horizontalScaling);
       }
     }
 
@@ -122,9 +132,10 @@ export class Text {
    * would affect the dimensions of the whole page.
    * @param text_
    * @param style
+   * @param formatting
    * @return {ITextMeasurement}
    */
-  static measureText(text_:string, style:string) {
+  static measureText(text_:string, style:string, formatting:ICharacterFormatting) {
     var span:HTMLSpanElement, block:HTMLDivElement, div:HTMLDivElement;
 
     span = document.createElement('span');
@@ -152,21 +163,25 @@ export class Text {
         descent : null,
         width : null,
         lineHeight : null,
+        ascentUnscaled : null,
+        descentUnscaled : null
       };
 
       span.setAttribute('style', style);
-      var lineHeight = parseFloat(span.style.lineHeight.replace("px",""));
-      var letterSpacing = parseFloat(span.style.letterSpacing.replace("em",""));
-      var fontSize = parseFloat(span.style.fontSize.replace("pt",""));
+      var lineHeight = formatting ? formatting.lineHeight : null;
+      var letterSpacing = formatting ? formatting.letterSpacing : null;
+      var verticalScaling = formatting && formatting.verticalScaling ? formatting.verticalScaling : 1;
+      var horizontalScaling = formatting && formatting.horizontalScaling ? formatting.horizontalScaling : 1;
+      var fontSize = formatting ? formatting.size : null;
       span.style.lineHeight = "normal";
 
       span.innerHTML = '';
       span.appendChild(document.createTextNode(text_.replace(/\s/g, Text.nbsp)));
       block.style.verticalAlign = 'baseline';
-      result.ascent = (block.offsetTop);
+      result.ascent = (block.offsetTop) * verticalScaling;
       block.style.verticalAlign = 'bottom';
-      result.height = (block.offsetTop);
-      result.descent = result.height - result.ascent;
+      result.height = (block.offsetTop) * verticalScaling;
+      result.descent = (result.height - result.ascent);
       Text.ctxMeasure.font = style.split(";")[0].replace("font:","");
       //if formatting contains letter spacing, respect in width computation
       if(letterSpacing) {
@@ -174,6 +189,7 @@ export class Text {
       } else {
         result.width = Text.ctxMeasure.measureText(text_).width;
       }
+      result.width *= horizontalScaling;
 
       //if formatting contains line-height, apply this - otherwise, lineHeight is measured height
       if(style.indexOf("line-height")>-1) {
@@ -181,6 +197,9 @@ export class Text {
       } else {
         result.lineHeight = result.height;
       }
+
+      result.ascentUnscaled = result.ascent / verticalScaling;
+      result.descentUnscaled = result.descent / verticalScaling;
     } finally {
       div.parentNode.removeChild(div);
       div = null;
@@ -210,20 +229,24 @@ export class Text {
    */
   static createCachedMeasureText() {
     var cache:{[s:string]:ITextMeasurement} = {};
-    return function(text_:string, style:string) {
+    return (text_:string, style:string, formatting:ICharacterFormatting)=> {
       var key = style + '<>!&%' + text_;
       var result = cache[key];
       if (!result) {
-        cache[key] = result = Text.measureText(text_, style);
+        cache[key] = result = Text.measureText(text_, style, formatting);
       }
       return result;
     };
   };
 
-  static cachedMeasureText:(text:string,style:string)=>ITextMeasurement;
+  static cachedMeasureText:(text:string,style:string,formatting:ICharacterFormatting)=>ITextMeasurement;
 
-  static measure(str:string, formatting:Run) {
-    return Text.cachedMeasureText(str, Text.getRunStyle(formatting));
+  static measure(str:string, run:Run) {
+    var formatting:ICharacterFormatting;
+    if(run) {
+      formatting = run.formatting;
+    }
+    return Text.cachedMeasureText(str, Text.getRunStyle(run), formatting);
   };
 
   static draw(ctx:CanvasRenderingContext2D, str:string, formatting:Run, left:number, baseline:number, width:number, ascent:number, descent:number) {
@@ -239,11 +262,19 @@ export class Text {
     }
     //ctx.fillText(str === '\n' ? Text.enter : str, left, baseline);
 
+
     if(str === '\n') {
       ctx.fillText(Text.enter, left, baseline);
     } else {
-      if(formatting.formatting["letterSpacing"]===0) {
-        ctx.fillText(str, left, baseline);
+      if(!formatting.formatting["letterSpacing"] || formatting.formatting["letterSpacing"]===0) {
+        //ctx.fillText(str, left, baseline);
+
+        var vscale = formatting.formatting["verticalScaling"] || 1;
+        var hscale = formatting.formatting["horizontalScaling"] || 1;
+
+        ctx.scale(hscale,vscale);
+        ctx.fillText(str, left/hscale, baseline/vscale);
+        ctx.scale(1/hscale,1/vscale);
       } else {
         for(var i = 0; i < str.length; i++) {
           var measurement = Text.measure(str[i], formatting);

@@ -24,6 +24,14 @@ export interface ISection {
    */
   descent: number;
   /**
+   * Ascent (distance from baseline to top) for whole section before applying character scaling.
+   */
+  ascentUnscaled: number;
+  /**
+   * Descent (distance from baseline to bottom) for whole section before applying character scaling.
+   */
+  descentUnscaled: number;
+  /**
    * line height of section.
    */
   lineHeight:number;
@@ -63,6 +71,14 @@ export class Word {
    */
   descent:number;
   /**
+   * Ascent (distance from baseline to top) for whole word before applying character scaling.
+   */
+  ascentUnscaled: number;
+  /**
+   * Descent (distance from baseline to bottom) for whole word before applying character scaling.
+   */
+  descentUnscaled: number;
+  /**
    * Line height of word.
    */
   lineHeight:number;
@@ -95,6 +111,8 @@ export class Word {
     this.space = section(space);
     this.ascent = Math.max(this.text.ascent, this.space.ascent);
     this.descent = Math.max(this.text.descent, this.space.descent);
+    this.ascentUnscaled = Math.max(this.text.ascentUnscaled, this.space.ascentUnscaled);
+    this.descentUnscaled = Math.max(this.text.descentUnscaled, this.space.descentUnscaled);
     this.lineHeight = this.text.lineHeight;
     this.width = this.text.width + this.space.width;
     this.length = this.text.length + this.space.length;
@@ -190,6 +208,8 @@ var section = function (runEmitter:((p:(r:Run)=>void)=>void)|Array<Run>) {
     }).all(),
     ascent: 0,
     descent: 0,
+    ascentUnscaled: 0,
+    descentUnscaled: 0,
     lineHeight: 0,
     width: 0,
     length: 0,
@@ -198,6 +218,8 @@ var section = function (runEmitter:((p:(r:Run)=>void)=>void)|Array<Run>) {
   s.parts.forEach(function (p:Part) {
     s.ascent = Math.max(s.ascent, p.ascent);
     s.descent = Math.max(s.descent, p.descent);
+    s.ascentUnscaled = Math.max(s.ascentUnscaled, p.ascentUnscaled);
+    s.descentUnscaled = Math.max(s.descentUnscaled, p.descentUnscaled);
     s.lineHeight = Math.max(s.lineHeight, p.lineHeight);
     s.width += p.width;
     s.length += Run.getPieceLength(p.run.text);

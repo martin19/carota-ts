@@ -16,6 +16,8 @@ export var LayouterParagraph = function (left:number, top:number, width:number, 
     lineWidth = 0,
     maxAscent = 0,
     maxDescent = 0,
+    maxAscentUnscaled = 0,
+    maxDescentUnscaled = 0,
     maxLineHeight = 0,
     quit:boolean|void,
     lastNewLineHeight = 0,
@@ -31,6 +33,8 @@ export var LayouterParagraph = function (left:number, top:number, width:number, 
     lineWidth += word.width;
     maxAscent = Math.max(maxAscent, word.ascent);
     maxDescent = Math.max(maxDescent, word.descent);
+    maxAscentUnscaled = Math.max(maxAscentUnscaled, word.ascentUnscaled);
+    maxDescentUnscaled = Math.max(maxDescentUnscaled, word.descentUnscaled);
     maxLineHeight = Math.max(maxLineHeight, word.lineHeight);
     if (word.isNewLine()) {
       send(emit);
@@ -47,20 +51,24 @@ export var LayouterParagraph = function (left:number, top:number, width:number, 
       return;
     }
     
-    if(y == top) {
-      var l = new Line(parent, left, width,  y + maxAscent, maxAscent, maxDescent, lineBuffer, ordinal);
-    } else {
-      var l = new Line(parent, left, width, y + maxLineHeight - maxDescent, maxAscent, maxDescent, lineBuffer, ordinal);
-    }
+    // if(y == top) {
+    //   var l = new Line(parent, left, width,  y + maxAscent, maxAscent, maxDescent, lineBuffer, ordinal);
+    // } else {
+    //   var l = new Line(parent, left, width, y + maxLineHeight - maxDescent, maxAscent, maxDescent, lineBuffer, ordinal);
+    // }
+
+    var l = new Line(parent, left, width, y + maxAscentUnscaled, maxAscent, maxDescent, maxAscentUnscaled, maxDescentUnscaled, lineBuffer, ordinal);
+
     ordinal += l.length;
     quit = emit(l);
     if(y == top) {
-      y += (maxAscent + maxDescent);
+      y += (maxAscentUnscaled + maxDescentUnscaled);
     } else {
-      y += maxLineHeight;
+      //y += maxLineHeight;
+      y += (maxAscentUnscaled + maxDescentUnscaled);
     }
     lineBuffer.length = 0;
-    lineWidth = maxAscent = maxDescent = maxLineHeight = 0;
+    lineWidth = maxAscent = maxDescent = maxLineHeight = maxDescentUnscaled = maxAscentUnscaled = 0;
   };
 
   return function (emit:(p:Line|number)=>boolean|void, word:Word) {

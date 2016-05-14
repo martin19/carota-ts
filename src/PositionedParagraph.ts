@@ -72,7 +72,7 @@ export class PositionedParagraph extends CNode {
             height = line;
           } else {
             length = (line.ordinal + line.length) - ordinal;
-            height += line.ascent + line.descent;
+            height += line.ascentUnscaled + line.descentUnscaled;
             lines.push(line);
           }
         }, word)) {

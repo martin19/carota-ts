@@ -7,7 +7,7 @@ import {Run} from "./Run";
 
 
 /**
- * A Part is a section of a word with its own CharacterRun, because a Word can span the
+ * A Part is a section of a word with its own Run, because a Word can span the
  * boundaries between CharacterRuns, so it may have several parts in its text or space
  * arrays.
  */
@@ -34,6 +34,16 @@ export class Part {
    * Distance from baseline to bottom.
    */
   descent:number;
+  /**
+   * Distance from baseline to top (before applying character scaling)
+   */
+  ascentUnscaled:number;
+  /**
+   * Distance from baseline to bottom (before applying character scaling)
+   */
+  descentUnscaled:number;
+
+  
   lineHeight:number;
 
   constructor(run:Run) {
@@ -48,6 +58,8 @@ export class Part {
     this.width = isNewLine ? 0 : m.width;
     this.ascent = m.ascent;
     this.descent = m.descent;
+    this.ascentUnscaled = m.ascentUnscaled;
+    this.descentUnscaled = m.descentUnscaled;
     this.lineHeight = m.lineHeight;
   }
 

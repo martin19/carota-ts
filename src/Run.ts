@@ -4,7 +4,9 @@ export type IFormattingMap = {[s:string]:any};
 export interface ICharacterFormatting {
   size?: number;
   letterSpacing?:number;
-  lineHeight?: string;
+  verticalScaling?:number;
+  horizontalScaling?:number;
+  lineHeight?: number;
   font?: string;
   color?: string;
   bold?: boolean;
@@ -25,12 +27,27 @@ export interface ICharacterFormatting {
  * TODO: where are character objects created and are there really occurrences? if not we might drop this abstraction
  */
 export class Run {
-  static formattingKeys:Array<string> = ['bold', 'italic', 'underline', 'strikeout', 'color', 'font', 'size', 'letterSpacing', 'lineHeight', 'align', 'script'];
+  static formattingKeys:Array<string> = [
+    'bold',
+    'italic',
+    'underline',
+    'strikeout',
+    'color',
+    'font',
+    'size',
+    'letterSpacing',
+    'verticalScaling',
+    'horizontalScaling',
+    'lineHeight',
+    'align',
+    'script'];
 
   static defaultFormatting:ICharacterFormatting = {
     size: 10,
     letterSpacing:0,
-    lineHeight: 'auto',
+    verticalScaling:1,
+    horizontalScaling:1,
+    lineHeight: -1,
     font: 'sans-serif',
     color: 'black',
     bold: false,
