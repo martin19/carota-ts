@@ -262,25 +262,24 @@ export class Text {
     }
     //ctx.fillText(str === '\n' ? Text.enter : str, left, baseline);
 
+    var vscale = formatting.formatting["verticalScaling"] || 1;
+    var hscale = formatting.formatting["horizontalScaling"] || 1;
 
     if(str === '\n') {
       ctx.fillText(Text.enter, left, baseline);
     } else {
       if(!formatting.formatting["letterSpacing"] || formatting.formatting["letterSpacing"]===0) {
-        //ctx.fillText(str, left, baseline);
-
-        var vscale = formatting.formatting["verticalScaling"] || 1;
-        var hscale = formatting.formatting["horizontalScaling"] || 1;
-
         ctx.scale(hscale,vscale);
         ctx.fillText(str, left/hscale, baseline/vscale);
         ctx.scale(1/hscale,1/vscale);
       } else {
+        ctx.scale(hscale,vscale);
         for(var i = 0; i < str.length; i++) {
           var measurement = Text.measure(str[i], formatting);
-          ctx.fillText(str[i], left, baseline);
+          ctx.fillText(str[i], left/hscale, baseline/vscale);
           left += measurement.width;
         }
+        ctx.scale(1/hscale,1/vscale);
       }
     }
 
