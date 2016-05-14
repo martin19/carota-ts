@@ -56,7 +56,7 @@ export class Frame extends CNode {
         //TODO: stupid fix, eof should not be emitted , see carota.js
         frame_.length = length - 1;
         frame_.height = height;
-        frame_.actualWidth()
+        frame_.actualWidth();
         emit(frame_);
       }
     };

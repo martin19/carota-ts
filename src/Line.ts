@@ -52,11 +52,16 @@ export class Line extends CNode {
    */
   descentUnscaled:number;
   /**
+   * Maximum lineHeight formatting within line.
+   */
+  maxLineHeight:number;
+  
+  /**
    * Alignment of the PositionedWords inside the Line.
    */
   align:ParagraphAlignment;
 
-  constructor(paragraph:PositionedParagraph, left:number, width:number, baseline:number, ascent:number, descent:number, ascentUnscaled:number, descentUnscaled:number, words:Array<Word>, ordinal:number) {
+  constructor(paragraph:PositionedParagraph, left:number, width:number, baseline:number, ascent:number, descent:number, ascentUnscaled:number, descentUnscaled:number, maxLineHeight:number, words:Array<Word>, ordinal:number) {
     super();
     this.type = 'line';
     var self = this;
@@ -69,6 +74,7 @@ export class Line extends CNode {
     this.descent = descent;
     this.ascentUnscaled = ascentUnscaled;
     this.descentUnscaled = descentUnscaled;
+    this.maxLineHeight = maxLineHeight;
     this.ordinal = ordinal;
     var align = this.paragraph.formatting.align;
     this.align = align;

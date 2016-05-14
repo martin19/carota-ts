@@ -168,7 +168,7 @@ export class Text {
       };
 
       span.setAttribute('style', style);
-      var lineHeight = formatting ? formatting.lineHeight : null;
+      var lineHeight = formatting && formatting.lineHeight ? formatting.lineHeight : 0;
       var letterSpacing = formatting ? formatting.letterSpacing : null;
       var verticalScaling = formatting && formatting.verticalScaling ? formatting.verticalScaling : 1;
       var horizontalScaling = formatting && formatting.horizontalScaling ? formatting.horizontalScaling : 1;
@@ -190,14 +190,7 @@ export class Text {
         result.width = Text.ctxMeasure.measureText(text_).width;
       }
       result.width *= horizontalScaling;
-
-      //if formatting contains line-height, apply this - otherwise, lineHeight is measured height
-      if(style.indexOf("line-height")>-1) {
-        result.lineHeight = lineHeight;
-      } else {
-        result.lineHeight = result.height;
-      }
-
+      result.lineHeight = lineHeight;
       result.ascentUnscaled = result.ascent / verticalScaling;
       result.descentUnscaled = result.descent / verticalScaling;
     } finally {

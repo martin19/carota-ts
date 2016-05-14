@@ -313,7 +313,7 @@
             letterSpacing : 0.1,
             verticalScaling : 1.0,
             horizontalScaling : 1.0,
-            lineHeight : -1,
+            lineHeight : 0,
             bold: false,
             italic: false,
             underline: false,
@@ -343,7 +343,7 @@
           cFormatting.push(f1.add(textBoxOptions, "letterSpacing").min(-0.2).max(0.2).listen());
           cFormatting.push(f1.add(textBoxOptions, "verticalScaling").min(0).max(10).listen());
           cFormatting.push(f1.add(textBoxOptions, "horizontalScaling").min(0).max(10).listen());
-          cFormatting.push(f1.add(textBoxOptions, "lineHeight").min(-1).max(100).listen());
+          cFormatting.push(f1.add(textBoxOptions, "lineHeight").min(0).max(100).listen());
           cFormatting.push(f1.add(textBoxOptions, "bold").listen());
           cFormatting.push(f1.add(textBoxOptions, "italic").listen());
           cFormatting.push(f1.add(textBoxOptions, "underline").listen());

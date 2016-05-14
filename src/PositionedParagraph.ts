@@ -72,7 +72,8 @@ export class PositionedParagraph extends CNode {
             height = line;
           } else {
             length = (line.ordinal + line.length) - ordinal;
-            height += line.ascentUnscaled + line.descentUnscaled;
+            //lineHeight is auto or lineHeight is set
+            height += line.maxLineHeight > 0 ? line.maxLineHeight : line.ascentUnscaled + line.descentUnscaled;
             lines.push(line);
           }
         }, word)) {

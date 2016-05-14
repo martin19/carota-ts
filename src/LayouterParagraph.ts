@@ -23,6 +23,13 @@ export var LayouterParagraph = function (left:number, top:number, width:number, 
     lastNewLineHeight = 0,
     y = top;
 
+  //determine previous baseline (last line of previous Paragraph)
+  var previousBaseline = top;
+  var previousLine = parent.frame.last() ? parent.frame.last().last() : null;
+  if(previousLine && previousLine instanceof Line) {
+    previousBaseline = previousLine.baseline;
+  }
+
   /**
    * Stores a word in the lineBuffer, updates lineWidth, maxAscent, maxDescent, maxLineHeight
    * @param word - the word to store.
@@ -50,23 +57,26 @@ export var LayouterParagraph = function (left:number, top:number, width:number, 
     if (quit || lineBuffer.length === 0) {
       return;
     }
-    
-    // if(y == top) {
-    //   var l = new Line(parent, left, width,  y + maxAscent, maxAscent, maxDescent, lineBuffer, ordinal);
-    // } else {
-    //   var l = new Line(parent, left, width, y + maxLineHeight - maxDescent, maxAscent, maxDescent, lineBuffer, ordinal);
-    // }
 
-    var l = new Line(parent, left, width, y + maxAscentUnscaled, maxAscent, maxDescent, maxAscentUnscaled, maxDescentUnscaled, lineBuffer, ordinal);
+    if(maxLineHeight !== 0) {
+      if(y==top) {
+        y = previousBaseline;
+      }
+      var l = new Line(parent, left, width, y + maxLineHeight, maxAscent, maxDescent, maxAscentUnscaled, maxDescentUnscaled, maxLineHeight, lineBuffer, ordinal);
+    } else {
+      var l = new Line(parent, left, width, y + maxAscentUnscaled, maxAscent, maxDescent, maxAscentUnscaled, maxDescentUnscaled, maxLineHeight, lineBuffer, ordinal);
+    }
 
     ordinal += l.length;
     quit = emit(l);
-    if(y == top) {
+
+    //lineHeight is set to Auto
+    if(maxLineHeight === 0) {
       y += (maxAscentUnscaled + maxDescentUnscaled);
     } else {
-      //y += maxLineHeight;
-      y += (maxAscentUnscaled + maxDescentUnscaled);
+      y += maxLineHeight;
     }
+
     lineBuffer.length = 0;
     lineWidth = maxAscent = maxDescent = maxLineHeight = maxDescentUnscaled = maxAscentUnscaled = 0;
   };

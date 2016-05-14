@@ -47,7 +47,7 @@ export class Run {
     letterSpacing:0,
     verticalScaling:1,
     horizontalScaling:1,
-    lineHeight: -1,
+    lineHeight: 0,
     font: 'sans-serif',
     color: 'black',
     bold: false,
