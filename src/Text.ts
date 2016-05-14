@@ -168,11 +168,11 @@ export class Text {
       };
 
       span.setAttribute('style', style);
-      var lineHeight = formatting && formatting.lineHeight ? formatting.lineHeight : 0;
-      var letterSpacing = formatting ? formatting.letterSpacing : null;
-      var verticalScaling = formatting && formatting.verticalScaling ? formatting.verticalScaling : 1;
-      var horizontalScaling = formatting && formatting.horizontalScaling ? formatting.horizontalScaling : 1;
-      var fontSize = formatting ? formatting.size : null;
+      var lineHeight = formatting && formatting.lineHeight ? formatting.lineHeight : Run.defaultFormatting.lineHeight;
+      var letterSpacing = formatting && formatting.letterSpacing ? formatting.letterSpacing : Run.defaultFormatting.letterSpacing;
+      var verticalScaling = formatting && formatting.verticalScaling ? formatting.verticalScaling : Run.defaultFormatting.verticalScaling;
+      var horizontalScaling = formatting && formatting.horizontalScaling ? formatting.horizontalScaling : Run.defaultFormatting.horizontalScaling;
+      var fontSize = formatting && formatting.size ? formatting.size : Run.defaultFormatting.size;
       span.style.lineHeight = "normal";
 
       span.innerHTML = '';
