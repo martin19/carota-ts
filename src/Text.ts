@@ -94,6 +94,10 @@ export class Text {
       if(formatting.horizontalScaling) {
         parts.push("; horizontal-scaling"+formatting.horizontalScaling);
       }
+
+      if(formatting.baselineShift) {
+        parts.push("; baseline-shift"+formatting.baselineShift);
+      }
     }
 
     return parts.join('');
@@ -173,14 +177,15 @@ export class Text {
       var verticalScaling = formatting && formatting.verticalScaling ? formatting.verticalScaling : Run.defaultFormatting.verticalScaling;
       var horizontalScaling = formatting && formatting.horizontalScaling ? formatting.horizontalScaling : Run.defaultFormatting.horizontalScaling;
       var fontSize = formatting && formatting.size ? formatting.size : Run.defaultFormatting.size;
+      var baselineShift = formatting && formatting.baselineShift ? formatting.baselineShift : Run.defaultFormatting.baselineShift;
       span.style.lineHeight = "normal";
 
       span.innerHTML = '';
       span.appendChild(document.createTextNode(text_.replace(/\s/g, Text.nbsp)));
       block.style.verticalAlign = 'baseline';
-      result.ascent = (block.offsetTop) * verticalScaling;
+      result.ascent = (block.offsetTop) * verticalScaling + ((baselineShift > 0) ? baselineShift : 0);
       block.style.verticalAlign = 'bottom';
-      result.height = (block.offsetTop) * verticalScaling;
+      result.height = (block.offsetTop) * verticalScaling - ((baselineShift < 0) ? baselineShift : 0);
       result.descent = (result.height - result.ascent);
       Text.ctxMeasure.font = style.split(";")[0].replace("font:","");
       //if formatting contains letter spacing, respect in width computation
@@ -191,8 +196,8 @@ export class Text {
       }
       result.width *= horizontalScaling;
       result.lineHeight = lineHeight;
-      result.ascentUnscaled = result.ascent / verticalScaling;
-      result.descentUnscaled = result.descent / verticalScaling;
+      result.ascentUnscaled = result.ascent / verticalScaling - ((baselineShift > 0) ? baselineShift : 0);
+      result.descentUnscaled = result.descent / verticalScaling + ((baselineShift < 0) ? baselineShift : 0);
     } finally {
       div.parentNode.removeChild(div);
       div = null;
@@ -255,21 +260,22 @@ export class Text {
     }
     //ctx.fillText(str === '\n' ? Text.enter : str, left, baseline);
 
-    var vscale = formatting.formatting["verticalScaling"] || 1;
-    var hscale = formatting.formatting["horizontalScaling"] || 1;
+    var vscale = formatting.formatting["verticalScaling"] || Run.defaultFormatting.verticalScaling;
+    var hscale = formatting.formatting["horizontalScaling"] || Run.defaultFormatting.horizontalScaling;
+    var baselineShift = formatting.formatting["baselineShift"] || Run.defaultFormatting.baselineShift;
 
     if(str === '\n') {
       ctx.fillText(Text.enter, left, baseline);
     } else {
       if(!formatting.formatting["letterSpacing"] || formatting.formatting["letterSpacing"]===0) {
         ctx.scale(hscale,vscale);
-        ctx.fillText(str, left/hscale, baseline/vscale);
+        ctx.fillText(str, left/hscale, baseline/vscale - baselineShift);
         ctx.scale(1/hscale,1/vscale);
       } else {
         ctx.scale(hscale,vscale);
         for(var i = 0; i < str.length; i++) {
           var measurement = Text.measure(str[i], formatting);
-          ctx.fillText(str[i], left/hscale, baseline/vscale);
+          ctx.fillText(str[i], left/hscale, baseline/vscale - baselineShift);
           left += measurement.width;
         }
         ctx.scale(1/hscale,1/vscale);

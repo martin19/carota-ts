@@ -606,7 +606,8 @@ export class CarotaDoc extends CNode {
       }
     } else {
       ctx.save();
-      ctx.fillStyle = hasFocus ? 'rgba(0, 100, 200, 0.3)' : 'rgba(160, 160, 160, 0.3)';
+      //ctx.fillStyle = hasFocus ? 'rgba(0, 100, 200, 0.3)' : 'rgba(160, 160, 160, 0.3)';
+      ctx.fillStyle = hasFocus ? 'rgba(0, 0, 0, 1.0)' : 'rgba(160, 160, 160, 0.3)';
       ctx.beginPath();
       this.selectedRange().parts(function (part:CNode) {
         var b = part.bounds();
@@ -619,6 +620,7 @@ export class CarotaDoc extends CNode {
           ctx.closePath();
         }
       }.bind(this));
+      ctx.globalCompositeOperation = "xor";
       ctx.fill();
       ctx.restore();
     }

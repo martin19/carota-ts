@@ -3,6 +3,7 @@ export type IFormattingMap = {[s:string]:any};
 
 export interface ICharacterFormatting {
   size?: number;
+  baselineShift?: number;
   letterSpacing?:number;
   verticalScaling?:number;
   horizontalScaling?:number;
@@ -35,6 +36,7 @@ export class Run {
     'color',
     'font',
     'size',
+    'baselineShift',
     'letterSpacing',
     'verticalScaling',
     'horizontalScaling',
@@ -44,6 +46,7 @@ export class Run {
 
   static defaultFormatting:ICharacterFormatting = {
     size: 10,
+    baselineShift : 0,
     letterSpacing:0,
     verticalScaling:1,
     horizontalScaling:1,
