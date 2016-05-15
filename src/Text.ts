@@ -182,11 +182,17 @@ export class Text {
 
       span.innerHTML = '';
       span.appendChild(document.createTextNode(text_.replace(/\s/g, Text.nbsp)));
+
       block.style.verticalAlign = 'baseline';
+      result.ascentUnscaled = (block.offsetTop);
       result.ascent = (block.offsetTop) * verticalScaling + ((baselineShift > 0) ? baselineShift : 0);
+
       block.style.verticalAlign = 'bottom';
       result.height = (block.offsetTop) * verticalScaling - ((baselineShift < 0) ? baselineShift : 0);
+
+      result.descentUnscaled = (block.offsetTop) - result.ascentUnscaled;
       result.descent = (result.height - result.ascent);
+
       Text.ctxMeasure.font = style.split(";")[0].replace("font:","");
       //if formatting contains letter spacing, respect in width computation
       if(letterSpacing) {
@@ -196,8 +202,6 @@ export class Text {
       }
       result.width *= horizontalScaling;
       result.lineHeight = lineHeight;
-      result.ascentUnscaled = result.ascent / verticalScaling - ((baselineShift > 0) ? baselineShift : 0);
-      result.descentUnscaled = result.descent / verticalScaling + ((baselineShift < 0) ? baselineShift : 0);
     } finally {
       div.parentNode.removeChild(div);
       div = null;

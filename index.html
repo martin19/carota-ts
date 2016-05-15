@@ -329,15 +329,12 @@
             },
             wrap : true,
             origin : "center",
-            baselines : false
+            baselines : false,
           };
 
           var gui = new dat.GUI({hideable:false});
 
           var f1 = gui.addFolder("Character");
-          var cOrigin = f1.add(textBoxOptions, "origin", ["topleft","center","bottomright"]);
-          var cWrap = f1.add(textBoxOptions, "wrap");
-          var cBaselines = f1.add(textBoxOptions,"baselines");
           var cFormatting = [];
           cFormatting.push(f1.add(textBoxOptions, "font", ["serif", "sans-serif", "monospace", "cursive", "fantasy"]).listen());
           cFormatting.push(f1.add(textBoxOptions, "size", [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 30, 36, 72]).listen());
@@ -352,6 +349,11 @@
           cFormatting.push(f1.add(textBoxOptions, "strikeout").listen());
           cFormatting.push(f1.add(textBoxOptions, "script", ["normal", "super", "sub"]).listen());
           cFormatting.push(f1.add(textBoxOptions, "color", ["black", "red", "green", "blue", "orange"]).listen());
+
+          var cOrigin = f1.add(textBoxOptions, "origin", ["topleft","center","bottomright"]);
+          var cWrap = f1.add(textBoxOptions, "wrap");
+          var cBaselines = f1.add(textBoxOptions,"baselines");
+
           cFormatting.forEach(function (c) {
             c.onChange(function (value) {
               var range = exampleEditor.selectedRange();
@@ -368,9 +370,7 @@
               case "bottomright" : editor.setOrigin(0.5,0.5); break;
             }
           });
-          cBaselines.onChange(function(value) {
-            editor.setPaintBaselines(value);
-          });
+          cBaselines.onChange(function(value) { editor.setPaintBaselines(value); });
 
           var paragraphOptions = {
             align: "left",
