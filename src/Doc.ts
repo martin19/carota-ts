@@ -543,15 +543,15 @@ export class CarotaDoc extends CNode {
         if (nodeBefore instanceof PositionedChar) {
           var newLineBounds = nodeBefore.bounds();
           var lineBounds = nodeBefore.parent().parent().bounds();
-          b = new Rect(lineBounds.l, lineBounds.b, 1, newLineBounds.h);
+          b = new Rect(lineBounds.l, lineBounds.b, 2, newLineBounds.h);
         } else {
           b = nodeBefore.bounds();
-          b = new Rect(b.r, b.t, 1, b.h);
+          b = new Rect(b.r, b.t, 2, b.h);
         }
       } else {
         b = node.bounds();
         if (b.h) {
-          b = new Rect(b.l, b.t, 1, b.h);
+          b = new Rect(b.l, b.t, 2, b.h);
         } else {
           b = new Rect(b.l, b.t, b.w, 1);
         }
@@ -586,7 +586,8 @@ export class CarotaDoc extends CNode {
         var caret = this.getCaretCoords(this.selection.start);
         if (caret && viewport.contains(caret.l, caret.t) && viewport.contains(caret.r, caret.b)) {
           ctx.save();
-          ctx.fillStyle = 'red';
+          ctx.fillStyle = 'rgba(0,0,0,1.0)';
+          ctx.globalCompositeOperation = "xor";
           caret.fill(ctx);
           ctx.restore();
         }
