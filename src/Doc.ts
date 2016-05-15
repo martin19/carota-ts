@@ -237,22 +237,6 @@ export class CarotaDoc extends CNode {
   }
 
   /**
-   * Applies the insertFormatting to an array of runs.
-   * @param text
-   */
-  applyInsertFormatting(text:Array<Run>) {
-    var formatting = this.nextInsertFormatting;
-    var insertFormattingProperties = Object.keys(formatting);
-    if (insertFormattingProperties.length) {
-      text.forEach(function (run:Run) {
-        insertFormattingProperties.forEach(function (property) {
-          (<IFormattingMap>run.formatting)[property] = formatting[property];
-        });
-      });
-    }
-  }
-
-  /**
    * Returns the ordinal number (first character) of word with index
    * @param index
    * @returns {number}
@@ -436,6 +420,11 @@ export class CarotaDoc extends CNode {
           text_.push(p)
         });
       }
+
+      //apply insert formatting
+      text_.forEach((p:Paragraph)=>{
+        p.formatRuns(this.nextInsertFormatting);
+      });
     } else {
       //If rich-text is entered, set text to the entered rich-text content.
       text_ = text;
@@ -444,8 +433,6 @@ export class CarotaDoc extends CNode {
     text_.forEach((p:Paragraph)=>{
       textLength_+=p.length;
     });
-
-    //this.applyInsertFormatting(text_);
 
     //Get old WordPointers for start and end
     var startWordPtr = this.wordContainingOrdinal(start);

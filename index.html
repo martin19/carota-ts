@@ -332,7 +332,7 @@
             baselines : false
           };
 
-          var gui = new dat.GUI();
+          var gui = new dat.GUI({hideable:false});
 
           var f1 = gui.addFolder("Character");
           var cOrigin = f1.add(textBoxOptions, "origin", ["topleft","center","bottomright"]);
@@ -353,22 +353,22 @@
           cFormatting.push(f1.add(textBoxOptions, "script", ["normal", "super", "sub"]).listen());
           cFormatting.push(f1.add(textBoxOptions, "color", ["black", "red", "green", "blue", "orange"]).listen());
           cFormatting.forEach(function (c) {
-            c.onFinishChange(function (value) {
+            c.onChange(function (value) {
               var range = exampleEditor.selectedRange();
               range.setCharacterFormatting(this.property, value);
             });
           });
-          cWrap.onFinishChange(function(value) {
+          cWrap.onChange(function(value) {
             exampleEditor.setWrap(value);
           });
-          cOrigin.onFinishChange(function(value) {
+          cOrigin.onChange(function(value) {
             switch(value) {
               case "topleft" : editor.setOrigin(-0.5,-0.5); break;
               case "center" : editor.setOrigin(0,0); break;
               case "bottomright" : editor.setOrigin(0.5,0.5); break;
             }
           });
-          cBaselines.onFinishChange(function(value) {
+          cBaselines.onChange(function(value) {
             editor.setPaintBaselines(value);
           });
 
@@ -392,7 +392,7 @@
           cParagraph.push(f2.add(paragraphOptions,"hyphenate").listen());
 
           cParagraph.forEach(function(c){
-            c.onFinishChange(function(value){
+            c.onChange(function(value){
               var range = exampleEditor.selectedRange();
               range.setParagraphFormatting(this.property, value);
             });
@@ -437,7 +437,7 @@
             sy : 1.0
           };
 
-          var gui2 = new dat.GUI();
+          var gui2 = new dat.GUI({hideable : false});
           var f4 = gui2.addFolder("Position");
           var cCx = f4.add(textBoxPosition,"cx").min(0).max(500);
           var cCy = f4.add(textBoxPosition,"cy").min(0).max(500);

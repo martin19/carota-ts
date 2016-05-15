@@ -86,6 +86,23 @@ export class Paragraph {
   }
 
   /**
+   * Format all runs of this Paragraph.
+   * @param formatting
+   */
+  formatRuns(formatting:IFormattingMap) {
+    if(formatting) {
+      var formattingProperties = Object.keys(formatting);
+      if(formattingProperties.length) {
+        this.runs_.forEach((run:Run)=>{
+          formattingProperties.forEach((property)=> {
+            (<IFormattingMap>run.formatting)[property] = formatting[property];
+          });
+        }); 
+      }
+    } 
+  }
+  
+  /**
    * Creates a partial paragraph from this by consolidating runs within range
    * @param range
    * @returns {Paragraph}
