@@ -185,10 +185,10 @@ export class Text {
 
       block.style.verticalAlign = 'baseline';
       result.ascentUnscaled = (block.offsetTop);
-      result.ascent = (block.offsetTop) * verticalScaling + ((baselineShift > 0) ? baselineShift : 0);
+      result.ascent = ((block.offsetTop) + ((baselineShift > 0) ? baselineShift : 0)) * verticalScaling;
 
       block.style.verticalAlign = 'bottom';
-      result.height = (block.offsetTop) * verticalScaling - ((baselineShift < 0) ? baselineShift : 0);
+      result.height = ((block.offsetTop) - ((baselineShift < 0) ? baselineShift : 0)) * verticalScaling ;
 
       result.descentUnscaled = (block.offsetTop) - result.ascentUnscaled;
       result.descent = (result.height - result.ascent);
@@ -268,30 +268,34 @@ export class Text {
     var hscale = formatting.formatting["horizontalScaling"] || Run.defaultFormatting.horizontalScaling;
     var baselineShift = formatting.formatting["baselineShift"] || Run.defaultFormatting.baselineShift;
 
+    ctx.scale(hscale,vscale);
+
+    var totalWidth = 0;
     if(str === '\n') {
-      ctx.fillText(Text.enter, left, baseline);
+      ctx.fillText(Text.enter, left/hscale, baseline/vscale);
     } else {
       if(!formatting.formatting["letterSpacing"] || formatting.formatting["letterSpacing"]===0) {
-        ctx.scale(hscale,vscale);
         ctx.fillText(str, left/hscale, baseline/vscale - baselineShift);
-        ctx.scale(1/hscale,1/vscale);
+        totalWidth = width;
       } else {
-        ctx.scale(hscale,vscale);
+        var leftPointer = left;
         for(var i = 0; i < str.length; i++) {
           var measurement = Text.measure(str[i], formatting);
-          ctx.fillText(str[i], left/hscale, baseline/vscale - baselineShift);
-          left += measurement.width;
+          ctx.fillText(str[i], leftPointer/hscale, baseline/vscale - baselineShift);
+          leftPointer += measurement.width;
+          totalWidth += measurement.width;
         }
-        ctx.scale(1/hscale,1/vscale);
       }
     }
 
     if ((<ICharacterFormatting>formatting.formatting).underline) {
-      ctx.fillRect(left, 1 + baseline, width, 1);
+      ctx.fillRect(left/hscale, (1 + baseline)/vscale - baselineShift, totalWidth/hscale, 1);
     }
     if ((<ICharacterFormatting>formatting.formatting).strikeout) {
-      ctx.fillRect(left, 1 + baseline - (ascent/2), width, 1);
+      ctx.fillRect(left/hscale, (1 + baseline - (ascent/2))/vscale - ((baselineShift > 0) ? baselineShift/2 : baselineShift) , totalWidth/hscale, 1);
     }
+
+    ctx.scale(1/hscale,1/vscale);
   };
 }
 Text.cachedMeasureText = Text.createCachedMeasureText();
