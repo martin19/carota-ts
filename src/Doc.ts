@@ -76,7 +76,7 @@ var makeEditCommand = function(doc:CarotaDoc, startWord:number, wordCount:number
     //All runs in words in new paragraphs must reference the new paragraphs.
     paragraphs.forEach((p:Paragraph, i : number)=>{
       var paragraphStart = doc.paragraphOrdinal(startParagraph + i);
-      var paragraphEnd = paragraphStart + p.length;
+      var paragraphEnd = paragraphStart + p.length - 1;
       var startWord = doc.wordContainingOrdinal(paragraphStart);
       var endWord = doc.wordContainingOrdinal(paragraphEnd);
       for(var i = startWord.index; i <= endWord.index; i++) {
@@ -206,7 +206,7 @@ export class CarotaDoc extends CNode {
   }
 
   documentRange() {
-    return this.range(0, this.frame.length - 1);
+    return this.range(0, this.frame.length);
   }
 
   selectedRange() {
@@ -350,19 +350,15 @@ export class CarotaDoc extends CNode {
    * @param range
    */
   paragraphs(emit:(p:Paragraph)=>void, range:IRange) {
-    //TODO: -2 because the eof marker is not contained in the last paragraph.
-    //Don't know how to handle this, maybe we should add it there - this fixes the
-    //immediate problem of not finding the last paragraph when no range is given.
     var start = this.paragraphContainingOrdinal(Math.max(0, range.start)),
       end = this.paragraphContainingOrdinal(Math.min(range.end, this.frame.length - 1));
 
     if (start.index === end.index) {
-      //TODO: another off by one candidate
-      emit(start.paragraph.partialParagraph({ start : start.offset, end : end.offset }));
+      emit(start.paragraph.partialParagraph({ start : start.offset, end : end.offset + 1}));
     } else {
       emit(start.paragraph.partialParagraph({ start : start.offset}));
       for (var n = start.index + 1; n < end.index; n++) { emit(this._paragraphs[n]); }
-      emit(end.paragraph.partialParagraph({ end : end.offset }));
+      emit(end.paragraph.partialParagraph({ end : end.offset + 1}));
     }
   }
 
@@ -421,9 +417,13 @@ export class CarotaDoc extends CNode {
         });
       }
 
+      //get this paragraphs formatting
+      var paragraphFormatting = this.paragraphContainingOrdinal(start).paragraph.formatting;
+
       //apply insert formatting
       text_.forEach((p:Paragraph)=>{
         p.formatRuns(this.nextInsertFormatting);
+        p.formatting = Paragraph.cloneFormatting(paragraphFormatting);
       });
     } else {
       //If rich-text is entered, set text to the entered rich-text content.
@@ -436,7 +436,7 @@ export class CarotaDoc extends CNode {
 
     //Get old WordPointers for start and end
     var startWordPtr = this.wordContainingOrdinal(start);
-    var endWordPtr = this.wordContainingOrdinal(end);
+    var endWordPtr = this.wordContainingOrdinal(Math.min(end,this.frame.length-1));
 
     //Include previous word and omit next word if breaker
     if (start === startWordPtr.ordinal) {
@@ -445,7 +445,8 @@ export class CarotaDoc extends CNode {
       }
     }
     if (end === endWordPtr.ordinal) {
-      if ((end === this.frame.length - 1) || isBreaker(endWordPtr.word)) {
+      //if ((end === this.frame.length - 1) || isBreaker(endWordPtr.word)) {
+      if (endWordPtr.word.eof) {
         var previousWord = this.wordContainingOrdinal(this.wordOrdinal(endWordPtr.index-1));
         if(previousWord) {
           endWordPtr = previousWord;
@@ -455,7 +456,7 @@ export class CarotaDoc extends CNode {
 
     //Get ParagraphPointers for start and end
     var startParagraphPtr = this.paragraphContainingOrdinal(start);
-    var endParagraphPtr = this.paragraphContainingOrdinal(end);
+    var endParagraphPtr = this.paragraphContainingOrdinal(Math.min(end,this.frame.length-1));
 
     //Constitute array of new Paragraphs
     var startParagraph = startParagraphPtr.paragraph;
@@ -463,6 +464,9 @@ export class CarotaDoc extends CNode {
     var newParagraphs:Array<Paragraph> = [startParagraph.partialParagraph({end : startParagraphPtr.offset})]
       .concat(text_)
       .concat([endParagraph.partialParagraph({start : endParagraphPtr.offset})]);
+      //.concat([endParagraph.partialParagraph({start : endParagraphPtr.offset + 1})]);
+      //.concat([endParagraph.partialParagraph({start : endParagraphPtr.offset + ((end==start)?0:1)})]);
+
 
     //Consolidate new Paragraphs
     var consolidatedNewParagraphs:Array<Paragraph> = [];
@@ -485,7 +489,7 @@ export class CarotaDoc extends CNode {
     //start of start word relative to startParagraphPtr
     var startOrdinal = startWordPtr.ordinal - startParagraphPtr.ordinal;
     //end of end word relative to startParagraphPtr
-    var endOrdinal = textLengthDiff + endWordPtr.ordinal + endWordPtr.word.length - startParagraphPtr.ordinal;
+    var endOrdinal = textLengthDiff + endWordPtr.ordinal + endWordPtr.word.length  - startParagraphPtr.ordinal;
     consolidatedNewParagraphs.forEach((p:Paragraph, i : number)=>{
       newRuns = newRuns.concat( new Per({start:startOrdinal, end:endOrdinal }).per(p.runs,p).all() );
       startOrdinal = Math.max(startOrdinal - p.length, 0);
@@ -629,6 +633,7 @@ export class CarotaDoc extends CNode {
   }
 
   select(ordinal:number, ordinalEnd:number, takeFocus?:boolean) {
+    console.log("select:" + ordinal + "->" + ordinalEnd);
     if (!this.frame) {
       // Something has gone terribly wrong - doc.transaction will rollback soon
       return;

@@ -180,6 +180,8 @@ export class Range implements IRange{
     var start = this.doc.paragraphContainingOrdinal(this.start),
       end = this.doc.paragraphContainingOrdinal(this.end);
 
+    if(!start || !end) return {};
+
     var paragraphs = this.doc._paragraphs.slice(start.index,end.index+1);
 
     var formatting = Paragraph.cloneFormatting(Paragraph.defaultFormatting);
@@ -204,7 +206,7 @@ export class Range implements IRange{
     var start = this.doc.paragraphContainingOrdinal(this.start),
       end = this.doc.paragraphContainingOrdinal(this.end);
 
-    var extendedRange = new Range(this.doc, start.ordinal, end.ordinal + this.doc._paragraphs[end.index].length);
+    var extendedRange = new Range(this.doc, start.ordinal, end.ordinal + this.doc._paragraphs[end.index].length );
     var saved = extendedRange.save();
 
     saved.forEach((p:Paragraph)=>{

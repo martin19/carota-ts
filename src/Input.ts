@@ -208,7 +208,9 @@ export class Input {
       case 88: // X - cut to clipboard
         if (ctrlKey) {
           // Allow standard handling to take place as well
-          editor.richClipboard = editor.doc.selectedRange().save();
+          var range = editor.doc.selectedRange();
+          range.end--;
+          editor.richClipboard = range.save();
           editor.plainClipboard = editor.doc.selectedRange().plainText();
         }
         break;

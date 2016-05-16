@@ -112,9 +112,6 @@ export class Paragraph {
     paragraph.clearRuns();
     var runs:Array<Run> = [];
 
-    //TODO: why does this not work?
-    //new Per(range).per(this.runs, this).per(Run.consolidate()).into(runs);
-
     var cons = new Per<Run>(Run.consolidate()).into(runs);
     new Per(range).per(this.runs, this).forEach((r:Run)=>{
       cons.submit(r);
@@ -165,12 +162,6 @@ export class Paragraph {
         }
         start -= text.length;
         end -= text.length;
-      } else {
-        if (start <= 0 && end >= 1) {
-          emit(run);
-        }
-        start--;
-        end--;
       }
     });
   }

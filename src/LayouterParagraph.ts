@@ -83,7 +83,7 @@ export var LayouterParagraph = function (left:number, top:number, width:number, 
 
   return function (emit:(p:Line|number)=>boolean|void, word:Word) {
     if (word.eof) {
-      store(word, emit);
+      //store(word, emit);
       if (!lineBuffer.length) {
         emit(y + lastNewLineHeight - top);
       } else {
