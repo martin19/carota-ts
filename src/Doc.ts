@@ -351,7 +351,7 @@ export class CarotaDoc extends CNode {
    */
   paragraphs(emit:(p:Paragraph)=>void, range:IRange) {
     var start = this.paragraphContainingOrdinal(Math.max(0, range.start)),
-      end = this.paragraphContainingOrdinal(Math.min(range.end, this.frame.length - 1));
+      end = this.paragraphContainingOrdinal(Math.min(range.end-1, this.frame.length - 1));
 
     if (start.index === end.index) {
       emit(start.paragraph.partialParagraph({ start : start.offset, end : end.offset + 1}));
