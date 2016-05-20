@@ -158,8 +158,6 @@ export class Range implements IRange{
     if (range.start === range.end) {
       range.doc.modifyInsertFormatting(attribute, value);
     } else {
-      //TODO:resolve this workaround
-      range.end --;
       var saved = range.save();
       var formatting:IFormattingMap = {};
       formatting[attribute] = value;
@@ -169,8 +167,6 @@ export class Range implements IRange{
           Run.format(r, <ICharacterFormatting>formatting);
         });
       });
-      //TODO:resolve this workaround
-      range.end ++;
       range.setText(saved);
     }
   };

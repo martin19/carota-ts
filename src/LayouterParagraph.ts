@@ -24,6 +24,7 @@ export var LayouterParagraph = function (left:number, top:number, width:number, 
     y = top;
 
   //determine previous baseline (last line of previous Paragraph)
+  //TODO: add spaceAfter to the baseline
   var previousBaseline = top;
   var previousLine = parent.frame.last() ? parent.frame.last().last() : null;
   if(previousLine && previousLine instanceof Line) {
@@ -81,7 +82,7 @@ export var LayouterParagraph = function (left:number, top:number, width:number, 
     lineWidth = maxAscent = maxDescent = maxLineHeight = maxDescentUnscaled = maxAscentUnscaled = 0;
   };
 
-  return function (emit:(p:Line|number)=>boolean|void, word:Word) {
+  return (emit:(p:Line|number)=>boolean|void, word:Word) => {
     if (word.eof) {
       //store(word, emit);
       if (!lineBuffer.length) {
