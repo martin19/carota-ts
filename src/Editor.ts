@@ -410,8 +410,7 @@ export class Editor {
     if (!this.keyboardSelect && start != end) {
       ordinal = end;
     }
-    var length = this.doc.frame.length - 1;
-    if (ordinal < length) {
+    if (ordinal < this.doc.frame.length) {
       ordinal++;
     }
     this.updateCaretAndSelection(ordinal);

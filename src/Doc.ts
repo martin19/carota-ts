@@ -482,7 +482,7 @@ export class CarotaDoc extends CNode {
       p.addRuns(runs);
     });
 
-    var textLengthDiff = textLength_ - (end-start);
+    var textLengthDiff = textLength_ - (Math.min(end,this.frame.length-1)-start);
 
     //Get new Runs from consolidated new paragraphs.
     var newRuns:Array<Run> = [];
@@ -641,8 +641,13 @@ export class CarotaDoc extends CNode {
     this.selection.start = Math.max(0, ordinal);
     this.selection.end = Math.min(
       typeof ordinalEnd === 'number' ? ordinalEnd : this.selection.start,
-      this.frame.length - 1
+      this.frame.length
     );
+    //Disallow setting cursor after last newline.
+    if(this.selection.start == this.frame.length && this.selection.end == this.frame.length) {
+      this.selection.start--;
+      this.selection.end--;
+    }
     this.selectionJustChanged = true;
     this.caretVisible = true;
     this.nextInsertFormatting = {};
