@@ -14,11 +14,12 @@ import {PositionedParagraph} from "./PositionedParagraph";
  * @param top - top coordinate of parent Frame in pixels.
  * @param width - width of parent Frame in pixels.
  * @param ordinal - ordinal value of first character.
+ * @param wrap - enable wrapping at frame boundaries
  * @param parent - parent Frame.
  * @returns {function(function(PositionedParagraph): (boolean|void), Word): boolean|void}
  * @constructor
  */
-export var LayouterFrame = function (left:number, top:number, width:number, ordinal:number, parent:Frame) {
+export var LayouterFrame = function (left:number, top:number, width:number, ordinal:number, wrap:boolean, parent:Frame) {
 
   var quit:boolean|void;
   var lastNewLineHeight = 0;
@@ -27,7 +28,7 @@ export var LayouterFrame = function (left:number, top:number, width:number, ordi
   var paragraphIndex = 0;
 
   var paragraphs = parent._parent._paragraphs;
-  layouter = PositionedParagraph.layout(left, y, width, ordinal, parent, paragraphs[paragraphIndex]);
+  layouter = PositionedParagraph.layout(left, y, width, ordinal, wrap, parent, paragraphs[paragraphIndex]);
 
   return function (emit:(p:PositionedParagraph)=>boolean|void, word:Word) {
     if(word.eof) {
@@ -49,7 +50,7 @@ export var LayouterFrame = function (left:number, top:number, width:number, ordi
         spaceBefore += paragraphs[paragraphIndex].formatting["spaceBefore"]||0;
       }
       y+=spaceBefore;
-      layouter = PositionedParagraph.layout(left, y, width, ordinal, parent, paragraphs[paragraphIndex]);
+      layouter = PositionedParagraph.layout(left, y, width, ordinal, wrap, parent, paragraphs[paragraphIndex]);
     }
     return quit;
   }

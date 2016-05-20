@@ -39,13 +39,14 @@ export class Frame extends CNode {
    * @param top - top coordinate of frame in pixels
    * @param width - width of frame in pixels
    * @param ordinal - ordinal number of first character in frame
+   * @param wrap - enable line wrapping at frame boundaries
    * @param parent - parent node of frame (the document node)
    * @return {function(function(Frame): void, Word): boolean}
    */
-  static layout(left:number, top:number, width:number, ordinal:number, parent:CarotaDoc) {
+  static layout(left:number, top:number, width:number, ordinal:number, wrap:boolean, parent:CarotaDoc) {
     var frame_ = new Frame(parent, ordinal);
     var paragraphs = frame_.paragraphs;
-    var layouter = LayouterFrame(left, top, width, ordinal, frame_);
+    var layouter = LayouterFrame(left, top, width, ordinal, wrap, frame_);
     var length = 0, height = 0;
     return (emit:(f:Frame)=>void, word:Word) => {
       if(layouter((p:PositionedParagraph)=>{

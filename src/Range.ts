@@ -179,7 +179,7 @@ export class Range implements IRange{
     var start = this.doc.paragraphContainingOrdinal(this.start),
       end = this.doc.paragraphContainingOrdinal(this.end);
 
-    if(!start || !end) return {};
+    if(!start || !end) return {} as IParagraphFormatting;
 
     var paragraphs = this.doc._paragraphs.slice(start.index,end.index+1);
 

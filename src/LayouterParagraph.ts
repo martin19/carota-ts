@@ -10,7 +10,7 @@ import {PositionedParagraph} from "./PositionedParagraph";
  *
  * Returns a stream of line objects, each containing an array of positionedWord objects.
  */
-export var LayouterParagraph = function (left:number, top:number, width:number, ordinal:number, parent:PositionedParagraph) {
+export var LayouterParagraph = function (left:number, top:number, width:number, ordinal:number, wrap:boolean, parent:PositionedParagraph) {
 
   var lineBuffer:Array<Word> = [],
     lineWidth = 0,
@@ -59,13 +59,33 @@ export var LayouterParagraph = function (left:number, top:number, width:number, 
       return;
     }
 
+    var x = left;
+    if(!wrap) {
+      width = 0;
+      lineBuffer.forEach((word:Word)=>{
+        width += word.width;
+      });
+
+      switch(parent.formatting.align) {
+        case 'left':
+          x = left;
+          break;
+        case 'right':
+          x = left - width;
+          break;
+        case 'center':
+          x = left - width/2;
+          break;
+      }
+    }
+
     if(maxLineHeight !== 0) {
       if(y==top) {
         y = previousBaseline;
       }
-      var l = new Line(parent, left, width, y + maxLineHeight, maxAscent, maxDescent, maxAscentUnscaled, maxDescentUnscaled, maxLineHeight, lineBuffer, ordinal);
+      var l = new Line(parent, x, width, y + maxLineHeight, maxAscent, maxDescent, maxAscentUnscaled, maxDescentUnscaled, maxLineHeight, lineBuffer, ordinal);
     } else {
-      var l = new Line(parent, left, width, y + maxAscentUnscaled, maxAscent, maxDescent, maxAscentUnscaled, maxDescentUnscaled, maxLineHeight, lineBuffer, ordinal);
+      var l = new Line(parent, x, width, y + maxAscentUnscaled, maxAscent, maxDescent, maxAscentUnscaled, maxDescentUnscaled, maxLineHeight, lineBuffer, ordinal);
     }
 
     ordinal += l.length;
@@ -84,7 +104,6 @@ export var LayouterParagraph = function (left:number, top:number, width:number, 
 
   return (emit:(p:Line|number)=>boolean|void, word:Word) => {
     if (word.eof) {
-      //store(word, emit);
       if (!lineBuffer.length) {
         emit(y + lastNewLineHeight - top);
       } else {
@@ -99,7 +118,7 @@ export var LayouterParagraph = function (left:number, top:number, width:number, 
         store(word, emit);
       } else {
         //if lineWidth is exceeded, send a new line object.
-        if (lineWidth + word.text.width > width) {
+        if (wrap && lineWidth + word.text.width > width) {
           send(emit);
         }
         //store the word to the lineBuffer

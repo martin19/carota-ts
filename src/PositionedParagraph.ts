@@ -44,11 +44,12 @@ export class PositionedParagraph extends CNode {
    * @param top - top coordinate of frame in pixels
    * @param width - width of frame in pixels
    * @param ordinal - ordinal number of first character in frame
+   * @param wrap - enable wrapping at frame boundaries.
    * @param parent - parent node of frame (the document node)
    * @param paragraph - the paragraph to be positioned.
    * @return {function(function(PositionedParagraph): void, Word): boolean}
    */
-  static layout(left:number, top:number, width:number, ordinal:number, parent:Frame, paragraph:Paragraph) {
+  static layout(left:number, top:number, width:number, ordinal:number, wrap:boolean, parent:Frame, paragraph:Paragraph) {
     var length = 0;
     var height = 0;
     var marginLeft = 0, marginRight = 0, spaceBefore = 0, spaceAfter = 0;
@@ -63,7 +64,7 @@ export class PositionedParagraph extends CNode {
     }
     var lines = pp.lines;
 
-    var layouter = LayouterParagraph(pp.left, pp.top, pp.width, ordinal, pp);
+    var layouter = LayouterParagraph(pp.left, pp.top, pp.width, ordinal, wrap, pp);
 
     return (emit:(p:PositionedParagraph)=>void, word:Word) => {
 

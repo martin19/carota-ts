@@ -183,11 +183,7 @@ export class CarotaDoc extends CNode {
   layout() {
     this.frame = null;
     try {
-      if(this.wrap) {
-        this.frame = new Per(this.words).per(Frame.layout(0, 0, this._width, 0, this)).first();
-      } else {
-        //this.frame = new Per(this.words).per(Frame.noWrap(0, 0, 0, this)).first();
-      }
+      this.frame = new Per(this.words).per(Frame.layout(0, 0, this._width, 0, this.wrap, this)).first();
     } catch (x) {
       console.error(x);
     }
@@ -464,9 +460,6 @@ export class CarotaDoc extends CNode {
     var newParagraphs:Array<Paragraph> = [startParagraph.partialParagraph({end : startParagraphPtr.offset})]
       .concat(text_)
       .concat([endParagraph.partialParagraph({start : endParagraphPtr.offset})]);
-      //.concat([endParagraph.partialParagraph({start : endParagraphPtr.offset + 1})]);
-      //.concat([endParagraph.partialParagraph({start : endParagraphPtr.offset + ((end==start)?0:1)})]);
-
 
     //Consolidate new Paragraphs
     var consolidatedNewParagraphs:Array<Paragraph> = [];
