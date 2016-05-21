@@ -17,6 +17,14 @@ import {PositionedParagraph} from "./PositionedParagraph";
 import {Paragraph} from "./Paragraph";
 import {Part} from "./Part";
 
+export interface IDocumentSettings {
+  SuperscriptSize: number;
+  SuperscriptPosition: number;
+  SubscriptSize: number;
+  SubscriptPosition: number;
+  SmallCapSize: number;
+}
+
 export interface ISelection {
   start : number;
   end : number;
@@ -149,6 +157,14 @@ export class CarotaDoc extends CNode {
   sendKey:(key:number, selecting:boolean, ctrlKey:boolean)=>void;
   wrap : boolean;
 
+  static settings: IDocumentSettings = {
+    SmallCapSize : 0.7,
+    SuperscriptSize : 0.583,
+    SuperscriptPosition : 0.333,
+    SubscriptSize : 0.583,
+    SubscriptPosition : 0.333
+  };
+
   constructor() {
     super();
     this.type = 'document';
@@ -169,6 +185,12 @@ export class CarotaDoc extends CNode {
     this.redo = [];
     this._wordOrdinals = [];
     this._paragraphOrdinals = [];
+
+    if(!paragraphs.length) {
+      var p = new Paragraph();
+      p.addRun(new Run("\n",{},p));
+      paragraphs = [p];
+    }
 
     this._paragraphs = paragraphs;
     var runs = new Per(paragraphs).per(Paragraph.runs).all();

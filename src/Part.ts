@@ -47,13 +47,14 @@ export class Part {
   lineHeight:number;
 
   constructor(run:Run) {
+    this.run = run;
+    
     var m : ITextMeasurement, isNewLine : boolean;
     if (typeof run.text === 'string') {
       isNewLine = (run.text.length === 1) && (run.text[0] === '\n');
-      m = Text.measure(isNewLine ? Text.nbsp : <string>run.text, run);
+      m = Text.measure(isNewLine ? Text.nbsp : this.maybeCapitalize(run.text as string), run);
     }
 
-    this.run = run;
     this.isNewLine = isNewLine;
     this.width = isNewLine ? 0 : m.width;
     this.ascent = m.ascent;
@@ -61,6 +62,18 @@ export class Part {
     this.ascentUnscaled = m.ascentUnscaled;
     this.descentUnscaled = m.descentUnscaled;
     this.lineHeight = m.lineHeight;
+  }
+
+  /**
+   * Capitalize the runs text if "capitals" formatting is set.
+   * @param text
+   * @returns {string}
+   */
+  maybeCapitalize(text:string):string {
+    if((this.run.formatting as ICharacterFormatting).capitals) {
+      return (<string>(this.run.text)).toUpperCase();
+    }
+    return <string>this.run.text;
   }
 
   /**
@@ -73,7 +86,7 @@ export class Part {
    */
   draw(ctx:CanvasRenderingContext2D, x:number, y:number) {
     if (typeof this.run.text === 'string') {
-      Text.draw(ctx, <string>(this.run.text), this.run, x, y, this.width, this.ascent, this.descent);
+      Text.draw(ctx, this.maybeCapitalize(this.run.text as string), this.run, x, y, this.width, this.ascent, this.descent);
     }
   }
 }

@@ -1,5 +1,6 @@
 import {ICharacterFormatting} from "./Run";
 import {Run} from "./Run";
+import {CarotaDoc} from "./Doc";
 
 export interface ITextMeasurement {
   ascent : number;
@@ -27,15 +28,17 @@ export class Text {
     if (run) {
       switch ((<ICharacterFormatting>run.formatting).script) {
         case 'super':
+          size *= CarotaDoc.settings.SuperscriptSize;
+          break;
         case 'sub':
-          size *= 0.8;
+          size *= CarotaDoc.settings.SubscriptSize;
           break;
       }
     }
 
     return (run && (<ICharacterFormatting>run.formatting).italic ? 'italic ' : '') +
       (run && (<ICharacterFormatting>run.formatting).bold ? 'bold ' : '') + ' ' +
-      size + 'pt ' +
+      size + 'px ' +
       ((run && (<ICharacterFormatting>run.formatting).font) || Run.defaultFormatting.font);
   }
 
@@ -256,10 +259,10 @@ export class Text {
     Text.applyRunStyle(ctx, formatting);
     switch ((<ICharacterFormatting>formatting.formatting).script) {
       case 'super':
-        baseline -= (ascent * (1/3));
+        baseline -= (ascent + descent) * CarotaDoc.settings.SuperscriptPosition;
         break;
       case 'sub':
-        baseline += (descent / 2);
+        baseline += (ascent + descent) * CarotaDoc.settings.SubscriptPosition;
         break;
     }
     //ctx.fillText(str === '\n' ? Text.enter : str, left, baseline);
@@ -292,7 +295,7 @@ export class Text {
       ctx.fillRect(left/hscale, (1 + baseline)/vscale - baselineShift, totalWidth/hscale, 1);
     }
     if ((<ICharacterFormatting>formatting.formatting).strikeout) {
-      ctx.fillRect(left/hscale, (1 + baseline - (ascent/2))/vscale - ((baselineShift > 0) ? baselineShift/2 : baselineShift) , totalWidth/hscale, 1);
+      ctx.fillRect(left/hscale, (1 + baseline - (ascent/4))/vscale - ((baselineShift > 0) ? baselineShift/2 : baselineShift) , totalWidth/hscale, 1);
     }
 
     ctx.scale(1/hscale,1/vscale);

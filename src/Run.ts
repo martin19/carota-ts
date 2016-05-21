@@ -16,6 +16,7 @@ export interface ICharacterFormatting {
   strikeout?: boolean;
   align?: string;
   script?: string;
+  capitals?: boolean;
 }
 
 /**
@@ -42,7 +43,9 @@ export class Run {
     'horizontalScaling',
     'lineHeight',
     'align',
-    'script'];
+    'script',
+    'capitals'
+  ];
 
   static defaultFormatting:ICharacterFormatting = {
     size: 10,
@@ -58,7 +61,8 @@ export class Run {
     underline: false,
     strikeout: false,
     align: 'left',
-    script: 'normal'
+    script: 'normal',
+    capitals: false
   };
 
 
