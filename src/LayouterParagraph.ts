@@ -25,7 +25,7 @@ export var LayouterParagraph = function (left:number, top:number, width:number, 
 
   //determine previous baseline (last line of previous Paragraph)
   //TODO: add spaceAfter to the baseline
-  var previousBaseline = top;
+  var previousBaseline:number = top;
   var previousLine = parent.frame.last() ? parent.frame.last().last() : null;
   if(previousLine && previousLine instanceof Line) {
     previousBaseline = previousLine.baseline;

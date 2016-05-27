@@ -62,20 +62,28 @@ export class Frame extends CNode {
     };
   }
 
-  bounds() {
-    var left = Number.MAX_VALUE, top = Number.MAX_VALUE, right = -Number.MAX_VALUE, bottom = -Number.MAX_VALUE;
-    if (this.paragraphs.length) {
-      this.paragraphs.forEach((paragraph:PositionedParagraph)=> {
-        var b = paragraph.bounds();
-        left = Math.min(left, b.l);
-        top = Math.min(top, b.t);
-        right = Math.max(right, b.l + b.w);
-        bottom = Math.max(bottom, b.t + b.h);
-      });
-    }
-    this._bounds = new Rect(left, top, right - left, this.height || bottom - top);
-    return this._bounds;
+  /**
+   * Gets the bounds of the Frame.
+   * @param actual
+   * @returns {Rect}
+   */
+  bounds(actual? : boolean) {
+  var left = Number.MAX_VALUE, top = Number.MAX_VALUE, right = -Number.MAX_VALUE, bottom = -Number.MAX_VALUE;
+  if (this.paragraphs.length) {
+    this.paragraphs.forEach((paragraph:PositionedParagraph, i:number)=> {
+      var b = paragraph.bounds(actual);
+      left = Math.min(left, b.l);
+      top = Math.min(top, b.t);
+      right = Math.max(right, b.l + b.w);
+      bottom = Math.max(bottom, b.t + b.h);
+    });
   }
+  if (actual) {
+    return new Rect(left, top, right - left, bottom - top);
+  }
+  return new Rect(left, top, right - left, this.height);
+
+}
 
   actualWidth() {
     if (!this._actualWidth) {
@@ -102,5 +110,15 @@ export class Frame extends CNode {
     this.paragraphs.forEach((p:PositionedParagraph)=> {
       p.draw(ctx, viewPort);
     });
+
+    //draw frame bounds
+    var b = this.bounds();
+    ctx.strokeStyle = "red";
+    ctx.strokeRect(b.l, b.t, b.w, b.h);
+
+    //draw actual frame bounds
+    var b = this.bounds(true);
+    ctx.strokeStyle = "yellow";
+    ctx.strokeRect(b.l, b.t, b.w, b.h);
   }
 }

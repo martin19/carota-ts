@@ -618,8 +618,8 @@ export class CarotaDoc extends CNode {
       ctx.beginPath();
       this.selectedRange().parts(function (part:CNode) {
         var b = part.bounds();
-        //if(viewport.contains(b.l,b.t) && viewport.contains(b.r,b.b)) {
-        if(viewport.t <= b.t && viewport.b >= b.b) {
+        if(viewport.contains(b.l,b.t) && viewport.contains(b.r,b.b)) {
+        //if(viewport.t <= b.t && viewport.b >= b.b) {
           ctx.moveTo(b.l, b.t);
           ctx.lineTo(b.r, b.t);
           ctx.lineTo(b.r, b.b);

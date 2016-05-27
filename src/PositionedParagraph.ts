@@ -86,8 +86,22 @@ export class PositionedParagraph extends CNode {
     };
   }
 
-  bounds() {
-    return new Rect(this.left, this.top, this.width, this.height);
+  bounds(actual?:boolean) {
+    if(!actual) {
+      return new Rect(this.left, this.top, this.width, this.height);
+    } else {
+      var left = Number.MAX_VALUE, top = Number.MAX_VALUE, right = -Number.MAX_VALUE, bottom = -Number.MAX_VALUE;
+      if (this.lines.length) {
+        this.lines.forEach((line:Line,i:number)=> {
+          var b = line.bounds(actual);
+          left = Math.min(left, b.l);
+          top = Math.min(top, b.t);
+          right = Math.max(right, b.l + b.w);
+          bottom = Math.max(bottom, b.t + b.h);
+        });
+      }
+      return new Rect(left, top, right - left, bottom - top);
+    }
   }
 
   parent() {

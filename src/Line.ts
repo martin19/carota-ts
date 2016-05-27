@@ -128,11 +128,11 @@ export class Line extends CNode {
 
   /**
    * Returns a Rect for the bounding box.
-   * @param minimal
+   * @param actual
    * @returns {Rect}
    */
-  bounds(minimal?:boolean) {
-    if (minimal) {
+  bounds(actual?:boolean) {
+    if (actual) {
       var firstWord = this.first().bounds(),
         lastWord = this.last().bounds();
       return new Rect(
@@ -140,8 +140,9 @@ export class Line extends CNode {
         this.baseline - this.ascent,
         (lastWord.l + lastWord.w) - firstWord.l,
         this.ascent + this.descent);
+    } else {
+      return new Rect(this.left, this.baseline - this.ascent, this.width, this.ascent + this.descent);
     }
-    return new Rect(this.left, this.baseline - this.ascent, this.width, this.ascent + this.descent);
   }
 
   parent() {

@@ -178,19 +178,18 @@ export class Editor {
   }
 
   editorBounds() {
-    var frameBounds = this.doc.frame.bounds();
     if(this.doc.wrap) {
-      var xF = 0;
-      var yF = 0;
-      var wF = this.w;
-      var hF = this.h;
+      var frameBoundsActual = this.doc.frame.bounds(true);
+      var frameBoundsSet = new Rect(0,0,this.w, this.h);
+      return new Rect(
+        Math.min(frameBoundsActual.l,frameBoundsSet.l),
+        Math.min(frameBoundsActual.t,frameBoundsSet.t),
+        Math.max(frameBoundsActual.w,frameBoundsSet.w),
+        Math.max(frameBoundsActual.h,frameBoundsSet.h)
+      );
     } else {
-      xF = frameBounds.l;
-      yF = frameBounds.t;
-      wF = frameBounds.w;
-      hF = frameBounds.h;
+      return this.doc.frame.bounds(true);
     }
-    return new Rect(xF,yF,wF,hF);
   }
 
   /**

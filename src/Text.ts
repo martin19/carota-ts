@@ -175,11 +175,12 @@ export class Text {
       };
 
       span.setAttribute('style', style);
-      var lineHeight = formatting && formatting.lineHeight ? formatting.lineHeight : Run.defaultFormatting.lineHeight;
       var letterSpacing = formatting && formatting.letterSpacing ? formatting.letterSpacing : Run.defaultFormatting.letterSpacing;
       var verticalScaling = formatting && formatting.verticalScaling ? formatting.verticalScaling : Run.defaultFormatting.verticalScaling;
       var horizontalScaling = formatting && formatting.horizontalScaling ? formatting.horizontalScaling : Run.defaultFormatting.horizontalScaling;
       var fontSize = formatting && formatting.size ? formatting.size : Run.defaultFormatting.size;
+      //var lineHeight = formatting && formatting.lineHeight ? formatting.lineHeight : Run.defaultFormatting.lineHeight;
+      var lineHeight = formatting && formatting.lineHeight ? formatting.lineHeight : fontSize*1.2;
       var baselineShift = formatting && formatting.baselineShift ? formatting.baselineShift : Run.defaultFormatting.baselineShift;
       span.style.lineHeight = "normal";
 
@@ -196,10 +197,16 @@ export class Text {
       result.descentUnscaled = (block.offsetTop) - result.ascentUnscaled;
       result.descent = (result.height - result.ascent);
 
+      //TODO: constrain measurements to lineheight.
+      //result.ascent = (lineHeight / result.height) * result.ascent;
+      //result.descent = (lineHeight / result.height) * result.descent;
+      //result.height = lineHeight;
+
       Text.ctxMeasure.font = style.split(";")[0].replace("font:","");
       //if formatting contains letter spacing, respect in width computation
       if(letterSpacing) {
-        result.width = Text.ctxMeasure.measureText(text_).width + ((text_.length) * letterSpacing * (fontSize * 96 / 72));
+        //result.width = Text.ctxMeasure.measureText(text_).width + ((text_.length) * letterSpacing * (fontSize * 96 / 72));
+        result.width = Text.ctxMeasure.measureText(text_).width + ((text_.length) * letterSpacing * fontSize);
       } else {
         result.width = Text.ctxMeasure.measureText(text_).width;
       }

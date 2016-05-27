@@ -7,7 +7,6 @@ gulp.task( 'build', function() {
 
   return gulp.src([
     "src/Characters.ts",
-    "src/Codes.ts",
     "src/Dom.ts",
     "src/Editor.ts",
     "src/Node.ts",
@@ -19,15 +18,19 @@ gulp.task( 'build', function() {
     "src/LiteEvent.ts",
     "src/Part.ts",
     "src/Per.ts",
-    "src/Positionedword.ts",
+    "src/PositionedChar.ts",
+    "src/PositionedWord.ts",
+    "src/PositionedParagraph.ts",
     "src/Range.ts",
     "src/Rect.ts",
     "src/Run.ts",
     "src/Split.ts",
     "src/Text.ts",
     "src/Word.ts",
-    "src/Wrap.ts",
-    "src/NoWrap.ts",
+    "src/Paragraph.ts",
+    "src/LayouterParagraph.ts",
+    "src/LayouterFrame.ts",
+    "src/import/EngineData.ts",
     "src/Carota.ts"
     ])
     .pipe(replace(/^import.*$\r\n/gm,''))

@@ -127,11 +127,6 @@
 
       window.editor = editor;
 
-      // Setting up the button so user can insert a smiley
-      /*carota.Dom.handleEvent(document.querySelector('#smiley'), 'click', function () {
-       exampleEditor.insert({smiley: true});
-       });*/
-
       // We don't update the JSON view until half a second after the last change
       // to avoid slowing things down too much
       var persistenceTextArea = document.querySelector('#examplePersistence textarea');
@@ -166,24 +161,25 @@
         }
       });
 
-      // Load one of the hidden chunks of HTML
-      var load = function (selector) {
-        var html = document.querySelector(selector);
-        if (html) {
-          var paragraphs = carota.Html.parse(html, {
-            carota: {color: 'orange', bold: true, size: 14}
-          });
-          console.log(paragraphs);
-          exampleEditor.load(paragraphs);
-        }
-      };
-
-//      var load = function() {
-//        $.getJSON("./src/import/enginedata_area.json", function(engineData) {
-//          var runs = carota.EngineData.parse(engineData);
-//          exampleEditor.load(runs);
-//        });
+//      // Load one of the hidden chunks of HTML
+//      var load = function (selector) {
+//        var html = document.querySelector(selector);
+//        if (html) {
+//          var paragraphs = carota.Html.parse(html, {
+//            carota: {color: 'orange', bold: true, size: 14}
+//          });
+//          console.log(paragraphs);
+//          exampleEditor.load(paragraphs);
+//        }
 //      };
+
+      var load = function() {
+        $.getJSON("./src/import/enginedata_area.json", function(engineData) {
+        //$.getJSON("./src/import/enginedata_paragraphs.json", function(engineData) {
+          var runs = carota.EngineData.parse(engineData);
+          exampleEditor.load(runs);
+        });
+      };
 
       //dat.gui
       var TextBoxController = {
@@ -201,6 +197,7 @@
             underline: false,
             strikeout: false,
             script: "normal",
+            capitals: false,
             color: "black",
             undo: function () {
               exampleEditor.performUndo(false);
@@ -229,6 +226,7 @@
           cFormatting.push(f1.add(textBoxOptions, "underline").listen());
           cFormatting.push(f1.add(textBoxOptions, "strikeout").listen());
           cFormatting.push(f1.add(textBoxOptions, "script", ["normal", "super", "sub"]).listen());
+          cFormatting.push(f1.add(textBoxOptions, "capitals").listen());
           cFormatting.push(f1.add(textBoxOptions, "color", ["black", "red", "green", "blue", "orange"]).listen());
 
           var cOrigin = f1.add(textBoxOptions, "origin", ["topleft","center","bottomright"]);
@@ -350,7 +348,7 @@
             editor.setScale(editor.getScale().x, value);
           });
 
-          //f1.open();
+          f1.open();
           f2.open();
           //f4.open();
         },

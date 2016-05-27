@@ -20,6 +20,6 @@ export var carota = {
   Html: html,
   Frame: Frame,
   Text: Text,
-  Rect: Rect
-  //EngineData: EngineData
+  Rect: Rect,
+  EngineData: EngineData
 };
