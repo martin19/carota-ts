@@ -30,7 +30,9 @@ gulp.task( 'build', function() {
     "src/Paragraph.ts",
     "src/LayouterParagraph.ts",
     "src/LayouterFrame.ts",
-    "src/import/EngineData.ts",
+    "src/importexport/EngineData.ts",
+    "src/importexport/EngineDataExport.ts",
+    "src/importexport/EngineDataImport.ts",
     "src/Carota.ts"
     ])
     .pipe(replace(/^import.*$\r\n/gm,''))

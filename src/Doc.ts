@@ -132,7 +132,6 @@ var isBreaker = function(word:Word) {
 
 export class CarotaDoc extends CNode {
   type : string;
-  _width : number;
   selection : ISelection;
   _nextSelection : ISelection;
   caretVisible : boolean;
@@ -168,9 +167,6 @@ export class CarotaDoc extends CNode {
   constructor() {
     super();
     this.type = 'document';
-    this._left = 0;
-    this._top = 0;
-    this._width = 0;
     this.selection = { start: 0, end: 0 };
     this.caretVisible = true;
     this.selectionChanged = new LiteEvent<any>();
@@ -203,9 +199,9 @@ export class CarotaDoc extends CNode {
   }
 
   layout() {
-    this.frame = null;
+    this.frame = new Frame(this, 0);
     try {
-      this.frame = new Per(this.words).per(Frame.layout(0, 0, this._width, 0, this.wrap, this)).first();
+      this.frame.layout();
     } catch (x) {
       console.error(x);
     }
@@ -518,19 +514,6 @@ export class CarotaDoc extends CNode {
     );
 
     return this.frame ? (this.frame.length - oldLength) : 0;
-  }
-
-  /**
-   * Gets/sets the current width of the document.
-   * @param width
-   * @returns {number}
-   */
-  width(width?:number) {
-    if (arguments.length === 0) {
-      return this._width;
-    }
-    this._width = width;
-    this.layout();
   }
 
   /**

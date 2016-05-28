@@ -161,25 +161,24 @@
         }
       });
 
-//      // Load one of the hidden chunks of HTML
-//      var load = function (selector) {
-//        var html = document.querySelector(selector);
-//        if (html) {
-//          var paragraphs = carota.Html.parse(html, {
-//            carota: {color: 'orange', bold: true, size: 14}
-//          });
-//          console.log(paragraphs);
-//          exampleEditor.load(paragraphs);
-//        }
-//      };
-
-      var load = function() {
-        $.getJSON("./src/import/enginedata_area.json", function(engineData) {
-        //$.getJSON("./src/import/enginedata_paragraphs.json", function(engineData) {
-          var runs = carota.EngineData.parse(engineData);
-          exampleEditor.load(runs);
-        });
+      // Load one of the hidden chunks of HTML
+      var load = function (selector) {
+        var html = document.querySelector(selector);
+        if (html) {
+          var paragraphs = carota.Html.parse(html, {
+            carota: {color: 'orange', bold: true, size: 14}
+          });
+          exampleEditor.load(paragraphs);
+        }
       };
+
+//      var load = function() {
+//        $.getJSON("./src/importexport/enginedata_area.json", function(engineData) {
+//        //$.getJSON("./src/import/enginedata_paragraphs.json", function(engineData) {
+//          var runs = carota.EngineDataImport.parse(engineData);
+//          exampleEditor.load(runs);
+//        });
+//      };
 
       //dat.gui
       var TextBoxController = {

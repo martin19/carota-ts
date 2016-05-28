@@ -176,20 +176,26 @@ export class Editor {
       this.paint();
     }
   }
-
-  editorBounds() {
-    if(this.doc.wrap) {
-      var frameBoundsActual = this.doc.frame.bounds(true);
-      var frameBoundsSet = new Rect(0,0,this.w, this.h);
-      return new Rect(
-        Math.min(frameBoundsActual.l,frameBoundsSet.l),
-        Math.min(frameBoundsActual.t,frameBoundsSet.t),
-        Math.max(frameBoundsActual.w,frameBoundsSet.w),
-        Math.max(frameBoundsActual.h,frameBoundsSet.h)
-      );
-    } else {
-      return this.doc.frame.bounds(true);
-    }
+  
+  /**
+   * Get bounds of editor.
+   * @param actual
+   * @returns {Rect}
+   */
+  bounds(actual?:boolean) {
+    return this.doc.frame.bounds(actual);
+    //if(this.doc.wrap) {
+    //  var frameBoundsActual = this.doc.frame.bounds(true);
+    //  var frameBoundsSet = new Rect(0,0,this.w, this.h);
+    //  return new Rect(
+    //    Math.min(frameBoundsActual.l,frameBoundsSet.l),
+    //    Math.min(frameBoundsActual.t,frameBoundsSet.t),
+    //    Math.max(frameBoundsActual.w,frameBoundsSet.w),
+    //    Math.max(frameBoundsActual.h,frameBoundsSet.h)
+    //  );
+    //} else {
+    //  return this.doc.frame.bounds(true);
+    //}
   }
 
   /**
@@ -199,13 +205,14 @@ export class Editor {
    */
   paint(canvas? : HTMLCanvasElement) {
 
-    if (this.doc.width() !== this.w) {
-      this.doc.width(this.w);
+    if (this.doc.frame.width !== this.w || this.doc.frame.height !== this.h) {
+      this.doc.frame.setSize(this.w, this.h);
     }
 
-    var b = this.editorBounds();
-    var anchorX = this.cx - b.w * (this.ox+0.5);
-    var anchorY = this.cy - b.h * (this.oy+0.5);
+    var bounds = this.bounds();
+    var boundsActual = this.bounds(true);
+    var anchorX = this.cx - bounds.w * (this.ox+0.5);
+    var anchorY = this.cy - bounds.h * (this.oy+0.5);
 
     if(typeof canvas !== "undefined") {
       var ctx = canvas.getContext("2d");
@@ -223,28 +230,28 @@ export class Editor {
 
     if(this.backgroundColor) {
       ctx.fillStyle = this.backgroundColor;
-      ctx.fillRect(b.l, b.t, b.w, b.h);
+      ctx.fillRect(bounds.l, bounds.t, bounds.w, bounds.h);
     }
 
     if(this.manageTextArea) {
-      this.updateTextArea(b.w, b.h);
+      this.updateTextArea(bounds.w, bounds.h);
     }
 
-    this.doc.draw(ctx, new Rect(b.l, b.t, b.w, b.h));
+    this.doc.draw(ctx, bounds);
 
     if(this.paintBaselines) {
-      this.doc.drawBaselines(ctx, new Rect(b.l, b.t, b.w, b.h));
+      this.doc.drawBaselines(ctx, bounds);
     }
 
     if(this.paintSelection) {
-      this.doc.drawSelection(ctx, true, new Rect(b.l, b.t, b.w, b.h));
+      this.doc.drawSelection(ctx, true, boundsActual);
     }
 
     ctx.restore();
   }
 
   private updateTextArea(logicalWidth : number, logicalHeight : number) {
-    var b = this.editorBounds();
+    var b = this.bounds();
     var anchorX = this.cx - b.w * (this.ox+0.5);
     var anchorY = this.cy - b.h * (this.oy+0.5);
 

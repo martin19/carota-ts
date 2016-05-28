@@ -146,7 +146,7 @@ export interface IShape {
 }
 
 export interface IShapes {
-  childeren : Array<IShape>
+  Children : Array<IShape>
   WritingDirection : number;
 }
 

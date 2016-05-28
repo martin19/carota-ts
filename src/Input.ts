@@ -51,7 +51,7 @@ export class Input {
       var center = this.editor.getPosition();
       var scale = this.editor.getScale();
       var origin = this.editor.getOrigin();
-      var b = this.editor.editorBounds();
+      var b = this.editor.bounds();
 
        //image coordinates to normalized box coordinates (-0.5,0.5|-0.5,0.5)
       var xT = (x - center.x);
