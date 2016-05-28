@@ -167,7 +167,7 @@ export class CNode {
    * Get bounding box of this CNode.
    * @returns {Rect}
    */
-  bounds() {
+  bounds(actual?:boolean) {
     var l = this._left, t = this._top, r = 0, b = 0;
     this.children().forEach(function (child) {
       var cb = child.bounds();

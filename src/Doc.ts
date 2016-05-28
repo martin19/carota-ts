@@ -617,7 +617,7 @@ export class CarotaDoc extends CNode {
       ctx.fillStyle = hasFocus ? 'rgba(0, 0, 0, 1.0)' : 'rgba(160, 160, 160, 0.3)';
       ctx.beginPath();
       this.selectedRange().parts(function (part:CNode) {
-        var b = part.bounds();
+        var b = part.bounds(true);
         if(viewport.contains(b.l,b.t) && viewport.contains(b.r,b.b)) {
         //if(viewport.t <= b.t && viewport.b >= b.b) {
           ctx.moveTo(b.l, b.t);
