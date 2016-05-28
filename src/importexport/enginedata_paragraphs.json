@@ -1,0 +1,1149 @@
+{
+  "EngineDict": {
+    "Editor": {
+      "Text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla quis odio ac turpis tincidunt consectetur et quis velit. Cras lectus lorem, blandit vitae leo a, viverra laoreet mi. Pellentesque et turpis ligula. Maecenas dignissim lectus ut dui maximus maximus. In vitae ipsum in enim sollicitudin eleifend. Vivamus pellentesque est ipsum, rutrum blandit augue iaculis eu. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Ut a lobortis arcu, non dignissim turpis. Vivamus urna lacus, lobortis imperdiet rhoncus vitae, auctor sed justo. Nunc tincidunt quis diam in finibus. In non euismod purus. Aliquam erat volutpat. Sed accumsan mi tincidunt, tincidunt massa eu, commodo eros. Maecenas finibus sapien in risus imperdiet iaculis.\r\rInteger vulputate sed tellus id vulputate. Fusce eu luctus nisl, ac faucibus elit. In varius, mauris sit amet ultricies blandit, mi justo dignissim erat, dictum lacinia dui nisi et nisl. Nulla mi nibh, volutpat eget vulputate at, vehicula et eros. Integer molestie ante condimentum, pellentesque lorem sed, bibendum mi. Vivamus a laoreet magna. In vitae sapien vehicula, volutpat ipsum a, vestibulum neque. Nulla vitae risus risus. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis at auctor justo. Morbi egestas placerat dolor non eleifend. Duis erat justo, scelerisque eu convallis id, molestie et orci. Sed eget nulla a mauris interdum pretium. Nulla tincidunt volutpat lorem, eget pulvinar libero eleifend vel. Nunc tempor quam mi. Phasellus faucibus sem sed lobortis posuere.\r\rPellentesque nunc augue, porta quis massa eget, elementum vestibulum est. Duis ut faucibus metus. Phasellus maximus, tortor eu venenatis tristique, mauris velit tristique purus, convallis volutpat erat velit at diam. Vestibulum rhoncus ipsum at pretium commodo. Pellentesque urna mauris, tristique nec nunc ac, efficitur cursus orci. Vivamus libero felis, posuere non vestibulum vehicula, tincidunt vitae eros. Pellentesque in diam mattis magna pharetra elementum. Ut quis sodales elit. Fusce dignissim quam mauris, a vehicula diam dapibus vel. Donec interdum ut justo ac porta. Nam nec convallis velit. Aliquam id urna lobortis, tempor enim nec, pharetra mi. Cras sed purus fermentum, luctus urna ac, fermentum odio.\r\rNulla a orci ex. Nulla nec nisi elit. Fusce convallis egestas eros, nec venenatis lacus sagittis efficitur. Sed in iaculis felis. Praesent id justo a felis feugiat sollicitudin. Praesent non tristique mauris. Vivamus in porttitor sem, ac condimentum leo. Proin non neque nisi. Quisque at posuere elit, non finibus elit. Mauris bibendum justo libero, ac volutpat quam luctus vitae. Phasellus ac urna nec ipsum auctor luctus. Suspendisse ac condimentum velit. Praesent ut magna aliquam, aliquet risus a, tempor turpis.\r\rMaecenas nec orci et libero facilisis efficitur. Cras ultrices ipsum id est varius, sed posuere orci suscipit. Pellentesque vehicula erat libero. Duis posuere lorem eget scelerisque facilisis. Sed blandit congue lectus a consequat. Nam dapibus quis neque ut viverra. Nunc at tristique nisl. Nulla vestibulum quis lacus eget sagittis. Aliquam mattis auctor turpis, sit amet dictum diam convallis in. Phasellus sit amet aliquam massa, id lobortis felis. Ut ultrices massa nec metus congue, sit amet tincidunt magna mattis. Vivamus commodo lorem eu fringilla ornare. Phasellus porttitor libero vel tellus sodales, eu consectetur nisl scelerisque. Vestibulum ac iaculis ligula.\r\rNullam eget suscipit neque. Pellentesque a nulla eu orci consectetur molestie sed ut lectus. Nunc vulputate ex lectus. Suspendisse dapibus dapibus tellus eget ornare. Etiam tortor urna, dignissim placerat elit nec, pretium posuere quam. Ut eget augue orci. Morbi blandit porttitor nisi, at sagittis sem tempor eget. Ut quam orci, tempor eget dui interdum, bibendum fringilla tortor. Praesent euismod fringilla nunc vitae suscipit. Morbi dictum, diam et vulputate elementum, velit risus dignissim est, quis ornare lacus justo egestas nunc. Vivamus tincidunt tortor quis mi mollis, vel porta leo euismod. Mauris volutpat convallis lectus, a hendrerit nisi vehicula et. Vivamus varius malesuada nisi, eget sodales orci tempor in.\r\rDuis nec tellus molestie, laoreet nunc nec, consectetur ipsum. Etiam euismod nibh quis mi consequat ultrices ac sed enim. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Aliquam vel lorem vitae nulla fringilla ullamcorper. Duis auctor pulvinar mauris in facilisis. Vestibulum non pulvinar sapien, vel sagittis sapien. Ut volutpat rhoncus purus. Curabitur libero neque, ornare ac pharetra et, tincidunt quis justo. Donec commodo arcu id eros tempor, vitae venenatis odio tempus.\r"
+    },
+    "ParagraphRun": {
+      "DefaultRunData": {
+        "ParagraphSheet": {
+          "DefaultStyleSheet": 0,
+          "Properties": {}
+        },
+        "Adjustments": {
+          "Axis": [
+            1,
+            0,
+            1
+          ],
+          "XY": [
+            0,
+            0
+          ]
+        }
+      },
+      "RunArray": [
+        {
+          "ParagraphSheet": {
+            "DefaultStyleSheet": 0,
+            "Properties": {
+              "Justification": 0,
+              "FirstLineIndent": 0,
+              "StartIndent": 40,
+              "EndIndent": 50,
+              "SpaceBefore": 60,
+              "SpaceAfter": 70,
+              "AutoHyphenate": true,
+              "HyphenatedWordSize": 6,
+              "PreHyphen": 2,
+              "PostHyphen": 2,
+              "ConsecutiveHyphens": 8,
+              "Zone": 36,
+              "WordSpacing": [
+                0.8,
+                1,
+                1.33
+              ],
+              "LetterSpacing": [
+                0,
+                0,
+                0
+              ],
+              "GlyphSpacing": [
+                1,
+                1,
+                1
+              ],
+              "AutoLeading": 1.2,
+              "LeadingType": 0,
+              "Hanging": false,
+              "Burasagari": false,
+              "KinsokuOrder": 0,
+              "EveryLineComposer": false
+            }
+          },
+          "Adjustments": {
+            "Axis": [
+              1,
+              0,
+              1
+            ],
+            "XY": [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "ParagraphSheet": {
+            "DefaultStyleSheet": 0,
+            "Properties": {
+              "Justification": 0,
+              "FirstLineIndent": 0,
+              "StartIndent": 0,
+              "EndIndent": 0,
+              "SpaceBefore": 0,
+              "SpaceAfter": 0,
+              "AutoHyphenate": true,
+              "HyphenatedWordSize": 6,
+              "PreHyphen": 2,
+              "PostHyphen": 2,
+              "ConsecutiveHyphens": 8,
+              "Zone": 36,
+              "WordSpacing": [
+                0.8,
+                1,
+                1.33
+              ],
+              "LetterSpacing": [
+                0,
+                0,
+                0
+              ],
+              "GlyphSpacing": [
+                1,
+                1,
+                1
+              ],
+              "AutoLeading": 1.2,
+              "LeadingType": 0,
+              "Hanging": false,
+              "Burasagari": false,
+              "KinsokuOrder": 0,
+              "EveryLineComposer": false
+            }
+          },
+          "Adjustments": {
+            "Axis": [
+              1,
+              0,
+              1
+            ],
+            "XY": [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "ParagraphSheet": {
+            "DefaultStyleSheet": 0,
+            "Properties": {
+              "Justification": 2,
+              "FirstLineIndent": 0,
+              "StartIndent": 40,
+              "EndIndent": 50,
+              "SpaceBefore": 60,
+              "SpaceAfter": 70,
+              "AutoHyphenate": true,
+              "HyphenatedWordSize": 6,
+              "PreHyphen": 2,
+              "PostHyphen": 2,
+              "ConsecutiveHyphens": 8,
+              "Zone": 36,
+              "WordSpacing": [
+                0.8,
+                1,
+                1.33
+              ],
+              "LetterSpacing": [
+                0,
+                0,
+                0
+              ],
+              "GlyphSpacing": [
+                1,
+                1,
+                1
+              ],
+              "AutoLeading": 1.2,
+              "LeadingType": 0,
+              "Hanging": false,
+              "Burasagari": false,
+              "KinsokuOrder": 0,
+              "EveryLineComposer": false
+            }
+          },
+          "Adjustments": {
+            "Axis": [
+              1,
+              0,
+              1
+            ],
+            "XY": [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "ParagraphSheet": {
+            "DefaultStyleSheet": 0,
+            "Properties": {
+              "Justification": 0,
+              "FirstLineIndent": 0,
+              "StartIndent": 0,
+              "EndIndent": 0,
+              "SpaceBefore": 0,
+              "SpaceAfter": 0,
+              "AutoHyphenate": true,
+              "HyphenatedWordSize": 6,
+              "PreHyphen": 2,
+              "PostHyphen": 2,
+              "ConsecutiveHyphens": 8,
+              "Zone": 36,
+              "WordSpacing": [
+                0.8,
+                1,
+                1.33
+              ],
+              "LetterSpacing": [
+                0,
+                0,
+                0
+              ],
+              "GlyphSpacing": [
+                1,
+                1,
+                1
+              ],
+              "AutoLeading": 1.2,
+              "LeadingType": 0,
+              "Hanging": false,
+              "Burasagari": false,
+              "KinsokuOrder": 0,
+              "EveryLineComposer": false
+            }
+          },
+          "Adjustments": {
+            "Axis": [
+              1,
+              0,
+              1
+            ],
+            "XY": [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "ParagraphSheet": {
+            "DefaultStyleSheet": 0,
+            "Properties": {
+              "Justification": 1,
+              "FirstLineIndent": 0,
+              "StartIndent": 0,
+              "EndIndent": 0,
+              "SpaceBefore": 0,
+              "SpaceAfter": 0,
+              "AutoHyphenate": true,
+              "HyphenatedWordSize": 6,
+              "PreHyphen": 2,
+              "PostHyphen": 2,
+              "ConsecutiveHyphens": 8,
+              "Zone": 36,
+              "WordSpacing": [
+                0.8,
+                1,
+                1.33
+              ],
+              "LetterSpacing": [
+                0,
+                0,
+                0
+              ],
+              "GlyphSpacing": [
+                1,
+                1,
+                1
+              ],
+              "AutoLeading": 1.2,
+              "LeadingType": 0,
+              "Hanging": false,
+              "Burasagari": false,
+              "KinsokuOrder": 0,
+              "EveryLineComposer": false
+            }
+          },
+          "Adjustments": {
+            "Axis": [
+              1,
+              0,
+              1
+            ],
+            "XY": [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "ParagraphSheet": {
+            "DefaultStyleSheet": 0,
+            "Properties": {
+              "Justification": 0,
+              "FirstLineIndent": 0,
+              "StartIndent": 0,
+              "EndIndent": 0,
+              "SpaceBefore": 0,
+              "SpaceAfter": 0,
+              "AutoHyphenate": true,
+              "HyphenatedWordSize": 6,
+              "PreHyphen": 2,
+              "PostHyphen": 2,
+              "ConsecutiveHyphens": 8,
+              "Zone": 36,
+              "WordSpacing": [
+                0.8,
+                1,
+                1.33
+              ],
+              "LetterSpacing": [
+                0,
+                0,
+                0
+              ],
+              "GlyphSpacing": [
+                1,
+                1,
+                1
+              ],
+              "AutoLeading": 1.2,
+              "LeadingType": 0,
+              "Hanging": false,
+              "Burasagari": false,
+              "KinsokuOrder": 0,
+              "EveryLineComposer": false
+            }
+          },
+          "Adjustments": {
+            "Axis": [
+              1,
+              0,
+              1
+            ],
+            "XY": [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "ParagraphSheet": {
+            "DefaultStyleSheet": 0,
+            "Properties": {
+              "Justification": 3,
+              "FirstLineIndent": 0,
+              "StartIndent": 0,
+              "EndIndent": 0,
+              "SpaceBefore": 0,
+              "SpaceAfter": 0,
+              "AutoHyphenate": true,
+              "HyphenatedWordSize": 6,
+              "PreHyphen": 2,
+              "PostHyphen": 2,
+              "ConsecutiveHyphens": 8,
+              "Zone": 36,
+              "WordSpacing": [
+                0.8,
+                1,
+                1.33
+              ],
+              "LetterSpacing": [
+                0,
+                0,
+                0
+              ],
+              "GlyphSpacing": [
+                1,
+                1,
+                1
+              ],
+              "AutoLeading": 1.2,
+              "LeadingType": 0,
+              "Hanging": false,
+              "Burasagari": false,
+              "KinsokuOrder": 0,
+              "EveryLineComposer": false
+            }
+          },
+          "Adjustments": {
+            "Axis": [
+              1,
+              0,
+              1
+            ],
+            "XY": [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "ParagraphSheet": {
+            "DefaultStyleSheet": 0,
+            "Properties": {
+              "Justification": 0,
+              "FirstLineIndent": 0,
+              "StartIndent": 0,
+              "EndIndent": 0,
+              "SpaceBefore": 0,
+              "SpaceAfter": 0,
+              "AutoHyphenate": true,
+              "HyphenatedWordSize": 6,
+              "PreHyphen": 2,
+              "PostHyphen": 2,
+              "ConsecutiveHyphens": 8,
+              "Zone": 36,
+              "WordSpacing": [
+                0.8,
+                1,
+                1.33
+              ],
+              "LetterSpacing": [
+                0,
+                0,
+                0
+              ],
+              "GlyphSpacing": [
+                1,
+                1,
+                1
+              ],
+              "AutoLeading": 1.2,
+              "LeadingType": 0,
+              "Hanging": false,
+              "Burasagari": false,
+              "KinsokuOrder": 0,
+              "EveryLineComposer": false
+            }
+          },
+          "Adjustments": {
+            "Axis": [
+              1,
+              0,
+              1
+            ],
+            "XY": [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "ParagraphSheet": {
+            "DefaultStyleSheet": 0,
+            "Properties": {
+              "Justification": 5,
+              "FirstLineIndent": 0,
+              "StartIndent": 0,
+              "EndIndent": 0,
+              "SpaceBefore": 0,
+              "SpaceAfter": 0,
+              "AutoHyphenate": true,
+              "HyphenatedWordSize": 6,
+              "PreHyphen": 2,
+              "PostHyphen": 2,
+              "ConsecutiveHyphens": 8,
+              "Zone": 36,
+              "WordSpacing": [
+                0.8,
+                1,
+                1.33
+              ],
+              "LetterSpacing": [
+                0,
+                0,
+                0
+              ],
+              "GlyphSpacing": [
+                1,
+                1,
+                1
+              ],
+              "AutoLeading": 1.2,
+              "LeadingType": 0,
+              "Hanging": false,
+              "Burasagari": false,
+              "KinsokuOrder": 0,
+              "EveryLineComposer": false
+            }
+          },
+          "Adjustments": {
+            "Axis": [
+              1,
+              0,
+              1
+            ],
+            "XY": [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "ParagraphSheet": {
+            "DefaultStyleSheet": 0,
+            "Properties": {
+              "Justification": 0,
+              "FirstLineIndent": 0,
+              "StartIndent": 0,
+              "EndIndent": 0,
+              "SpaceBefore": 0,
+              "SpaceAfter": 0,
+              "AutoHyphenate": true,
+              "HyphenatedWordSize": 6,
+              "PreHyphen": 2,
+              "PostHyphen": 2,
+              "ConsecutiveHyphens": 8,
+              "Zone": 36,
+              "WordSpacing": [
+                0.8,
+                1,
+                1.33
+              ],
+              "LetterSpacing": [
+                0,
+                0,
+                0
+              ],
+              "GlyphSpacing": [
+                1,
+                1,
+                1
+              ],
+              "AutoLeading": 1.2,
+              "LeadingType": 0,
+              "Hanging": false,
+              "Burasagari": false,
+              "KinsokuOrder": 0,
+              "EveryLineComposer": false
+            }
+          },
+          "Adjustments": {
+            "Axis": [
+              1,
+              0,
+              1
+            ],
+            "XY": [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "ParagraphSheet": {
+            "DefaultStyleSheet": 0,
+            "Properties": {
+              "Justification": 4,
+              "FirstLineIndent": 0,
+              "StartIndent": 0,
+              "EndIndent": 0,
+              "SpaceBefore": 0,
+              "SpaceAfter": 0,
+              "AutoHyphenate": true,
+              "HyphenatedWordSize": 6,
+              "PreHyphen": 2,
+              "PostHyphen": 2,
+              "ConsecutiveHyphens": 8,
+              "Zone": 36,
+              "WordSpacing": [
+                0.8,
+                1,
+                1.33
+              ],
+              "LetterSpacing": [
+                0,
+                0,
+                0
+              ],
+              "GlyphSpacing": [
+                1,
+                1,
+                1
+              ],
+              "AutoLeading": 1.2,
+              "LeadingType": 0,
+              "Hanging": false,
+              "Burasagari": false,
+              "KinsokuOrder": 0,
+              "EveryLineComposer": false
+            }
+          },
+          "Adjustments": {
+            "Axis": [
+              1,
+              0,
+              1
+            ],
+            "XY": [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "ParagraphSheet": {
+            "DefaultStyleSheet": 0,
+            "Properties": {
+              "Justification": 0,
+              "FirstLineIndent": 0,
+              "StartIndent": 0,
+              "EndIndent": 0,
+              "SpaceBefore": 0,
+              "SpaceAfter": 0,
+              "AutoHyphenate": true,
+              "HyphenatedWordSize": 6,
+              "PreHyphen": 2,
+              "PostHyphen": 2,
+              "ConsecutiveHyphens": 8,
+              "Zone": 36,
+              "WordSpacing": [
+                0.8,
+                1,
+                1.33
+              ],
+              "LetterSpacing": [
+                0,
+                0,
+                0
+              ],
+              "GlyphSpacing": [
+                1,
+                1,
+                1
+              ],
+              "AutoLeading": 1.2,
+              "LeadingType": 0,
+              "Hanging": false,
+              "Burasagari": false,
+              "KinsokuOrder": 0,
+              "EveryLineComposer": false
+            }
+          },
+          "Adjustments": {
+            "Axis": [
+              1,
+              0,
+              1
+            ],
+            "XY": [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "ParagraphSheet": {
+            "DefaultStyleSheet": 0,
+            "Properties": {
+              "Justification": 6,
+              "FirstLineIndent": 0,
+              "StartIndent": 0,
+              "EndIndent": 0,
+              "SpaceBefore": 0,
+              "SpaceAfter": 0,
+              "AutoHyphenate": true,
+              "HyphenatedWordSize": 6,
+              "PreHyphen": 2,
+              "PostHyphen": 2,
+              "ConsecutiveHyphens": 8,
+              "Zone": 36,
+              "WordSpacing": [
+                0.8,
+                1,
+                1.33
+              ],
+              "LetterSpacing": [
+                0,
+                0,
+                0
+              ],
+              "GlyphSpacing": [
+                1,
+                1,
+                1
+              ],
+              "AutoLeading": 1.2,
+              "LeadingType": 0,
+              "Hanging": false,
+              "Burasagari": false,
+              "KinsokuOrder": 0,
+              "EveryLineComposer": false
+            }
+          },
+          "Adjustments": {
+            "Axis": [
+              1,
+              0,
+              1
+            ],
+            "XY": [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "RunLengthArray": [
+        767,
+        1,
+        793,
+        1,
+        718,
+        1,
+        517,
+        1,
+        674,
+        1,
+        727,
+        1,
+        518
+      ],
+      "IsJoinable": 1
+    },
+    "StyleRun": {
+      "DefaultRunData": {
+        "StyleSheet": {
+          "StyleSheetData": {}
+        }
+      },
+      "RunArray": [
+        {
+          "StyleSheet": {
+            "StyleSheetData": {
+              "Font": 0,
+              "FontSize": 10,
+              "FauxBold": false,
+              "FauxItalic": false,
+              "AutoLeading": true,
+              "Leading": 57.6,
+              "HorizontalScale": 1.5,
+              "VerticalScale": 1.5,
+              "Tracking": 0,
+              "AutoKerning": true,
+              "Kerning": 0,
+              "BaselineShift": 0,
+              "FontCaps": 0,
+              "FontBaseline": 0,
+              "Underline": false,
+              "Strikethrough": false,
+              "Ligatures": true,
+              "DLigatures": false,
+              "BaselineDirection": 1,
+              "Tsume": 0,
+              "StyleRunAlignment": 2,
+              "Language": 0,
+              "NoBreak": false,
+              "FillColor": {
+                "Type": 1,
+                "Values": [
+                  1,
+                  1,
+                  0,
+                  0.91763
+                ]
+              },
+              "StrokeColor": {
+                "Type": 1,
+                "Values": [
+                  1,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              "FillFlag": true,
+              "StrokeFlag": false,
+              "FillFirst": false,
+              "YUnderline": 1,
+              "OutlineWidth": 1
+            }
+          }
+        }
+      ],
+      "RunLengthArray": [
+        4720
+      ],
+      "IsJoinable": 2
+    },
+    "GridInfo": {
+      "GridIsOn": false,
+      "ShowGrid": false,
+      "GridSize": 18,
+      "GridLeading": 22,
+      "GridColor": {
+        "Type": 1,
+        "Values": [
+          0,
+          0,
+          0,
+          1
+        ]
+      },
+      "GridLeadingFillColor": {
+        "Type": 1,
+        "Values": [
+          0,
+          0,
+          0,
+          1
+        ]
+      },
+      "AlignLineHeightToGridFlags": false
+    },
+    "AntiAlias": 4,
+    "UseFractionalGlyphWidths": true,
+    "Rendered": {
+      "Version": 1,
+      "Shapes": {
+        "WritingDirection": 0,
+        "Children": [
+          {
+            "ShapeType": 1,
+            "Procession": 0,
+            "Lines": {
+              "WritingDirection": 0,
+              "Children": [
+                ""
+              ]
+            },
+            "Cookie": {
+              "Photoshop": {
+                "ShapeType": 1,
+                "BoxBounds": [
+                  0,
+                  0,
+                  767.61621,
+                  671.66412
+                ],
+                "Base": {
+                  "ShapeType": 1,
+                  "TransformPoint0": [
+                    1,
+                    0
+                  ],
+                  "TransformPoint1": [
+                    0,
+                    1
+                  ],
+                  "TransformPoint2": [
+                    0,
+                    0
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "ResourceDict": {
+    "KinsokuSet": [
+      {
+        "Name": "PhotoshopKinsokuHard",
+        "NoStart": "、。，．・：；？！ー―’”）〕］｝〉》」』】ヽヾゝゞ々ぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮヵヶ゛゜?!\\⤀崀紀Ⰰ⸀㨀㬡̡ऀꋿԠ　",
+        "NoEnd": "(þÿ \u0018 \u001cÿ\b0\u0014ÿ;ÿ[0\b0",
+        "Keep": "―‥",
+        "Hanging": "、。.,"
+      },
+      {
+        "Name": "PhotoshopKinsokuSoft",
+        "NoStart": "、。，．・：；？！’”）〕］｝〉》」』】ヽヾゝゞ々",
+        "NoEnd": "(þÿ \u0018 \u001cÿ\b0\u0014ÿ;ÿ[0\b0",
+        "Keep": "―‥",
+        "Hanging": "、。.,"
+      }
+    ],
+    "MojiKumiSet": [
+      {
+        "InternalName": "Photoshop6MojiKumiSet1"
+      },
+      {
+        "InternalName": "Photoshop6MojiKumiSet2"
+      },
+      {
+        "InternalName": "Photoshop6MojiKumiSet3"
+      },
+      {
+        "InternalName": "Photoshop6MojiKumiSet4"
+      }
+    ],
+    "TheNormalStyleSheet": 0,
+    "TheNormalParagraphSheet": 0,
+    "ParagraphSheetSet": [
+      {
+        "Name": "Normal RGB",
+        "DefaultStyleSheet": 0,
+        "Properties": {
+          "Justification": 0,
+          "FirstLineIndent": 0,
+          "StartIndent": 0,
+          "EndIndent": 0,
+          "SpaceBefore": 0,
+          "SpaceAfter": 0,
+          "AutoHyphenate": true,
+          "HyphenatedWordSize": 6,
+          "PreHyphen": 2,
+          "PostHyphen": 2,
+          "ConsecutiveHyphens": 8,
+          "Zone": 36,
+          "WordSpacing": [
+            0.8,
+            1,
+            1.33
+          ],
+          "LetterSpacing": [
+            0,
+            0,
+            0
+          ],
+          "GlyphSpacing": [
+            1,
+            1,
+            1
+          ],
+          "AutoLeading": 1.2,
+          "LeadingType": 0,
+          "Hanging": false,
+          "Burasagari": false,
+          "KinsokuOrder": 0,
+          "EveryLineComposer": false
+        }
+      }
+    ],
+    "StyleSheetSet": [
+      {
+        "Name": "Normal RGB",
+        "StyleSheetData": {
+          "Font": 1,
+          "FontSize": 12,
+          "FauxBold": false,
+          "FauxItalic": false,
+          "AutoLeading": true,
+          "Leading": 0,
+          "HorizontalScale": 1,
+          "VerticalScale": 1,
+          "Tracking": 0,
+          "AutoKerning": true,
+          "Kerning": 0,
+          "BaselineShift": 0,
+          "FontCaps": 0,
+          "FontBaseline": 0,
+          "Underline": false,
+          "Strikethrough": false,
+          "Ligatures": true,
+          "DLigatures": false,
+          "BaselineDirection": 2,
+          "Tsume": 0,
+          "StyleRunAlignment": 2,
+          "Language": 0,
+          "NoBreak": false,
+          "FillColor": {
+            "Type": 1,
+            "Values": [
+              1,
+              0,
+              0,
+              0
+            ]
+          },
+          "StrokeColor": {
+            "Type": 1,
+            "Values": [
+              1,
+              0,
+              0,
+              0
+            ]
+          },
+          "FillFlag": true,
+          "StrokeFlag": false,
+          "FillFirst": true,
+          "YUnderline": 1,
+          "OutlineWidth": 1
+        }
+      }
+    ],
+    "FontSet": [
+      {
+        "Name": "Alba",
+        "Script": 0,
+        "FontType": 1,
+        "Synthetic": 0
+      },
+      {
+        "Name": "TimesNewRomanPSMT",
+        "Script": 0,
+        "FontType": 1,
+        "Synthetic": 0
+      },
+      {
+        "Name": "AdobeInvisFont",
+        "Script": 0,
+        "FontType": 0,
+        "Synthetic": 0
+      }
+    ],
+    "SuperscriptSize": 0.583,
+    "SuperscriptPosition": 0.333,
+    "SubscriptSize": 0.583,
+    "SubscriptPosition": 0.333,
+    "SmallCapSize": 0.7
+  },
+  "DocumentResources": {
+    "KinsokuSet": [
+      {
+        "Name": "PhotoshopKinsokuHard",
+        "NoStart": "、。，．・：；？！ー―’”）〕］｝〉》」』】ヽヾゝゞ々ぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮヵヶ゛゜?!\\⤀崀紀Ⰰ⸀㨀㬡̡ऀꋿԠ　",
+        "NoEnd": "(þÿ \u0018 \u001cÿ\b0\u0014ÿ;ÿ[0\b0",
+        "Keep": "―‥",
+        "Hanging": "、。.,"
+      },
+      {
+        "Name": "PhotoshopKinsokuSoft",
+        "NoStart": "、。，．・：；？！’”）〕］｝〉》」』】ヽヾゝゞ々",
+        "NoEnd": "(þÿ \u0018 \u001cÿ\b0\u0014ÿ;ÿ[0\b0",
+        "Keep": "―‥",
+        "Hanging": "、。.,"
+      }
+    ],
+    "MojiKumiSet": [
+      {
+        "InternalName": "Photoshop6MojiKumiSet1"
+      },
+      {
+        "InternalName": "Photoshop6MojiKumiSet2"
+      },
+      {
+        "InternalName": "Photoshop6MojiKumiSet3"
+      },
+      {
+        "InternalName": "Photoshop6MojiKumiSet4"
+      }
+    ],
+    "TheNormalStyleSheet": 0,
+    "TheNormalParagraphSheet": 0,
+    "ParagraphSheetSet": [
+      {
+        "Name": "Normal RGB",
+        "DefaultStyleSheet": 0,
+        "Properties": {
+          "Justification": 0,
+          "FirstLineIndent": 0,
+          "StartIndent": 0,
+          "EndIndent": 0,
+          "SpaceBefore": 0,
+          "SpaceAfter": 0,
+          "AutoHyphenate": true,
+          "HyphenatedWordSize": 6,
+          "PreHyphen": 2,
+          "PostHyphen": 2,
+          "ConsecutiveHyphens": 8,
+          "Zone": 36,
+          "WordSpacing": [
+            0.8,
+            1,
+            1.33
+          ],
+          "LetterSpacing": [
+            0,
+            0,
+            0
+          ],
+          "GlyphSpacing": [
+            1,
+            1,
+            1
+          ],
+          "AutoLeading": 1.2,
+          "LeadingType": 0,
+          "Hanging": false,
+          "Burasagari": false,
+          "KinsokuOrder": 0,
+          "EveryLineComposer": false
+        }
+      }
+    ],
+    "StyleSheetSet": [
+      {
+        "Name": "Normal RGB",
+        "StyleSheetData": {
+          "Font": 1,
+          "FontSize": 12,
+          "FauxBold": false,
+          "FauxItalic": false,
+          "AutoLeading": true,
+          "Leading": 0,
+          "HorizontalScale": 1,
+          "VerticalScale": 1,
+          "Tracking": 0,
+          "AutoKerning": true,
+          "Kerning": 0,
+          "BaselineShift": 0,
+          "FontCaps": 0,
+          "FontBaseline": 0,
+          "Underline": false,
+          "Strikethrough": false,
+          "Ligatures": true,
+          "DLigatures": false,
+          "BaselineDirection": 2,
+          "Tsume": 0,
+          "StyleRunAlignment": 2,
+          "Language": 0,
+          "NoBreak": false,
+          "FillColor": {
+            "Type": 1,
+            "Values": [
+              1,
+              0,
+              0,
+              0
+            ]
+          },
+          "StrokeColor": {
+            "Type": 1,
+            "Values": [
+              1,
+              0,
+              0,
+              0
+            ]
+          },
+          "FillFlag": true,
+          "StrokeFlag": false,
+          "FillFirst": true,
+          "YUnderline": 1,
+          "OutlineWidth": 1
+        }
+      }
+    ],
+    "FontSet": [
+      {
+        "Name": "Alba",
+        "Script": 0,
+        "FontType": 1,
+        "Synthetic": 0
+      },
+      {
+        "Name": "TimesNewRomanPSMT",
+        "Script": 0,
+        "FontType": 1,
+        "Synthetic": 0
+      },
+      {
+        "Name": "AdobeInvisFont",
+        "Script": 0,
+        "FontType": 0,
+        "Synthetic": 0
+      }
+    ],
+    "SuperscriptSize": 0.583,
+    "SuperscriptPosition": 0.333,
+    "SubscriptSize": 0.583,
+    "SubscriptPosition": 0.333,
+    "SmallCapSize": 0.7
+  }
+}

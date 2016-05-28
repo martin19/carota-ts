@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.3.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.5.1/dat.gui.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.22/require.min.js"></script>
+  <script>
+
+    window.onload = function () {
+      require.config({
+        baseUrl: './'
+      });
+      require(["EngineDataImport", "EngineDataExport"], function (parser, writer) {
+        var load = function () {
+          $.getJSON("./enginedata_area.json", function (engineData) {
+            //console.log(engineData);
+            var output = writer.EngineDataSaver.save(engineData);
+            console.log(output);
+          });
+        };
+        load();
+      });
+    }
+  </script>
+</head>
+</body>
+</html>
