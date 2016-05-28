@@ -46,30 +46,10 @@ export class Input {
 
   registerMouseEvent(name:string, handler:(n:CNode)=>void) {
     Dom.handleMouseEvent(this.editor.canvas, name, (e:MouseEvent,x:number,y:number) => {
-
-      var alpha = this.editor.getRotation();
-      var center = this.editor.getPosition();
-      var scale = this.editor.getScale();
-      var origin = this.editor.getOrigin();
-      var b = this.editor.bounds();
-
-       //image coordinates to normalized box coordinates (-0.5,0.5|-0.5,0.5)
-      var xT = (x - center.x);
-      var yT = (y - center.y);
-      var xT2 = (Math.cos(-alpha) * xT - Math.sin(-alpha) * yT);
-      var yT2 = (Math.sin(-alpha) * xT + Math.cos(-alpha) * yT);
-      var xT3 = xT2 * (1/b.w) * (1/scale.x);
-      var yT3 = yT2 * (1/b.h) * (1/scale.y);
-      var xT4 = xT3 + (origin.x+0.5);
-      var yT4 = yT3 + (origin.y+0.5);
-
-      //transform to textbox coordinates (0,editor.size|0,editor.size)
-      var xC = (xT4) * b.w;
-      var yC = (yT4) * b.h;
-
-      handler(this.editor.doc.byCoordinate(xC, yC)[0]||this.editor.doc.frame);
-
-
+      var W2E = this.editor.getWorldtoEditorTransform();
+      var xE = W2E[0] * x + W2E[2] * y + W2E[4];
+      var yE = W2E[1] * x + W2E[3] * y + W2E[5];
+      handler(this.editor.doc.byCoordinate(xE, yE)[0]||this.editor.doc.frame);
     });
   }
 

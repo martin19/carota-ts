@@ -570,6 +570,61 @@ export class Editor {
   }
 
   /**
+   * Returns the world to editor frame transform.
+   * @returns {number[]}
+   */
+  getWorldtoEditorTransform() {
+
+    var bounds = this.bounds();
+
+    var alpha = this.alpha;
+    var ax = this.cx - bounds.w * (this.ox+0.5);
+    var ay = this.cy - bounds.h * (this.oy+0.5);
+    var sx = this.sx;
+    var sy = this.sy;
+    var cx = this.cx;
+    var cy = this.cy;
+
+    var a:number, b:number, c:number, d:number, e:number, f:number;
+
+    //inverse 1.
+    a = Math.cos(alpha)/sx;
+    b = -Math.sin(alpha)/sy;
+    c = Math.sin(alpha)/sx;
+    d = Math.cos(alpha)/sy;
+    e = -(ax*sx - cx*sx + cx*Math.cos(alpha) + cy*Math.sin(alpha))/sx;
+    f = ((-ay + cy)*sy - cy*Math.cos(alpha) + cx*Math.sin(alpha))/sy;
+
+    return [a,b,c,d,e,f];
+  }
+
+  /**
+   * Returns the editorframe to world transform.
+   * @returns {number[]}
+   */
+  getEditorToWorldTransform() {
+    var bounds = this.bounds();
+
+    var alpha = this.alpha;
+    var ax = this.cx - bounds.w * (this.ox+0.5);
+    var ay = this.cy - bounds.h * (this.oy+0.5);
+    var sx = this.sx;
+    var sy = this.sy;
+    var cx = this.cx;
+    var cy = this.cy;
+
+    var a:number, b:number, c:number, d:number, e:number, f:number;
+    a = Math.cos(alpha) * this.sx;
+    b = Math.sin(alpha) * this.sx;
+    c = -Math.sin(alpha) * this.sy;
+    d = Math.cos(alpha) * this.sy;
+    e = cx+ax*sx*Math.cos(alpha)-cx*sx*Math.cos(alpha)-ay*sy*Math.sin(alpha)+cy*sy*Math.sin(alpha);
+    f = cy+ay*sy*Math.cos(alpha)-cy*sy*Math.cos(alpha)+ax*sx*Math.sin(alpha)-cx*sx*Math.sin(alpha);
+
+    return [a,b,c,d,e,f];
+  }
+
+  /**
    * If set to true, baselines are painted.
    * @param value
    */

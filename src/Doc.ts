@@ -784,4 +784,13 @@ export class CarotaDoc extends CNode {
     this.wrap = wrap;
     this.layout();
   }
+
+  /**
+   * Return document bounds. Equals to frame bounds.
+   * @param actual
+   * @returns {Rect|Rect}
+   */
+  bounds(actual : boolean) {
+    return this.frame.bounds(actual);
+  }
 }
