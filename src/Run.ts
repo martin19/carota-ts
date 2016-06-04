@@ -163,13 +163,15 @@ export class Run {
   static consolidate() {
     var current:Run;
     return (emit:(p:Run)=>void, run:Run)=> {
-      if (!current || !this.sameFormatting(run,current) ||
-        (typeof current.text != 'string') ||
-        (typeof run.text != 'string')) {
-        current = run.clone();
-        emit(current);
-      } else {
-        current.text += <string>(run.text);
+      if(run.text.length !== 0) {
+        if (!current || !this.sameFormatting(run,current) ||
+          (typeof current.text != 'string') ||
+          (typeof run.text != 'string')) {
+          current = run.clone();
+          emit(current);
+        } else {
+          current.text += <string>(run.text);
+        }
       }
     };
   }

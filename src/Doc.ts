@@ -341,9 +341,13 @@ export class CarotaDoc extends CNode {
    * @param emit
    * @param range
    */
-  runs(emit:(p:Run)=>void, range:IRange) {
+  runs(emit:(p:Run)=>void, range?:IRange) {
+    if(!range) {
+      range = this.documentRange();
+    }
     var start = this.wordContainingOrdinal(Math.max(0, range.start)),
-      end = this.wordContainingOrdinal(Math.min(range.end, this.frame.length - 1));
+      //end = this.wordContainingOrdinal(Math.min(range.end, this.frame.length - 1));
+      end = this.wordContainingOrdinal(Math.min(range.end, this.frame.length));
     if (start.index === end.index) {
       start.word.runs(emit, {
         start: start.offset,
@@ -363,9 +367,12 @@ export class CarotaDoc extends CNode {
    * @param emit
    * @param range
    */
-  paragraphs(emit:(p:Paragraph)=>void, range:IRange) {
+  paragraphs(emit:(p:Paragraph)=>void, range?:IRange) {
+    if(!range) {
+      range = this.documentRange();
+    }
     var start = this.paragraphContainingOrdinal(Math.max(0, range.start)),
-      end = this.paragraphContainingOrdinal(Math.min(range.end-1, this.frame.length - 1));
+          end = this.paragraphContainingOrdinal(Math.min(range.end-1, this.frame.length - 1));
 
     if (start.index === end.index) {
       emit(start.paragraph.partialParagraph({ start : start.offset, end : end.offset + 1}));
@@ -790,7 +797,7 @@ export class CarotaDoc extends CNode {
    * @param actual
    * @returns {Rect|Rect}
    */
-  bounds(actual : boolean) {
+  bounds(actual? : boolean) {
     return this.frame.bounds(actual);
   }
 }

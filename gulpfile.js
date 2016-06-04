@@ -35,7 +35,7 @@ gulp.task( 'build', function() {
     "src/importexport/EngineDataImport.ts",
     "src/Carota.ts"
     ])
-    .pipe(replace(/^import.*$\r\n/gm,''))
+    .pipe(replace(/^import[\s\S]*?;/gm,''))
     .pipe(concat('carota.ts'))
     .pipe(filter(['carota.ts']))
     .pipe(gulp.dest('./lib/'));

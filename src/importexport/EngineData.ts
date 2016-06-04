@@ -5,27 +5,27 @@ export interface IColor {
 
 
 export interface IParagraphProperties {
-  AutoHyphenate: boolean;
-  AutoLeading: number;
-  Burasagari: boolean;
-  ConsecutiveHyphens: number;
-  EndIndent: number;
-  EveryLineComposer: boolean;
-  FirstLineIndent: number;
-  GlyphSpacing: Array<number>
-  Hanging: boolean;
-  HyphenatedWordSize: number;
-  Justification: number;
-  KinsokuOrder: number;
-  LeadingType: number;
-  LetterSpacing: Array<number>
-  PostHyphen: number;
-  PreHyphen: number;
-  SpaceAfter: number;
-  SpaceBefore: number;
-  StartIndent: number;
-  WordSpacing: Array<number>
-  Zone: number;
+  AutoHyphenate?: boolean;
+  AutoLeading?: number;
+  Burasagari?: boolean;
+  ConsecutiveHyphens?: number;
+  EndIndent?: number;
+  EveryLineComposer?: boolean;
+  FirstLineIndent?: number;
+  GlyphSpacing?: Array<number>
+  Hanging?: boolean;
+  HyphenatedWordSize?: number;
+  Justification?: number;
+  KinsokuOrder?: number;
+  LeadingType?: number;
+  LetterSpacing?: Array<number>
+  PostHyphen?: number;
+  PreHyphen?: number;
+  SpaceAfter?: number;
+  SpaceBefore?: number;
+  StartIndent?: number;
+  WordSpacing?: Array<number>
+  Zone?: number;
 }
 
 export interface IFont {
@@ -37,45 +37,45 @@ export interface IFont {
 
 export interface IParagraphSheet {
   DefaultStyleSheet : number;
-  Name : string;
+  Name? : string;
   Properties : IParagraphProperties;
 }
 
 export interface IStyleSheetData {
-  AutoKerning: boolean;
-  AutoLeading: boolean;
-  BaselineDirection: number;
-  BaselineShift: number;
-  DLigatures: boolean;
-  FauxBold: boolean;
-  FauxItalic: boolean;
-  FillColor: IColor;
-  FillFirst: boolean;
-  FillFlag: boolean;
-  Font: number;
-  FontBaseline: number;
-  FontCaps: number;
-  FontSize: number;
-  HorizontalScale: number;
-  Kerning: number;
-  Language: number;
-  Leading: number;
-  Ligatures: boolean;
-  NoBreak: boolean;
-  OutlineWidth: number;
-  Strikethrough: boolean;
-  StrokeColor: IColor;
-  StrokeFlag: boolean;
-  StyleRunAlignment: number;
-  Tracking: number;
-  Tsume: number;
-  Underline: boolean;
-  VerticalScale: number;
-  YUnderline: number;
+  AutoKerning?: boolean;
+  AutoLeading?: boolean;
+  BaselineDirection?: number;
+  BaselineShift?: number;
+  DLigatures?: boolean;
+  FauxBold?: boolean;
+  FauxItalic?: boolean;
+  FillColor?: IColor;
+  FillFirst?: boolean;
+  FillFlag?: boolean;
+  Font?: number;
+  FontBaseline?: number;
+  FontCaps?: number;
+  FontSize?: number;
+  HorizontalScale?: number;
+  Kerning?: number;
+  Language?: number;
+  Leading?: number;
+  Ligatures?: boolean;
+  NoBreak?: boolean;
+  OutlineWidth?: number;
+  Strikethrough?: boolean;
+  StrokeColor?: IColor;
+  StrokeFlag?: boolean;
+  StyleRunAlignment?: number;
+  Tracking?: number;
+  Tsume?: number;
+  Underline?: boolean;
+  VerticalScale?: number;
+  YUnderline?: number;
 }
 
 export interface IStyleSheet {
-  Name : string;
+  Name? : string;
   StyleSheetData : IStyleSheetData;
 }
 
@@ -100,14 +100,15 @@ export interface IAdjustments {
 
 //paragraph runs
 export interface IParagraphRunData {
-  Adjustments: IAdjustments;
+  Adjustments?: IAdjustments;
   ParagraphSheet: IParagraphSheet;
 }
 
 export interface IParagraphRun {
   DefaultRunData : IParagraphRunData;
   RunArray : Array<IParagraphRunData>;
-  RunLengthArray : Array<number>
+  RunLengthArray : Array<number>;
+  IsJoinable : number;
 }
 
 //style runs
@@ -119,7 +120,7 @@ export interface IStyleRun {
   DefaultRunData : IStyleRunData;
   RunArray : Array<IStyleRunData>;
   RunLengthArray : Array<number>
-  IsJoinable : boolean;
+  IsJoinable : number;
 }
 
 //rendered
@@ -127,6 +128,7 @@ export interface IStyleRun {
 export interface IShape {
   Cookie : {
     Photoshop : {
+      ShapeType : number;
       Base : {
         ShapeType : number;
         TransformPoint0 : Array<number>;
@@ -155,15 +157,25 @@ export interface IRendered {
   Version : number;
 }
 
-//top level
+export interface IKinsokuSet {
+  Name : string,
+  NoStart : string,
+  NoEnd : string,
+  Keep : string,
+  Hanging : string,
+}
+
+export interface IMojikumiSet {
+  InternalName : string
+}
 
 export interface IEngineData {
   DocumentResources:{
     FontSet:Array<IFont>;
     ParagraphSheetSet:Array<IParagraphSheet>;
     StyleSheetSet: Array<IStyleSheet>
-    KinsokuSet:Array<any>;
-    MojiKumiSet:Array<any>
+    KinsokuSet:Array<IKinsokuSet>;
+    MojiKumiSet:Array<IMojikumiSet>
     SmallCapSize:number;
     SubscriptPosition: number;
     SubscriptSize: number;

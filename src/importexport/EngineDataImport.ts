@@ -30,7 +30,6 @@ export class EngineDataImport {
     formatting["underline"] = styleSheetData.Underline;
     formatting["strikeout"] = styleSheetData.Strikethrough;
     formatting["capitals"] = styleSheetData.FontCaps == 2;
-    //formatting["script"] = styleSheetData.Ligatures
     return formatting;
   }
 

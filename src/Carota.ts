@@ -23,5 +23,5 @@ export var carota = {
   Text: Text,
   Rect: Rect,
   EngineDataImport: EngineDataImport,
-  EngingDataExport: EngineDataExport,
+  EngineDataExport: EngineDataExport,
 };
