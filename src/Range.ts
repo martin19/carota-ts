@@ -153,7 +153,7 @@ export class Range implements IRange{
    * @param attribute
    * @param value
    */
-  setCharacterFormatting(attribute:string, value:string|boolean) {
+  setCharacterFormatting(attribute:string, value:string|boolean|number) {
     var range:Range = this;
     if (range.start === range.end) {
       range.doc.modifyInsertFormatting(attribute, value);

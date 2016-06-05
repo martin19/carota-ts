@@ -245,7 +245,7 @@ export class CarotaDoc extends CNode {
    * @param attribute - the formatting attribute to set.
    * @param value - the value to set the attribute to.
    */
-  modifyInsertFormatting(attribute:string, value:string|boolean) {
+  modifyInsertFormatting(attribute:string, value:string|boolean|number) {
     this.nextInsertFormatting[attribute] = value;
     this.notifySelectionChanged();
   }
