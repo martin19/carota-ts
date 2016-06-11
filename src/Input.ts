@@ -46,9 +46,10 @@ export class Input {
 
   registerMouseEvent(name:string, handler:(n:CNode)=>void) {
     Dom.handleMouseEvent(this.editor.canvas, name, (e:MouseEvent,x:number,y:number) => {
-      var W2E = this.editor.getWorldtoEditorTransform();
+      var W2E = this.editor.getWorldToEditorTransform();
       var xE = W2E[0] * x + W2E[2] * y + W2E[4];
       var yE = W2E[1] * x + W2E[3] * y + W2E[5];
+
       handler(this.editor.doc.byCoordinate(xE, yE)[0]||this.editor.doc.frame);
     });
   }

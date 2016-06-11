@@ -48,6 +48,8 @@ export class Editor {
   private cy : number;
   private sx : number;
   private sy : number;
+  private skewX : number;
+  private skewY : number;
   private alpha : number;
 
   private backgroundColor : string;
@@ -72,6 +74,8 @@ export class Editor {
     this.alpha = 0;
     this.sx = 1.0;
     this.sy = 1.0;
+    this.skewX = 0;
+    this.skewY = 0;
 
     this.wrap = typeof options.wrap === "boolean" ? options.wrap : true;
     this.bindInputHandlers = typeof options.bindHandlers === "boolean" ? options.bindHandlers : true;
@@ -150,6 +154,7 @@ export class Editor {
     clone.setRotation(this.getRotation());
     clone.setPosition(this.getPosition().x, this.getPosition().y);
     clone.setSize(this.getSize().w, this.getSize().h);
+    clone.setSkew(this.getSkew().skewX, this.getSkew().skewY);
     clone.doc.load(this.doc.save());
     return clone;
   }
@@ -211,6 +216,7 @@ export class Editor {
 
     ctx.translate(this.cx, this.cy);
     ctx.rotate(this.alpha);
+    ctx.transform(1,Math.tan(this.skewX),Math.tan(this.skewY),1,0,0);
     ctx.scale(this.sx, this.sy);
     ctx.translate(-this.cx, - this.cy);
     ctx.translate(anchorX, anchorY);
@@ -244,6 +250,8 @@ export class Editor {
 
     var transform = "translate(" + this.cx + "px," + this.cy + "px) " +
       "rotate(" + this.alpha + "rad) " +
+      "skewY(" + this.skewY + "rad) " +
+      "skewX(" + this.skewX + "rad) " +
       "scale(" + this.sx + "," + this.sy + ") " +
       "translate(" + -this.cx + "px," + -this.cy + "px) " +
       "translate(" + anchorX + "px," + anchorY + "px) ";
@@ -559,11 +567,24 @@ export class Editor {
   }
 
   /**
-   * Returns the world to editor frame transform.
-   * @returns {number[]}
+   * Sets the skew in radians.
+   * @param skewX
+   * @param skewY
    */
-  getWorldtoEditorTransform() {
+  setSkew(skewX:number, skewY:number) {
+    this.skewX = skewX;
+    this.skewY = skewY;
+    if(!this.manualRepaint) this.paint();
+  }
 
+  /**
+   * Get skew in radians.
+   */
+  getSkew() {
+    return { skewX : this.skewX, skewY : this.skewY };
+  }
+
+  getWorldToEditorTransform() {
     var bounds = this.bounds();
 
     var alpha = this.alpha;
@@ -571,19 +592,24 @@ export class Editor {
     var ay = this.cy - bounds.h * (this.oy+0.5);
     var sx = this.sx;
     var sy = this.sy;
+    var skx = this.skewX;
+    var sky = this.skewY;
     var cx = this.cx;
     var cy = this.cy;
 
+    function Sec(alpha:number) {
+      return 1/Math.cos(alpha);
+    }
+
     var a:number, b:number, c:number, d:number, e:number, f:number;
-
-    //inverse 1.
-    a = Math.cos(alpha)/sx;
-    b = -Math.sin(alpha)/sy;
-    c = Math.sin(alpha)/sx;
-    d = Math.cos(alpha)/sy;
-    e = -(ax*sx - cx*sx + cx*Math.cos(alpha) + cy*Math.sin(alpha))/sx;
-    f = ((-ay + cy)*sy - cy*Math.cos(alpha) + cx*Math.sin(alpha))/sy;
-
+    a = (Math.cos(skx)*Math.cos(alpha - sky)*Sec(skx + sky)) / sx;
+    b = -(Math.cos(sky)*Sec(skx + sky)*Math.sin(alpha + skx)) / sy;
+    c = (Math.cos(skx)*Sec(skx + sky)*Math.sin(alpha - sky)) / sx;
+    d = (Math.cos(alpha + skx)*Math.cos(sky)*Sec(skx + sky)) / sy;
+    e = ((ax - cx)*sx*Math.cos(skx + sky)*Sec(skx)*Sec(sky) +
+    Math.sin(alpha)*(cy + cx*Math.tan(sky)) + Math.cos(alpha)*(cx - cy*Math.tan(sky))) / (sx*(-1 + Math.tan(skx)*Math.tan(sky)));
+    f = ((ay - cy)*sy*Math.cos(skx + sky)*Sec(skx)*Sec(sky) +
+    Math.cos(alpha)*(cy - cx*Math.tan(skx)) - Math.sin(alpha)*(cx + cy*Math.tan(skx))) / (sy*(-1 + Math.tan(skx)*Math.tan(sky)));
     return [a,b,c,d,e,f];
   }
 
@@ -599,16 +625,24 @@ export class Editor {
     var ay = this.cy - bounds.h * (this.oy+0.5);
     var sx = this.sx;
     var sy = this.sy;
+    var skx = this.skewX;
+    var sky = this.skewY;
     var cx = this.cx;
     var cy = this.cy;
 
+    function Sec(alpha:number) {
+      return 1/Math.cos(alpha);
+    }
+
     var a:number, b:number, c:number, d:number, e:number, f:number;
-    a = Math.cos(alpha) * this.sx;
-    b = Math.sin(alpha) * this.sx;
-    c = -Math.sin(alpha) * this.sy;
-    d = Math.cos(alpha) * this.sy;
-    e = cx+ax*sx*Math.cos(alpha)-cx*sx*Math.cos(alpha)-ay*sy*Math.sin(alpha)+cy*sy*Math.sin(alpha);
-    f = cy+ay*sy*Math.cos(alpha)-cy*sy*Math.cos(alpha)+ax*sx*Math.sin(alpha)-cx*sx*Math.sin(alpha);
+    a = sx*Math.cos(alpha + skx)*Sec(skx);
+    b = sx*Sec(skx)*Math.sin(alpha + skx);
+    c = -sy*Sec(sky)*Math.sin(alpha - sky);
+    d = sy*(Math.cos(alpha) + Math.sin(alpha)*Math.tan(sky));
+    e = cx + (ax - cx)*sx*Math.cos(alpha + skx)*Sec(skx) + (-ay + cy)*sy*Sec(
+      sky)*Math.sin(alpha - sky);
+    f = cy + (ax - cx)*sx*Sec(skx)*Math.sin(
+    alpha + skx) + (ay - cy)*sy*(Math.cos(alpha) + Math.sin(alpha)*Math.tan(sky));
 
     return [a,b,c,d,e,f];
   }

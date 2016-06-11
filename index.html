@@ -313,6 +313,8 @@
             cx : 100,
             cy : 100,
             alpha : 0,
+            skewX : 0,
+            skewY : 0,
             w : 100,
             h : 100,
             sx : 1.0,
@@ -324,6 +326,8 @@
           var cCx = f4.add(textBoxPosition,"cx").min(0).max(500);
           var cCy = f4.add(textBoxPosition,"cy").min(0).max(500);
           var cAlpha = f4.add(textBoxPosition,"alpha").min(0).max(Math.PI*2);
+          var cSkewX = f4.add(textBoxPosition,"skewX").min(0).max(Math.PI/2);
+          var cSkewY = f4.add(textBoxPosition,"skewY").min(0).max(Math.PI/2);
           var cW = f4.add(textBoxPosition,"w").min(0).max(500);
           var cH = f4.add(textBoxPosition,"h").min(0).max(500);
           var cSx = f4.add(textBoxPosition,"sx").min(-5).max(5);
@@ -337,6 +341,12 @@
           });
           cAlpha.onChange(function(value){
             editor.setRotation(value)
+          });
+          cSkewX.onChange(function(value){
+            editor.setSkew(value, editor.getSkew().skewY);
+          });
+          cSkewY.onChange(function(value){
+            editor.setSkew(editor.getSkew().skewX, value);
           });
           cW.onChange(function(value){
             editor.setSize(value, editor.getSize().h);
