@@ -172,6 +172,7 @@ export class CarotaDoc extends CNode {
     this.selectionChanged = new LiteEvent<any>();
     this.contentChanged = new LiteEvent<any>();
     this.wrap = true;
+    this.frame = new Frame(this, 0);
     this.load([]);
   }
 
@@ -199,7 +200,6 @@ export class CarotaDoc extends CNode {
   }
 
   layout() {
-    this.frame = new Frame(this, 0);
     try {
       this.frame.layout();
     } catch (x) {

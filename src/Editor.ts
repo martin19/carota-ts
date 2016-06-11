@@ -17,6 +17,7 @@ export interface EditorOptions {
   manageTextArea? : boolean,
   paintSelection? : boolean,
   paintBaselines? : boolean,
+  manualRepaint? : boolean
 }
 
 export class Editor {
@@ -51,6 +52,7 @@ export class Editor {
 
   private backgroundColor : string;
   private wrap : boolean;
+  private manualRepaint : boolean;
   private bindInputHandlers : boolean;
   private manageTextArea : boolean;
   private paintSelection : boolean;
@@ -77,6 +79,7 @@ export class Editor {
     this.paintSelection = typeof options.paintSelection === "boolean" ? options.paintSelection : true;
     this.paintBaselines = typeof options.paintBaselines === "boolean" ? options.paintBaselines : false;
     this.backgroundColor = typeof options.backgroundColor === "string" ? options.backgroundColor : null;
+    this.manualRepaint = typeof options.manualRepaint === "boolean" ? options.manualRepaint : false;
 
     if(this.manageTextArea) {
       this.textArea = document.createElement("textarea");
@@ -103,15 +106,10 @@ export class Editor {
     this.verticalAlignment = 'top';
     this.nextCaretToggle = new Date().getTime();
 
-    this.doc.setVerticalAlignment = function (va) {
-      this.verticalAlignment = va;
-      this.paint();
-    };
-
     this.doc.setWrap(this.wrap);
 
     this.doc.selectionChanged.on(({getFormatting:getFormatting, takeFocus:takeFocus}) => {
-      this.paint();
+      if(!this.manualRepaint) this.paint();
       this.input.updateTextArea();
     });
 
@@ -119,7 +117,7 @@ export class Editor {
       this.update();
     });
 
-    this.paint();
+    if(!this.manualRepaint) this.paint();
     this.update();
     this.input = new Input(this, this.bindInputHandlers);
   }
@@ -145,6 +143,7 @@ export class Editor {
       manageTextArea : this.manageTextArea,
       paintSelection : this.paintSelection,
       paintBaselines : this.paintBaselines,
+      manualRepaint : this.manualRepaint
     });
     clone.setOrigin(this.getOrigin().x, this.getOrigin().y);
     clone.setScale(this.getScale().x, this.getScale().y);
@@ -173,7 +172,7 @@ export class Editor {
     }
 
     if (requirePaint) {
-      this.paint();
+      if(!this.manualRepaint) this.paint();
     }
   }
   
@@ -184,18 +183,6 @@ export class Editor {
    */
   bounds(actual?:boolean) {
     return this.doc.frame.bounds(actual);
-    //if(this.doc.wrap) {
-    //  var frameBoundsActual = this.doc.frame.bounds(true);
-    //  var frameBoundsSet = new Rect(0,0,this.w, this.h);
-    //  return new Rect(
-    //    Math.min(frameBoundsActual.l,frameBoundsSet.l),
-    //    Math.min(frameBoundsActual.t,frameBoundsSet.t),
-    //    Math.max(frameBoundsActual.w,frameBoundsSet.w),
-    //    Math.max(frameBoundsActual.h,frameBoundsSet.h)
-    //  );
-    //} else {
-    //  return this.doc.frame.bounds(true);
-    //}
   }
 
   /**
@@ -492,6 +479,7 @@ export class Editor {
   setOrigin(x : number, y : number) {
     this.ox = x;
     this.oy = y;
+    if(!this.manualRepaint) this.paint();
   }
 
   /**
@@ -511,7 +499,7 @@ export class Editor {
   setPosition(x : number, y : number) {
     this.cx = x;
     this.cy = y;
-    this.paint();
+    if(!this.manualRepaint) this.paint();
   }
 
   /**
@@ -530,7 +518,8 @@ export class Editor {
   setSize(w : number, h : number) {
     this.w = w;
     this.h = h;
-    this.paint();
+    this.doc.frame.setSize(w,h);
+    if(!this.manualRepaint) this.paint();
   }
 
   /**
@@ -539,7 +528,7 @@ export class Editor {
    */
   setRotation(alpha : number) {
     this.alpha = alpha;
-    this.paint();
+    if(!this.manualRepaint) this.paint();
   }
 
   /**
@@ -558,7 +547,7 @@ export class Editor {
   setScale(sx : number, sy : number) {
     this.sx = sx;
     this.sy = sy;
-    this.paint();
+    if(!this.manualRepaint) this.paint();
   }
 
   /**
@@ -630,7 +619,7 @@ export class Editor {
    */
   setPaintBaselines(value : boolean) {
     this.paintBaselines = value;
-    this.paint();
+    if(!this.manualRepaint) this.paint();
   }
 
   /**
