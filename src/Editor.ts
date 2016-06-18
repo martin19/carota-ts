@@ -17,7 +17,8 @@ export interface EditorOptions {
   manageTextArea? : boolean,
   paintSelection? : boolean,
   paintBaselines? : boolean,
-  manualRepaint? : boolean
+  manualRepaint? : boolean,
+  anchorAtActualBounds? : boolean
 }
 
 export class Editor {
@@ -59,6 +60,7 @@ export class Editor {
   private manageTextArea : boolean;
   private paintSelection : boolean;
   private paintBaselines : boolean;
+  private anchorAtActualBounds : boolean;
 
   constructor(options:EditorOptions) {
 
@@ -84,6 +86,7 @@ export class Editor {
     this.paintBaselines = typeof options.paintBaselines === "boolean" ? options.paintBaselines : false;
     this.backgroundColor = typeof options.backgroundColor === "string" ? options.backgroundColor : null;
     this.manualRepaint = typeof options.manualRepaint === "boolean" ? options.manualRepaint : false;
+    this.anchorAtActualBounds = typeof options.anchorAtActualBounds === "boolean" ? options.anchorAtActualBounds : false;
 
     if(this.manageTextArea) {
       this.textArea = document.createElement("textarea");
@@ -147,7 +150,8 @@ export class Editor {
       manageTextArea : this.manageTextArea,
       paintSelection : this.paintSelection,
       paintBaselines : this.paintBaselines,
-      manualRepaint : this.manualRepaint
+      manualRepaint : this.manualRepaint,
+      anchorAtActualBounds : this.anchorAtActualBounds
     });
     clone.setOrigin(this.getOrigin().x, this.getOrigin().y);
     clone.setScale(this.getScale().x, this.getScale().y);
@@ -203,8 +207,11 @@ export class Editor {
 
     var bounds = this.bounds();
     var boundsActual = this.bounds(true);
-    var anchorX = this.cx - bounds.w * (this.ox+0.5);
-    var anchorY = this.cy - bounds.h * (this.oy+0.5);
+    if(this.anchorAtActualBounds){
+      bounds = boundsActual;
+    }
+    var anchorX = this.cx - (bounds.l + bounds.w * (this.ox+0.5));
+    var anchorY = this.cy - (bounds.t + bounds.h * (this.oy+0.5));
 
     if(typeof canvas !== "undefined") {
       var ctx = canvas.getContext("2d");
@@ -216,7 +223,7 @@ export class Editor {
 
     ctx.translate(this.cx, this.cy);
     ctx.rotate(this.alpha);
-    ctx.transform(1,Math.tan(this.skewX),Math.tan(this.skewY),1,0,0);
+    ctx.transform(1,Math.tan(this.skewY),Math.tan(this.skewX),1,0,0);
     ctx.scale(this.sx, this.sy);
     ctx.translate(-this.cx, - this.cy);
     ctx.translate(anchorX, anchorY);
@@ -585,15 +592,16 @@ export class Editor {
   }
 
   getWorldToEditorTransform() {
-    var bounds = this.bounds();
+    var bounds = this.bounds(this.anchorAtActualBounds);
 
     var alpha = this.alpha;
-    var ax = this.cx - bounds.w * (this.ox+0.5);
-    var ay = this.cy - bounds.h * (this.oy+0.5);
+    var ax = this.cx - (bounds.l + bounds.w * (this.ox+0.5));
+    var ay = this.cy - (bounds.t + bounds.h * (this.oy+0.5));
+
     var sx = this.sx;
     var sy = this.sy;
-    var skx = this.skewX;
     var sky = this.skewY;
+    var skx = this.skewX;
     var cx = this.cx;
     var cy = this.cy;
 
@@ -602,14 +610,14 @@ export class Editor {
     }
 
     var a:number, b:number, c:number, d:number, e:number, f:number;
-    a = (Math.cos(skx)*Math.cos(alpha - sky)*Sec(skx + sky)) / sx;
-    b = -(Math.cos(sky)*Sec(skx + sky)*Math.sin(alpha + skx)) / sy;
-    c = (Math.cos(skx)*Sec(skx + sky)*Math.sin(alpha - sky)) / sx;
-    d = (Math.cos(alpha + skx)*Math.cos(sky)*Sec(skx + sky)) / sy;
-    e = ((ax - cx)*sx*Math.cos(skx + sky)*Sec(skx)*Sec(sky) +
-    Math.sin(alpha)*(cy + cx*Math.tan(sky)) + Math.cos(alpha)*(cx - cy*Math.tan(sky))) / (sx*(-1 + Math.tan(skx)*Math.tan(sky)));
-    f = ((ay - cy)*sy*Math.cos(skx + sky)*Sec(skx)*Sec(sky) +
-    Math.cos(alpha)*(cy - cx*Math.tan(skx)) - Math.sin(alpha)*(cx + cy*Math.tan(skx))) / (sy*(-1 + Math.tan(skx)*Math.tan(sky)));
+    a = (Math.cos(sky)*Math.cos(alpha - skx)*Sec(sky + skx)) / sx;
+    b = -(Math.cos(skx)*Sec(sky + skx)*Math.sin(alpha + sky)) / sy;
+    c = (Math.cos(sky)*Sec(sky + skx)*Math.sin(alpha - skx)) / sx;
+    d = (Math.cos(alpha + sky)*Math.cos(skx)*Sec(sky + skx)) / sy;
+    e = ((ax - cx)*sx*Math.cos(sky + skx)*Sec(sky)*Sec(skx) +
+    Math.sin(alpha)*(cy + cx*Math.tan(skx)) + Math.cos(alpha)*(cx - cy*Math.tan(skx))) / (sx*(-1 + Math.tan(sky)*Math.tan(skx)));
+    f = ((ay - cy)*sy*Math.cos(sky + skx)*Sec(sky)*Sec(skx) +
+    Math.cos(alpha)*(cy - cx*Math.tan(sky)) - Math.sin(alpha)*(cx + cy*Math.tan(sky))) / (sy*(-1 + Math.tan(sky)*Math.tan(skx)));
     return [a,b,c,d,e,f];
   }
 
@@ -618,15 +626,15 @@ export class Editor {
    * @returns {number[]}
    */
   getEditorToWorldTransform() {
-    var bounds = this.bounds();
+    var bounds = this.bounds(this.anchorAtActualBounds);
 
     var alpha = this.alpha;
-    var ax = this.cx - bounds.w * (this.ox+0.5);
-    var ay = this.cy - bounds.h * (this.oy+0.5);
+    var ax = this.cx - (bounds.l + bounds.w * (this.ox+0.5));
+    var ay = this.cy - (bounds.t + bounds.h * (this.oy+0.5));
     var sx = this.sx;
     var sy = this.sy;
-    var skx = this.skewX;
     var sky = this.skewY;
+    var skx = this.skewX;
     var cx = this.cx;
     var cy = this.cy;
 
@@ -635,14 +643,14 @@ export class Editor {
     }
 
     var a:number, b:number, c:number, d:number, e:number, f:number;
-    a = sx*Math.cos(alpha + skx)*Sec(skx);
-    b = sx*Sec(skx)*Math.sin(alpha + skx);
-    c = -sy*Sec(sky)*Math.sin(alpha - sky);
-    d = sy*(Math.cos(alpha) + Math.sin(alpha)*Math.tan(sky));
-    e = cx + (ax - cx)*sx*Math.cos(alpha + skx)*Sec(skx) + (-ay + cy)*sy*Sec(
-      sky)*Math.sin(alpha - sky);
-    f = cy + (ax - cx)*sx*Sec(skx)*Math.sin(
-    alpha + skx) + (ay - cy)*sy*(Math.cos(alpha) + Math.sin(alpha)*Math.tan(sky));
+    a = sx*Math.cos(alpha + sky)*Sec(sky);
+    b = sx*Sec(sky)*Math.sin(alpha + sky);
+    c = -sy*Sec(skx)*Math.sin(alpha - skx);
+    d = sy*(Math.cos(alpha) + Math.sin(alpha)*Math.tan(skx));
+    e = cx + (ax - cx)*sx*Math.cos(alpha + sky)*Sec(sky) + (-ay + cy)*sy*Sec(
+      skx)*Math.sin(alpha - skx);
+    f = cy + (ax - cx)*sx*Sec(sky)*Math.sin(
+    alpha + sky) + (ay - cy)*sy*(Math.cos(alpha) + Math.sin(alpha)*Math.tan(skx));
 
     return [a,b,c,d,e,f];
   }
