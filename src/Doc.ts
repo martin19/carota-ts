@@ -638,7 +638,7 @@ export class CarotaDoc extends CNode {
   }
 
   select(ordinal:number, ordinalEnd:number, takeFocus?:boolean) {
-    console.log("select:" + ordinal + "->" + ordinalEnd);
+    //console.log("select:" + ordinal + "->" + ordinalEnd);
     if (!this.frame) {
       // Something has gone terribly wrong - doc.transaction will rollback soon
       return;

@@ -237,7 +237,8 @@ export class Editor {
       this.updateTextArea(bounds.w, bounds.h);
     }
 
-    this.doc.draw(ctx, bounds);
+    var viewport = new Rect(Math.floor(bounds.l),Math.floor(bounds.t),Math.ceil(bounds.r)-Math.floor(bounds.l),Math.ceil(bounds.b)-Math.floor(bounds.t));
+    this.doc.draw(ctx, viewport);
 
     if(this.paintBaselines) {
       this.doc.drawBaselines(ctx, bounds);
