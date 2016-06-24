@@ -5,20 +5,25 @@ import {Input} from "./Input";
 import {Run} from "./Run";
 import {Paragraph} from "./Paragraph";
 
+export type OriginX = "left"|"center"|"right"|"left-actual"|"center-actual"|"right-actual";
+export type OriginY = "top"|"center"|"bottom"|"top-actual"|"center-actual"|"bottom-actual"|"firstBaseline";
+
 export interface EditorOptions {
-  canvas : HTMLCanvasElement;
-  x : number;
-  y : number;
-  w? : number;
-  h? : number;
-  backgroundColor? : string;
-  wrap? : boolean
-  bindHandlers? : boolean,
-  manageTextArea? : boolean,
-  paintSelection? : boolean,
-  paintBaselines? : boolean,
-  manualRepaint? : boolean,
-  anchorAtFirstCharacter? : boolean
+  canvas:HTMLCanvasElement;
+  x:number;
+  y:number;
+  w?:number;
+  h?:number;
+  backgroundColor?:string;
+  wrap?:boolean
+  bindHandlers?:boolean,
+  manageTextArea?:boolean,
+  paintSelection?:boolean,
+  paintBaselines?:boolean,
+  manualRepaint?:boolean,
+  clipAtBounds?:boolean,
+  originX?:OriginX;
+  originY?:OriginY;
 }
 
 export class Editor {
@@ -38,46 +43,35 @@ export class Editor {
   richClipboard:Array<Paragraph>;
   plainClipboard:string;
   toggles:{[n:number]:string};
-  verticalAlignment:string;
   nextCaretToggle:number;
 
-  private ox : number;
-  private oy : number;
-  private w : number;
-  private h : number;
-  private cx : number;
-  private cy : number;
-  private sx : number;
-  private sy : number;
-  private skewX : number;
-  private skewY : number;
-  private alpha : number;
+  private w:number;
+  private h:number;
+  private cx:number;
+  private cy:number;
+  private sx:number;
+  private sy:number;
+  private skewX:number;
+  private skewY:number;
+  private alpha:number;
+  private originX:OriginX;
+  private originY:OriginY;
 
-  private backgroundColor : string;
-  private wrap : boolean;
-  private manualRepaint : boolean;
-  private bindInputHandlers : boolean;
-  private manageTextArea : boolean;
-  private paintSelection : boolean;
-  private paintBaselines : boolean;
-  private anchorAtFirstCharacter : boolean;
+  private backgroundColor:string;
+  private wrap:boolean;
+  private manualRepaint:boolean;
+  private bindInputHandlers:boolean;
+  private manageTextArea:boolean;
+  private paintSelection:boolean;
+  private paintBaselines:boolean;
+  private clipAtBounds:boolean;
+
 
   constructor(options:EditorOptions) {
 
     this.canvas = options.canvas;
     this.canvas.classList.add("carotaEditorCanvas");
-
-    this.cx = options.x;
-    this.cy = options.y;
-    this.w = typeof options.w == "number" ? options.w : 0;
-    this.h = typeof options.h == "number" ? options.h : 0;
-    this.ox = 0;
-    this.oy = 0;
-    this.alpha = 0;
-    this.sx = 1.0;
-    this.sy = 1.0;
-    this.skewX = 0;
-    this.skewY = 0;
+    this.doc = new CarotaDoc();
 
     this.wrap = typeof options.wrap === "boolean" ? options.wrap : true;
     this.bindInputHandlers = typeof options.bindHandlers === "boolean" ? options.bindHandlers : true;
@@ -86,9 +80,17 @@ export class Editor {
     this.paintBaselines = typeof options.paintBaselines === "boolean" ? options.paintBaselines : false;
     this.backgroundColor = typeof options.backgroundColor === "string" ? options.backgroundColor : null;
     this.manualRepaint = typeof options.manualRepaint === "boolean" ? options.manualRepaint : false;
-    this.anchorAtFirstCharacter = typeof options.anchorAtFirstCharacter === "boolean" ? options.anchorAtFirstCharacter : false;
+    this.clipAtBounds = typeof options.clipAtBounds === "boolean" ? options.clipAtBounds : true;
 
-    if(this.manageTextArea) {
+    this.setPosition(options.x, options.y);
+    this.setSize(typeof options.w == "number" ? options.w : 0, typeof options.h == "number" ? options.h : 0);
+    this.setRotation(0);
+    this.setScale(1.0, 1.0);
+    this.setSkew(0, 0);
+    this.setOrigin(typeof options.originX !== "undefined" ? options.originX : "center",
+      typeof options.originY !== "undefined" ? options.originY : "center");
+
+    if (this.manageTextArea) {
       this.textArea = document.createElement("textarea");
       this.textArea.style.position = "absolute";
       this.textArea.style.zIndex = "-10000";
@@ -96,7 +98,6 @@ export class Editor {
       this.textAreaContent = "";
     }
 
-    this.doc = new CarotaDoc();
     this.keyboardSelect = 0;
     this.keyboardX = null;
     this.nextKeyboardX = null;
@@ -110,13 +111,12 @@ export class Editor {
       85: 'underline',
       83: 'strikeout'
     };
-    this.verticalAlignment = 'top';
     this.nextCaretToggle = new Date().getTime();
 
     this.doc.setWrap(this.wrap);
 
     this.doc.selectionChanged.on(({getFormatting:getFormatting, takeFocus:takeFocus}) => {
-      if(!this.manualRepaint) this.paint();
+      if (!this.manualRepaint) this.paint();
       this.input.updateTextArea();
     });
 
@@ -124,7 +124,7 @@ export class Editor {
       this.update();
     });
 
-    if(!this.manualRepaint) this.paint();
+    if (!this.manualRepaint) this.paint();
     this.update();
     this.input = new Input(this, this.bindInputHandlers);
   }
@@ -139,19 +139,21 @@ export class Editor {
    */
   clone():Editor {
     var clone = new Editor({
-      canvas : this.canvas,
-      x : this.cx,
-      y : this.cy,
-      w : this.w,
-      h : this.h,
-      backgroundColor : this.backgroundColor,
-      wrap : this.wrap,
-      bindHandlers : this.bindInputHandlers,
-      manageTextArea : this.manageTextArea,
-      paintSelection : this.paintSelection,
-      paintBaselines : this.paintBaselines,
-      manualRepaint : this.manualRepaint,
-      anchorAtFirstCharacter : this.anchorAtFirstCharacter
+      canvas: this.canvas,
+      x: this.cx,
+      y: this.cy,
+      w: this.w,
+      h: this.h,
+      backgroundColor: this.backgroundColor,
+      wrap: this.wrap,
+      bindHandlers: this.bindInputHandlers,
+      manageTextArea: this.manageTextArea,
+      paintSelection: this.paintSelection,
+      paintBaselines: this.paintBaselines,
+      manualRepaint: this.manualRepaint,
+      clipAtBounds: this.clipAtBounds,
+      originX: this.originX,
+      originY: this.originY
     });
     clone.setOrigin(this.getOrigin().x, this.getOrigin().y);
     clone.setScale(this.getScale().x, this.getScale().y);
@@ -181,10 +183,10 @@ export class Editor {
     }
 
     if (requirePaint) {
-      if(!this.manualRepaint) this.paint();
+      if (!this.manualRepaint) this.paint();
     }
   }
-  
+
   /**
    * Get bounds of editor.
    * @param actual
@@ -195,11 +197,127 @@ export class Editor {
   }
 
   /**
+   * Compute the anchor point ratio within editor bounds.
+   * @returns {{x: number, y: number}}
+   */
+  computeAnchorRatio(actual:boolean) {
+    var b = this.bounds(false);
+    var bA = this.bounds(true);
+    var b2 = this.bounds(actual);
+    var ratioX:number;
+    var ratioY:number;
+    switch (this.originX) {
+      case "left"          :
+        ratioX = (b.l / b2.w) - b2.l - 0.5;
+        break;
+      case "center"        :
+        ratioX = (b.l + b.w * 0.5) / b2.w - b2.l - 0.5;
+        break;
+      case "right"         :
+        ratioX = (b.l + b.w) / b2.w - b2.l - 0.5;
+        break;
+      case "left-actual"   :
+        ratioX = (bA.l / b2.w) - b2.l - 0.5;
+        break;
+      case "center-actual" :
+        ratioX = (bA.l + bA.w * 0.5) / b2.w - b2.l - 0.5;
+        break;
+      case "right-actual"  :
+        ratioX = (bA.l + bA.w) / b2.w - b2.l - 0.5;
+        break;
+    }
+    switch (this.originY) {
+      case "top"           :
+        ratioY = (b.t / b2.h) - b2.t - 0.5;
+        break;
+      case "center"        :
+        ratioY = (b.t + b.h * 0.5) / b2.h - b2.t - 0.5;
+        break;
+      case "bottom"        :
+        ratioY = (b.t + b.h) / b2.h - b2.t - 0.5;
+        break;
+      case "top-actual"    :
+        ratioY = (bA.t / b2.h) - b2.t - 0.5;
+        break;
+      case "center-actual" :
+        ratioY = (bA.t + bA.h * 0.5) / b2.h - b2.t - 0.5;
+        break;
+      case "bottom-actual" :
+        ratioY = (bA.t + bA.h) / b2.h - b2.t - 0.5;
+        break;
+
+      case "firstBaseline" :
+        ratioY = ((this.doc.frame.paragraphs[0].lines[0].baseline - b2.t) / b2.h) - 0.5;
+        break;
+    }
+
+    ratioX = !isFinite(ratioX) || isNaN(ratioX) ? 0 : ratioX;
+    ratioY = !isFinite(ratioY) || isNaN(ratioY) ? 0 : ratioY;
+
+    return {x: ratioX, y: ratioY};
+  }
+
+  /**
+   * Compute the editor anchor point offset from editor center.
+   * @returns {{x: number, y: number}}
+   */
+  computeAnchorOffset() {
+    var bounds = this.bounds();
+    var boundsActual = this.bounds(true);
+    var anchorX:number;
+    var anchorY:number;
+    switch (this.originX) {
+      case "left"  :
+        anchorX = this.cx - (bounds.l);
+        break;
+      case "center" :
+        anchorX = this.cx - (bounds.l + bounds.w * 0.5);
+        break;
+      case "right"  :
+        anchorX = this.cx - (bounds.l + bounds.w);
+        break;
+      case "left-actual"  :
+        anchorX = this.cx - (boundsActual.l);
+        break;
+      case "center-actual" :
+        anchorX = this.cx - (boundsActual.l + boundsActual.w * 0.5);
+        break;
+      case "right-actual"  :
+        anchorX = this.cx - (boundsActual.l + boundsActual.w);
+        break;
+    }
+    switch (this.originY) {
+      case "top"    :
+        anchorY = this.cy - (bounds.t);
+        break;
+      case "center" :
+        anchorY = this.cy - (bounds.t + bounds.h * 0.5);
+        break;
+      case "bottom" :
+        anchorY = this.cy - (bounds.t + bounds.h);
+        break;
+      case "top-actual"    :
+        anchorY = this.cy - (boundsActual.t);
+        break;
+      case "center-actual" :
+        anchorY = this.cy - (boundsActual.t + boundsActual.h * 0.5);
+        break;
+      case "bottom-actual" :
+        anchorY = this.cy - (boundsActual.t + boundsActual.h);
+        break;
+      case "firstBaseline" :
+        anchorY = this.cy - this.doc.frame.paragraphs[0].lines[0].baseline;
+        break;
+    }
+    return {x: anchorX, y: anchorY};
+  }
+
+  /**
    * Paint editor contents to the assigned canvas element.
    * If a canvas element is passed, the contents will be rendered to this element.
    * @param canvas
    */
-  paint(canvas? : HTMLCanvasElement) {
+  paint(canvas?:HTMLCanvasElement) {
 
     if (this.doc.frame.width !== this.w || this.doc.frame.height !== this.h) {
       this.doc.frame.setSize(this.w, this.h);
@@ -207,16 +325,9 @@ export class Editor {
 
     var bounds = this.bounds();
     var boundsActual = this.bounds(true);
-    if(this.anchorAtFirstCharacter){
-      bounds = boundsActual;
-      var anchorX = this.cx - 0;
-      var anchorY = this.cy - this.doc.frame.paragraphs[0].lines[0].baseline;
-    } else {
-      anchorX = this.cx - (bounds.l + bounds.w * (this.ox+0.5));
-      anchorY = this.cy - (bounds.t + bounds.h * (this.oy+0.5));
-    }
+    var anchor = this.computeAnchorOffset();
 
-    if(typeof canvas !== "undefined") {
+    if (typeof canvas !== "undefined") {
       var ctx = canvas.getContext("2d");
     } else {
       ctx = this.canvas.getContext('2d');
@@ -226,38 +337,36 @@ export class Editor {
 
     ctx.translate(this.cx, this.cy);
     ctx.rotate(this.alpha);
-    ctx.transform(1,Math.tan(this.skewY),Math.tan(this.skewX),1,0,0);
+    ctx.transform(1, Math.tan(this.skewY), Math.tan(this.skewX), 1, 0, 0);
     ctx.scale(this.sx, this.sy);
-    ctx.translate(-this.cx, - this.cy);
-    ctx.translate(anchorX, anchorY);
+    ctx.translate(-this.cx, -this.cy);
+    ctx.translate(anchor.x, anchor.y);
 
-    if(this.backgroundColor) {
+    if (this.backgroundColor) {
       ctx.fillStyle = this.backgroundColor;
       ctx.fillRect(bounds.l, bounds.t, bounds.w, bounds.h);
     }
 
-    if(this.manageTextArea) {
+    if (this.manageTextArea) {
       this.updateTextArea(bounds.w, bounds.h);
     }
 
-    var viewport = new Rect(Math.floor(bounds.l),Math.floor(bounds.t),Math.ceil(bounds.r)-Math.floor(bounds.l),Math.ceil(bounds.b)-Math.floor(bounds.t));
+    var viewport = this.clipAtBounds ? bounds : null;
     this.doc.draw(ctx, viewport);
 
-    if(this.paintBaselines) {
+    if (this.paintBaselines) {
       this.doc.drawBaselines(ctx, bounds);
     }
 
-    if(this.paintSelection) {
+    if (this.paintSelection) {
       this.doc.drawSelection(ctx, true, boundsActual);
     }
 
     ctx.restore();
   }
 
-  private updateTextArea(logicalWidth : number, logicalHeight : number) {
-    var b = this.bounds();
-    var anchorX = this.cx - b.w * (this.ox+0.5);
-    var anchorY = this.cy - b.h * (this.oy+0.5);
+  private updateTextArea(logicalWidth:number, logicalHeight:number) {
+    var anchor = this.computeAnchorOffset();
 
     var transform = "translate(" + this.cx + "px," + this.cy + "px) " +
       "rotate(" + this.alpha + "rad) " +
@@ -265,12 +374,12 @@ export class Editor {
       "skewX(" + this.skewX + "rad) " +
       "scale(" + this.sx + "," + this.sy + ") " +
       "translate(" + -this.cx + "px," + -this.cy + "px) " +
-      "translate(" + anchorX + "px," + anchorY + "px) ";
+      "translate(" + anchor.x + "px," + anchor.y + "px) ";
     this.textArea.style.transformOrigin = "0 0";
     this.textArea.style.left = "10px";
     this.textArea.style.top = "40px";
-    this.textArea.style.width  = logicalWidth+"px";
-    this.textArea.style.height = logicalHeight+"px";
+    this.textArea.style.width = logicalWidth + "px";
+    this.textArea.style.height = logicalHeight + "px";
     this.textArea.style.transform = transform;
   }
 
@@ -330,7 +439,7 @@ export class Editor {
    */
   delCharAfter() {
     var start = this.doc.selection.start,
-        end = this.doc.selection.end,
+      end = this.doc.selection.end,
       length = this.doc.frame.length - 1;
     var ordinal = this.getOrdinal();
 
@@ -483,27 +592,22 @@ export class Editor {
   }
 
   /**
-   * Get origin for editor frame transformations in normalized object coordinate system.
+   * Get origin for editor origin.
    * @return {{x: number, y: number}}
    */
   getOrigin() {
-    if(this.anchorAtFirstCharacter) {
-      var actualOriginX = ((this.bounds(false).l - this.bounds(true).l)/this.bounds(true).w) - 0.5;
-      var actualOriginY = ((this.doc.frame.paragraphs[0].lines[0].baseline - this.bounds(true).t) / this.bounds(true).h) - 0.5;
-      return { x : actualOriginX, y : actualOriginY };
-    }
-    return { x : this.ox, y : this.oy }
+    return {x: this.originX, y: this.originY};
   }
 
   /**
-   * Set origin for editor frame transformations in normalized object coordinate system.
+   * Set origin for editor origin.
    * @param x
    * @param y
    */
-  setOrigin(x : number, y : number) {
-    this.ox = x;
-    this.oy = y;
-    if(!this.manualRepaint) this.paint();
+  setOrigin(x:OriginX, y:OriginY) {
+    this.originX = x;
+    this.originY = y;
+    if (!this.manualRepaint) this.paint();
   }
 
   /**
@@ -512,7 +616,7 @@ export class Editor {
    * @return {{x: number, y: number}}
    */
   getPosition() {
-    return { x : this.cx, y : this.cy }
+    return {x: this.cx, y: this.cy}
   }
 
   /**
@@ -520,10 +624,10 @@ export class Editor {
    * Translation is relative to origin.
    * @return {{x: number, y: number}}
    */
-  setPosition(x : number, y : number) {
+  setPosition(x:number, y:number) {
     this.cx = x;
     this.cy = y;
-    if(!this.manualRepaint) this.paint();
+    if (!this.manualRepaint) this.paint();
   }
 
   /**
@@ -531,7 +635,7 @@ export class Editor {
    * @return {{w: number, h: number}}
    */
   getSize() {
-    return { w : this.w, h : this.h }
+    return {w: this.w, h: this.h}
   }
 
   /**
@@ -539,20 +643,20 @@ export class Editor {
    * @param w
    * @param h
    */
-  setSize(w : number, h : number) {
+  setSize(w:number, h:number) {
     this.w = w;
     this.h = h;
-    this.doc.frame.setSize(w,h);
-    if(!this.manualRepaint) this.paint();
+    this.doc.frame.setSize(w, h);
+    if (!this.manualRepaint) this.paint();
   }
 
   /**
    * Set rotation of editor frame.
    * @param alpha
    */
-  setRotation(alpha : number) {
+  setRotation(alpha:number) {
     this.alpha = alpha;
-    if(!this.manualRepaint) this.paint();
+    if (!this.manualRepaint) this.paint();
   }
 
   /**
@@ -568,10 +672,10 @@ export class Editor {
    * @param sx
    * @param sy
    */
-  setScale(sx : number, sy : number) {
+  setScale(sx:number, sy:number) {
     this.sx = sx;
     this.sy = sy;
-    if(!this.manualRepaint) this.paint();
+    if (!this.manualRepaint) this.paint();
   }
 
   /**
@@ -579,7 +683,7 @@ export class Editor {
    * @return {{x: number, y: number}}
    */
   getScale() {
-    return { x : this.sx, y : this.sy };
+    return {x: this.sx, y: this.sy};
   }
 
   /**
@@ -590,29 +694,22 @@ export class Editor {
   setSkew(skewX:number, skewY:number) {
     this.skewX = skewX;
     this.skewY = skewY;
-    if(!this.manualRepaint) this.paint();
+    if (!this.manualRepaint) this.paint();
   }
 
   /**
    * Get skew in radians.
    */
   getSkew() {
-    return { skewX : this.skewX, skewY : this.skewY };
+    return {skewX: this.skewX, skewY: this.skewY};
   }
 
   getWorldToEditorTransform() {
-    var bounds = this.bounds(this.anchorAtFirstCharacter);
-
     var alpha = this.alpha;
 
-    if(this.anchorAtFirstCharacter){
-      bounds = this.bounds(true);
-      var ax = this.cx - 0;
-      var ay = this.cy - this.doc.frame.paragraphs[0].lines[0].baseline;
-    } else {
-      ax = this.cx - (bounds.l + bounds.w * (this.ox+0.5));
-      ay = this.cy - (bounds.t + bounds.h * (this.oy+0.5));
-    }
+    var anchor = this.computeAnchorOffset();
+    var ax = anchor.x;
+    var ay = anchor.y;
 
     var sx = this.sx;
     var sy = this.sy;
@@ -622,19 +719,19 @@ export class Editor {
     var cy = this.cy;
 
     function Sec(alpha:number) {
-      return 1/Math.cos(alpha);
+      return 1 / Math.cos(alpha);
     }
 
     var a:number, b:number, c:number, d:number, e:number, f:number;
-    a = (Math.cos(sky)*Math.cos(alpha - skx)*Sec(sky + skx)) / sx;
-    b = -(Math.cos(skx)*Sec(sky + skx)*Math.sin(alpha + sky)) / sy;
-    c = (Math.cos(sky)*Sec(sky + skx)*Math.sin(alpha - skx)) / sx;
-    d = (Math.cos(alpha + sky)*Math.cos(skx)*Sec(sky + skx)) / sy;
-    e = ((ax - cx)*sx*Math.cos(sky + skx)*Sec(sky)*Sec(skx) +
-    Math.sin(alpha)*(cy + cx*Math.tan(skx)) + Math.cos(alpha)*(cx - cy*Math.tan(skx))) / (sx*(-1 + Math.tan(sky)*Math.tan(skx)));
-    f = ((ay - cy)*sy*Math.cos(sky + skx)*Sec(sky)*Sec(skx) +
-    Math.cos(alpha)*(cy - cx*Math.tan(sky)) - Math.sin(alpha)*(cx + cy*Math.tan(sky))) / (sy*(-1 + Math.tan(sky)*Math.tan(skx)));
-    return [a,b,c,d,e,f];
+    a = (Math.cos(sky) * Math.cos(alpha - skx) * Sec(sky + skx)) / sx;
+    b = -(Math.cos(skx) * Sec(sky + skx) * Math.sin(alpha + sky)) / sy;
+    c = (Math.cos(sky) * Sec(sky + skx) * Math.sin(alpha - skx)) / sx;
+    d = (Math.cos(alpha + sky) * Math.cos(skx) * Sec(sky + skx)) / sy;
+    e = ((ax - cx) * sx * Math.cos(sky + skx) * Sec(sky) * Sec(skx) +
+      Math.sin(alpha) * (cy + cx * Math.tan(skx)) + Math.cos(alpha) * (cx - cy * Math.tan(skx))) / (sx * (-1 + Math.tan(sky) * Math.tan(skx)));
+    f = ((ay - cy) * sy * Math.cos(sky + skx) * Sec(sky) * Sec(skx) +
+      Math.cos(alpha) * (cy - cx * Math.tan(sky)) - Math.sin(alpha) * (cx + cy * Math.tan(sky))) / (sy * (-1 + Math.tan(sky) * Math.tan(skx)));
+    return [a, b, c, d, e, f];
   }
 
   /**
@@ -642,18 +739,11 @@ export class Editor {
    * @returns {number[]}
    */
   getEditorToWorldTransform() {
-    var bounds = this.bounds(this.anchorAtFirstCharacter);
-
     var alpha = this.alpha;
 
-    if(this.anchorAtFirstCharacter){
-      bounds = this.bounds(true);
-      var ax = this.cx - 0;
-      var ay = this.cy - this.doc.frame.paragraphs[0].lines[0].baseline;
-    } else {
-      ax = this.cx - (bounds.l + bounds.w * (this.ox+0.5));
-      ay = this.cy - (bounds.t + bounds.h * (this.oy+0.5));
-    }
+    var anchor = this.computeAnchorOffset();
+    var ax = anchor.x;
+    var ay = anchor.y;
 
     var sx = this.sx;
     var sy = this.sy;
@@ -663,29 +753,29 @@ export class Editor {
     var cy = this.cy;
 
     function Sec(alpha:number) {
-      return 1/Math.cos(alpha);
+      return 1 / Math.cos(alpha);
     }
 
     var a:number, b:number, c:number, d:number, e:number, f:number;
-    a = sx*Math.cos(alpha + sky)*Sec(sky);
-    b = sx*Sec(sky)*Math.sin(alpha + sky);
-    c = -sy*Sec(skx)*Math.sin(alpha - skx);
-    d = sy*(Math.cos(alpha) + Math.sin(alpha)*Math.tan(skx));
-    e = cx + (ax - cx)*sx*Math.cos(alpha + sky)*Sec(sky) + (-ay + cy)*sy*Sec(
-      skx)*Math.sin(alpha - skx);
-    f = cy + (ax - cx)*sx*Sec(sky)*Math.sin(
-    alpha + sky) + (ay - cy)*sy*(Math.cos(alpha) + Math.sin(alpha)*Math.tan(skx));
+    a = sx * Math.cos(alpha + sky) * Sec(sky);
+    b = sx * Sec(sky) * Math.sin(alpha + sky);
+    c = -sy * Sec(skx) * Math.sin(alpha - skx);
+    d = sy * (Math.cos(alpha) + Math.sin(alpha) * Math.tan(skx));
+    e = cx + (ax - cx) * sx * Math.cos(alpha + sky) * Sec(sky) + (-ay + cy) * sy * Sec(
+        skx) * Math.sin(alpha - skx);
+    f = cy + (ax - cx) * sx * Sec(sky) * Math.sin(
+        alpha + sky) + (ay - cy) * sy * (Math.cos(alpha) + Math.sin(alpha) * Math.tan(skx));
 
-    return [a,b,c,d,e,f];
+    return [a, b, c, d, e, f];
   }
 
   /**
    * If set to true, baselines are painted.
    * @param value
    */
-  setPaintBaselines(value : boolean) {
+  setPaintBaselines(value:boolean) {
     this.paintBaselines = value;
-    if(!this.manualRepaint) this.paint();
+    if (!this.manualRepaint) this.paint();
   }
 
   /**

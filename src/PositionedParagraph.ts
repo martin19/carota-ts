@@ -126,7 +126,7 @@ export class PositionedParagraph extends CNode {
   }
 
   draw(ctx:CanvasRenderingContext2D, viewPort:Rect) {
-    var top = viewPort ? viewPort.t : 0;
+    var top = viewPort ? viewPort.t : -Number.MAX_VALUE;
     var bottom = viewPort ? (viewPort.t + viewPort.h) : Number.MAX_VALUE;
     this.lines.some((l:Line)=> {
       var b = l.bounds();
