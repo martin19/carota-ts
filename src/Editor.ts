@@ -18,7 +18,7 @@ export interface EditorOptions {
   paintSelection? : boolean,
   paintBaselines? : boolean,
   manualRepaint? : boolean,
-  anchorAtActualBounds? : boolean
+  anchorAtFirstCharacter? : boolean
 }
 
 export class Editor {
@@ -60,7 +60,7 @@ export class Editor {
   private manageTextArea : boolean;
   private paintSelection : boolean;
   private paintBaselines : boolean;
-  private anchorAtActualBounds : boolean;
+  private anchorAtFirstCharacter : boolean;
 
   constructor(options:EditorOptions) {
 
@@ -86,7 +86,7 @@ export class Editor {
     this.paintBaselines = typeof options.paintBaselines === "boolean" ? options.paintBaselines : false;
     this.backgroundColor = typeof options.backgroundColor === "string" ? options.backgroundColor : null;
     this.manualRepaint = typeof options.manualRepaint === "boolean" ? options.manualRepaint : false;
-    this.anchorAtActualBounds = typeof options.anchorAtActualBounds === "boolean" ? options.anchorAtActualBounds : false;
+    this.anchorAtFirstCharacter = typeof options.anchorAtFirstCharacter === "boolean" ? options.anchorAtFirstCharacter : false;
 
     if(this.manageTextArea) {
       this.textArea = document.createElement("textarea");
@@ -151,7 +151,7 @@ export class Editor {
       paintSelection : this.paintSelection,
       paintBaselines : this.paintBaselines,
       manualRepaint : this.manualRepaint,
-      anchorAtActualBounds : this.anchorAtActualBounds
+      anchorAtFirstCharacter : this.anchorAtFirstCharacter
     });
     clone.setOrigin(this.getOrigin().x, this.getOrigin().y);
     clone.setScale(this.getScale().x, this.getScale().y);
@@ -207,11 +207,14 @@ export class Editor {
 
     var bounds = this.bounds();
     var boundsActual = this.bounds(true);
-    if(this.anchorAtActualBounds){
+    if(this.anchorAtFirstCharacter){
       bounds = boundsActual;
+      var anchorX = this.cx - 0;
+      var anchorY = this.cy - this.doc.frame.paragraphs[0].lines[0].baseline;
+    } else {
+      anchorX = this.cx - (bounds.l + bounds.w * (this.ox+0.5));
+      anchorY = this.cy - (bounds.t + bounds.h * (this.oy+0.5));
     }
-    var anchorX = this.cx - (bounds.l + bounds.w * (this.ox+0.5));
-    var anchorY = this.cy - (bounds.t + bounds.h * (this.oy+0.5));
 
     if(typeof canvas !== "undefined") {
       var ctx = canvas.getContext("2d");
@@ -484,6 +487,11 @@ export class Editor {
    * @return {{x: number, y: number}}
    */
   getOrigin() {
+    if(this.anchorAtFirstCharacter) {
+      var actualOriginX = ((this.bounds(false).l - this.bounds(true).l)/this.bounds(true).w) - 0.5;
+      var actualOriginY = ((this.doc.frame.paragraphs[0].lines[0].baseline - this.bounds(true).t) / this.bounds(true).h) - 0.5;
+      return { x : actualOriginX, y : actualOriginY };
+    }
     return { x : this.ox, y : this.oy }
   }
 
@@ -593,11 +601,18 @@ export class Editor {
   }
 
   getWorldToEditorTransform() {
-    var bounds = this.bounds(this.anchorAtActualBounds);
+    var bounds = this.bounds(this.anchorAtFirstCharacter);
 
     var alpha = this.alpha;
-    var ax = this.cx - (bounds.l + bounds.w * (this.ox+0.5));
-    var ay = this.cy - (bounds.t + bounds.h * (this.oy+0.5));
+
+    if(this.anchorAtFirstCharacter){
+      bounds = this.bounds(true);
+      var ax = this.cx - 0;
+      var ay = this.cy - this.doc.frame.paragraphs[0].lines[0].baseline;
+    } else {
+      ax = this.cx - (bounds.l + bounds.w * (this.ox+0.5));
+      ay = this.cy - (bounds.t + bounds.h * (this.oy+0.5));
+    }
 
     var sx = this.sx;
     var sy = this.sy;
@@ -627,11 +642,19 @@ export class Editor {
    * @returns {number[]}
    */
   getEditorToWorldTransform() {
-    var bounds = this.bounds(this.anchorAtActualBounds);
+    var bounds = this.bounds(this.anchorAtFirstCharacter);
 
     var alpha = this.alpha;
-    var ax = this.cx - (bounds.l + bounds.w * (this.ox+0.5));
-    var ay = this.cy - (bounds.t + bounds.h * (this.oy+0.5));
+
+    if(this.anchorAtFirstCharacter){
+      bounds = this.bounds(true);
+      var ax = this.cx - 0;
+      var ay = this.cy - this.doc.frame.paragraphs[0].lines[0].baseline;
+    } else {
+      ax = this.cx - (bounds.l + bounds.w * (this.ox+0.5));
+      ay = this.cy - (bounds.t + bounds.h * (this.oy+0.5));
+    }
+
     var sx = this.sx;
     var sy = this.sy;
     var sky = this.skewY;
