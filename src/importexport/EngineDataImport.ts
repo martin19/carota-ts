@@ -1,6 +1,7 @@
+///
 import {Run, ICharacterFormatting, IFormattingMap} from "../Run";
 import {Paragraph} from "../Paragraph";
-import {IColor, IEngineData, IParagraphRunData} from "./EngineData";
+import {IColor, IEngineData, IParagraphRunData, IStyleSheetData} from "./EngineData";
 
 export class EngineDataImport {
 
@@ -10,26 +11,29 @@ export class EngineDataImport {
 
   static getCharacterFormatting(engineData:IEngineData, runIndex:number) {
     var formatting:IFormattingMap = {};
+    var defaultStyleSheetData = engineData.ResourceDict.StyleSheetSet[engineData.ResourceDict.TheNormalStyleSheet].StyleSheetData;
     var styleSheetData = engineData.EngineDict.StyleRun.RunArray[runIndex].StyleSheet.StyleSheetData;
-    formatting["size"] = styleSheetData.FontSize;
-    var fontIndex = styleSheetData.Font;
-    switch(styleSheetData.FontBaseline) {
+    var mergedStyleSheet = $.extend(true, {},defaultStyleSheetData,styleSheetData) as IStyleSheetData;
+
+    formatting["size"] = mergedStyleSheet.FontSize;
+    var fontIndex = mergedStyleSheet.Font;
+    switch(mergedStyleSheet.FontBaseline) {
       case 0 : formatting["script"] = "normal"; break;
       case 1 : formatting["script"] = "super"; break;
       case 2 : formatting["script"] = "sub"; break;
     }
     formatting["font"] = engineData.ResourceDict.FontSet[fontIndex].Name;
-    formatting["color"] = EngineDataImport.getColor(styleSheetData.FillColor);
-    formatting["baselineShift"] = styleSheetData.BaselineShift;
-    formatting["letterSpacing"] = styleSheetData.Tracking/1000;
-    formatting["lineHeight"] = styleSheetData.AutoLeading ? 0 : styleSheetData.Leading;
-    formatting["verticalScaling"] = styleSheetData.VerticalScale;
-    formatting["horizontalScaling"] = styleSheetData.HorizontalScale;
-    formatting["bold"] = styleSheetData.FauxBold;
-    formatting["italic"] = styleSheetData.FauxItalic;
-    formatting["underline"] = styleSheetData.Underline;
-    formatting["strikeout"] = styleSheetData.Strikethrough;
-    formatting["capitals"] = styleSheetData.FontCaps == 2;
+    formatting["color"] = EngineDataImport.getColor(mergedStyleSheet.FillColor);
+    formatting["baselineShift"] = mergedStyleSheet.BaselineShift;
+    formatting["letterSpacing"] = mergedStyleSheet.Tracking/1000;
+    formatting["lineHeight"] = mergedStyleSheet.AutoLeading ? 0 : mergedStyleSheet.Leading;
+    formatting["verticalScaling"] = mergedStyleSheet.VerticalScale;
+    formatting["horizontalScaling"] = mergedStyleSheet.HorizontalScale;
+    formatting["bold"] = mergedStyleSheet.FauxBold;
+    formatting["italic"] = mergedStyleSheet.FauxItalic;
+    formatting["underline"] = mergedStyleSheet.Underline;
+    formatting["strikeout"] = mergedStyleSheet.Strikethrough;
+    formatting["capitals"] = mergedStyleSheet.FontCaps == 2;
     return formatting;
   }
 

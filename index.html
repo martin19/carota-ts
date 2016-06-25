@@ -121,7 +121,8 @@
         x : 400,
         y : 400,
         w : 400,
-        h : 500
+        h : 500,
+        anchorAtFirstCharacter : true
       });
       var exampleEditor = editor.getDoc();
 
@@ -209,8 +210,9 @@
               exampleEditor.performUndo(true);
             },
             wrap : true,
-            origin : "center",
-            baselines : false,
+            originX : "center",
+            originY : "center",
+            baselines : false
           };
 
           var gui = new dat.GUI({hideable:false});
@@ -232,7 +234,8 @@
           cFormatting.push(f1.add(textBoxOptions, "capitals").listen());
           cFormatting.push(f1.add(textBoxOptions, "color", ["black", "red", "green", "blue", "orange"]).listen());
 
-          var cOrigin = f1.add(textBoxOptions, "origin", ["topleft","center","bottomright"]);
+          var cOriginX = f1.add(textBoxOptions, "originX", ["left","center","right","left-actual","center-actual","right-actual"]);
+          var cOriginY = f1.add(textBoxOptions, "originY", ["top","center","bottom","top-actual","center-actual","bottom-actual","firstBaseline"]);
           var cWrap = f1.add(textBoxOptions, "wrap");
           var cBaselines = f1.add(textBoxOptions,"baselines");
 
@@ -245,12 +248,11 @@
           cWrap.onChange(function(value) {
             exampleEditor.setWrap(value);
           });
-          cOrigin.onChange(function(value) {
-            switch(value) {
-              case "topleft" : editor.setOrigin(-0.5,-0.5); break;
-              case "center" : editor.setOrigin(0,0); break;
-              case "bottomright" : editor.setOrigin(0.5,0.5); break;
-            }
+          cOriginX.onChange(function(value) {
+            editor.setOrigin(value,editor.getOrigin().y);
+          });
+          cOriginY.onChange(function(value) {
+            editor.setOrigin(editor.getOrigin().x, value);
           });
           cBaselines.onChange(function(value) { editor.setPaintBaselines(value); });
 
