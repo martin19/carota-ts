@@ -5,7 +5,6 @@ import {
 import {Paragraph, IParagraphFormatting} from "../Paragraph";
 import {CarotaDoc} from "../Doc";
 import {Run, ICharacterFormatting} from "../Run";
-import {EngineDataImport} from "./EngineDataImport";
 
 var DefaultParagraphSheet:IParagraphSheet = {
   "DefaultStyleSheet": 0,
@@ -523,7 +522,6 @@ export class EngineDataExport {
       Cookie : {
         Photoshop: {
           ShapeType: null,
-          BoxBounds: null,
           Base: {
             ShapeType: null,
             TransformPoint0: [1,0],
@@ -541,7 +539,6 @@ export class EngineDataExport {
     } else {
       shape.ShapeType = 1;
       shape.Cookie.Photoshop.ShapeType = 1;
-      //shape.Cookie.Photoshop.BoxBounds = [0,0,503,343];
       shape.Cookie.Photoshop.BoxBounds = [0,0,doc.bounds().w,doc.bounds().h];
       shape.Cookie.Photoshop.Base.ShapeType = 1;
     }
