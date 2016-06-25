@@ -83,7 +83,11 @@ export var LayouterParagraph = function (left:number, top:number, width:number, 
       if(y==top) {
         y = previousBaseline;
       }
-      var l = new Line(parent, x, width, y + maxLineHeight, maxAscent, maxDescent, maxAscentUnscaled, maxDescentUnscaled, maxLineHeight, lineBuffer, ordinal);
+      if(wrap) {
+        var l = new Line(parent, x, width, y + maxAscentUnscaled, maxAscent, maxDescent, maxAscentUnscaled, maxDescentUnscaled, maxLineHeight, lineBuffer, ordinal);
+      } else {
+        var l = new Line(parent, x, width, y + maxLineHeight, maxAscent, maxDescent, maxAscentUnscaled, maxDescentUnscaled, maxLineHeight, lineBuffer, ordinal);
+      }
     } else {
       var l = new Line(parent, x, width, y + maxAscentUnscaled, maxAscent, maxDescent, maxAscentUnscaled, maxDescentUnscaled, maxLineHeight, lineBuffer, ordinal);
     }

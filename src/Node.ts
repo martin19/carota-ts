@@ -96,12 +96,19 @@ export class CNode {
     return this;
   }
 
-  findChildByCoordinate(x:number, y: number) {
+  /**
+   * Finds a child node by coordinate.
+   * @param x
+   * @param y
+   * @param actualBounds - determines if user set bounds or actual bounds are considered.
+   * @returns {CNode}
+   */
+  findChildByCoordinate(x:number, y: number, actualBounds?:boolean) {
     var found:CNode = null;
-    if(this.bounds().contains(x,y)) {
+    if(this.bounds(actualBounds).contains(x,y)) {
       found = this;
       this.children().forEach((child:CNode)=>{
-        var foundChild = child.findChildByCoordinate(x,y);
+        var foundChild = child.findChildByCoordinate(x,y,actualBounds);
         if(foundChild) {
           found = foundChild;
         }
@@ -114,9 +121,10 @@ export class CNode {
    * Find closest child node by coordinate.
    * @param x
    * @param y
+   * @param actualBounds - determines if user set bounds or actual bounds are considered.
    * @returns {CNode}
    */
-  byCoordinate(x:number, y:number):CNode[] {
+  byCoordinate(x:number, y:number, actualBounds?:boolean):CNode[] {
     var found:Array<CNode>;
     var foundNodes:Array<CNode> = [];
 
@@ -125,9 +133,9 @@ export class CNode {
     }
 
     this.children().forEach((child:CNode)=> {
-      var b = child.bounds();
+      var b = child.bounds(actualBounds);
       if (b.contains(x, y)) {
-        found = child.byCoordinate(x, y);
+        found = child.byCoordinate(x, y, actualBounds);
         if (found) {
           foundNodes = foundNodes.concat(found);
           //return true;
