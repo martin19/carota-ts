@@ -254,7 +254,7 @@ export class Text {
           break;
         }
       }
-      Text.ExtendedFontMetricsCache[key] = result = { estimatedTypeAscender : y - i + 1 };
+      Text.ExtendedFontMetricsCache[key] = result = { estimatedTypeAscender : y - i - 1 };
     }
     return result;
   }
