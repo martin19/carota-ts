@@ -16,6 +16,7 @@ export var LayouterParagraph = function (left:number, top:number, width:number, 
     lineWidth = 0,
     maxAscent = 0,
     maxDescent = 0,
+    maxEstimatedTypeAscender = 0,
     maxAscentUnscaled = 0,
     maxDescentUnscaled = 0,
     maxLineHeight = 0,
@@ -44,6 +45,7 @@ export var LayouterParagraph = function (left:number, top:number, width:number, 
     maxAscentUnscaled = Math.max(maxAscentUnscaled, word.ascentUnscaled);
     maxDescentUnscaled = Math.max(maxDescentUnscaled, word.descentUnscaled);
     maxLineHeight = Math.max(maxLineHeight, word.lineHeight);
+    maxEstimatedTypeAscender = Math.max(maxEstimatedTypeAscender, word.estimatedTypeAscender);
     if (word.isNewLine()) {
       send(emit);
       lastNewLineHeight = word.ascent + word.descent;
@@ -80,32 +82,18 @@ export var LayouterParagraph = function (left:number, top:number, width:number, 
     }
 
     if(maxLineHeight !== 0) {
-      if(y==top) {
-        y = previousBaseline;
-      }
-      if(wrap) {
-        if(y == 0) {
-          var l = new Line(parent, x, width, y + maxAscentUnscaled, maxAscent, maxDescent, maxAscentUnscaled, maxDescentUnscaled, maxLineHeight, lineBuffer, ordinal);
-        } else {
-          var l = new Line(parent, x, width, y + maxLineHeight, maxAscent, maxDescent, maxAscentUnscaled, maxDescentUnscaled, maxLineHeight, lineBuffer, ordinal);
-        }
-      } else {
-        var l = new Line(parent, x, width, y + maxLineHeight, maxAscent, maxDescent, maxAscentUnscaled, maxDescentUnscaled, maxLineHeight, lineBuffer, ordinal);
-      }
+      if(y==top) y = previousBaseline;
+      var yNew = (wrap && y == 0) ? y + maxEstimatedTypeAscender : y+maxLineHeight;
     } else {
-      var l = new Line(parent, x, width, y + maxAscentUnscaled, maxAscent, maxDescent, maxAscentUnscaled, maxDescentUnscaled, maxLineHeight, lineBuffer, ordinal);
+      yNew = y+maxAscentUnscaled;
     }
+
+    var l = new Line(parent, x, width, yNew, maxAscent, maxDescent, maxAscentUnscaled, maxDescentUnscaled, maxLineHeight, lineBuffer, ordinal);
 
     ordinal += l.length;
     quit = emit(l);
-
-    //lineHeight is set to Auto
-    if(maxLineHeight === 0) {
-      y += (maxAscentUnscaled + maxDescentUnscaled);
-    } else {
-      y += maxLineHeight;
-    }
-
+    
+    y = yNew;
     lineBuffer.length = 0;
     lineWidth = maxAscent = maxDescent = maxLineHeight = maxDescentUnscaled = maxAscentUnscaled = 0;
   };

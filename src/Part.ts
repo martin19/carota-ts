@@ -42,6 +42,10 @@ export class Part {
    * Distance from baseline to bottom (before applying character scaling)
    */
   descentUnscaled:number;
+  /**
+   * Estimated type ascender.
+   */
+  estimatedTypeAscender: number;
 
   
   lineHeight:number;
@@ -62,6 +66,7 @@ export class Part {
     this.ascentUnscaled = m.ascentUnscaled;
     this.descentUnscaled = m.descentUnscaled;
     this.lineHeight = m.lineHeight;
+    this.estimatedTypeAscender = m.extendedFontMetrics.estimatedTypeAscender;
   }
 
   /**

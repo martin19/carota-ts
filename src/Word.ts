@@ -36,6 +36,10 @@ export interface ISection {
    */
   lineHeight:number;
   /**
+   * Estimated type ascender.
+   */
+  estimatedTypeAscender:number;
+  /**
    * Width of the whole section
    */
   width: number;
@@ -83,6 +87,10 @@ export class Word {
    */
   lineHeight:number;
   /**
+   * Estimated type ascender
+   */
+  estimatedTypeAscender:number;
+  /**
    * Width of the whole word (including trailing space) in pixels.
    */
   width:number;
@@ -114,6 +122,7 @@ export class Word {
     this.ascentUnscaled = Math.max(this.text.ascentUnscaled, this.space.ascentUnscaled);
     this.descentUnscaled = Math.max(this.text.descentUnscaled, this.space.descentUnscaled);
     this.lineHeight = this.text.lineHeight;
+    this.estimatedTypeAscender = Math.max(this.text.estimatedTypeAscender, this.space.estimatedTypeAscender);
     this.width = this.text.width + this.space.width;
     this.length = this.text.length + this.space.length;
     if (!coords) {
@@ -211,6 +220,7 @@ var section = function (runEmitter:((p:(r:Run)=>void)=>void)|Array<Run>) {
     ascentUnscaled: 0,
     descentUnscaled: 0,
     lineHeight: 0,
+    estimatedTypeAscender: 0,
     width: 0,
     length: 0,
     plainText: ''
@@ -221,6 +231,7 @@ var section = function (runEmitter:((p:(r:Run)=>void)=>void)|Array<Run>) {
     s.ascentUnscaled = Math.max(s.ascentUnscaled, p.ascentUnscaled);
     s.descentUnscaled = Math.max(s.descentUnscaled, p.descentUnscaled);
     s.lineHeight = Math.max(s.lineHeight, p.lineHeight);
+    s.estimatedTypeAscender = Math.max(s.estimatedTypeAscender, p.estimatedTypeAscender);
     s.width += p.width;
     s.length += Run.getPieceLength(p.run.text);
     s.plainText += Run.getPiecePlainText(p.run.text);

@@ -82,14 +82,6 @@ export class Editor {
     this.manualRepaint = typeof options.manualRepaint === "boolean" ? options.manualRepaint : false;
     this.clipAtBounds = typeof options.clipAtBounds === "boolean" ? options.clipAtBounds : true;
 
-    this.setPosition(options.x, options.y);
-    this.setSize(typeof options.w == "number" ? options.w : 0, typeof options.h == "number" ? options.h : 0);
-    this.setRotation(0);
-    this.setScale(1.0, 1.0);
-    this.setSkew(0, 0);
-    this.setOrigin(typeof options.originX !== "undefined" ? options.originX : "center",
-      typeof options.originY !== "undefined" ? options.originY : "center");
-
     if (this.manageTextArea) {
       this.textArea = document.createElement("textarea");
       this.textArea.style.position = "absolute";
@@ -97,6 +89,14 @@ export class Editor {
       document.body.appendChild(this.textArea);
       this.textAreaContent = "";
     }
+
+    this.setPosition(options.x, options.y);
+    this.setSize(typeof options.w == "number" ? options.w : 0, typeof options.h == "number" ? options.h : 0);
+    this.setRotation(0);
+    this.setScale(1.0, 1.0);
+    this.setSkew(0, 0);
+    this.setOrigin(typeof options.originX !== "undefined" ? options.originX : "center",
+      typeof options.originY !== "undefined" ? options.originY : "center");
 
     this.keyboardSelect = 0;
     this.keyboardX = null;

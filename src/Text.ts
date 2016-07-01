@@ -10,6 +10,11 @@ export interface ITextMeasurement {
   height? : number;
   lineHeight? : number;
   width : number;
+  extendedFontMetrics? : IExtendedFontMetrics;
+}
+
+interface IExtendedFontMetrics {
+  estimatedTypeAscender : number;
 }
 
 export class Text {
@@ -212,12 +217,47 @@ export class Text {
       }
       result.width *= horizontalScaling;
       result.lineHeight = lineHeight;
+      result.extendedFontMetrics = Text.ComputeExtendedFontMetrics(formatting);
     } finally {
       div.parentNode.removeChild(div);
       div = null;
     }
     return result;
   };
+
+  static ExtendedFontMetricsCache : {[s:string]:IExtendedFontMetrics};
+  static ComputeExtendedFontMetrics(formatting:ICharacterFormatting) {
+    if(typeof formatting === "undefined") {
+      return { estimatedTypeAscender : 0 }
+    }
+    var key = (formatting.size||Run.defaultFormatting.size) + "px " + (formatting.font||Run.defaultFormatting.font);
+    var result = Text.ExtendedFontMetricsCache[key];
+    if(!result) {
+      var ctx = Text.ctxMeasure;
+      ctx.font = key;
+      var x = 0;
+      var y = ctx.canvas.height/2;
+      var w = Math.ceil(ctx.measureText("d").width);
+      ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height);
+      ctx.fillText("d",0,y);
+      var data = ctx.getImageData(x,0,w,y).data;
+      for(var i = y-1; i >= 0; i--) {
+        var clean = true;
+        var x0 = (i*w*4);
+        for(var j = 0; j <= (w*4); j+=4) {
+          if(data[x0+j+3] != 0) {
+            clean = false;
+            break;
+          }
+        }
+        if(clean) {
+          break;
+        }
+      }
+      Text.ExtendedFontMetricsCache[key] = result = { estimatedTypeAscender : y - i + 1 };
+    }
+    return result;
+  }
 
   /**
    * Create a function that works like measureText except it caches every result for every
@@ -309,3 +349,6 @@ export class Text {
   };
 }
 Text.cachedMeasureText = Text.createCachedMeasureText();
+Text.ExtendedFontMetricsCache = {};
+Text.ctxMeasure.canvas.width = 300;
+Text.ctxMeasure.canvas.height = 600;

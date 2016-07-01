@@ -75,7 +75,7 @@ var fontName = function (name:string) {
 };
 
 var headings:{[s:string]:number} = {
-  H1: 30,
+  H1: 72,
   H2: 20,
   H3: 16,
   H4: 14,
