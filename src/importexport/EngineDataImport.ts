@@ -10,22 +10,21 @@ export class EngineDataImport {
   }
 
   static getCharacterFormatting(engineData:IEngineData, runIndex:number) {
-    var formatting:IFormattingMap = {};
-    var defaultStyleSheetData = engineData.ResourceDict.StyleSheetSet[engineData.ResourceDict.TheNormalStyleSheet].StyleSheetData;
-    var styleSheetData = engineData.EngineDict.StyleRun.RunArray[runIndex].StyleSheet.StyleSheetData;
-    var mergedStyleSheet = $.extend(true, {},defaultStyleSheetData,styleSheetData) as IStyleSheetData;
+    let formatting:IFormattingMap = {};
+    let defaultStyleSheetData = engineData.ResourceDict.StyleSheetSet[engineData.ResourceDict.TheNormalStyleSheet].StyleSheetData;
+    let styleSheetData = engineData.EngineDict.StyleRun.RunArray[runIndex].StyleSheet.StyleSheetData;
+    let mergedStyleSheet = $.extend(true, {},defaultStyleSheetData,styleSheetData) as IStyleSheetData;
 
     formatting["size"] = mergedStyleSheet.FontSize;
-    var fontIndex = mergedStyleSheet.Font;
     switch(mergedStyleSheet.FontBaseline) {
       case 0 : formatting["script"] = "normal"; break;
       case 1 : formatting["script"] = "super"; break;
       case 2 : formatting["script"] = "sub"; break;
     }
-    formatting["font"] = engineData.ResourceDict.FontSet[fontIndex].Name;
-    formatting["color"] = EngineDataImport.getColor(mergedStyleSheet.FillColor);
+    mergedStyleSheet.Font && (formatting["font"] = engineData.ResourceDict.FontSet[mergedStyleSheet.Font].Name);
+    mergedStyleSheet.FillColor && (formatting["color"] = EngineDataImport.getColor(mergedStyleSheet.FillColor));
     formatting["baselineShift"] = mergedStyleSheet.BaselineShift;
-    formatting["letterSpacing"] = mergedStyleSheet.Tracking/1000;
+    mergedStyleSheet.Tracking && (formatting["letterSpacing"] = mergedStyleSheet.Tracking/1000);
     formatting["lineHeight"] = mergedStyleSheet.AutoLeading ? 0 : mergedStyleSheet.Leading;
     formatting["verticalScaling"] = mergedStyleSheet.VerticalScale;
     formatting["horizontalScaling"] = mergedStyleSheet.HorizontalScale;
@@ -38,8 +37,8 @@ export class EngineDataImport {
   }
 
   static getParagraphFormatting(engineData:IEngineData, runIndex:number) {
-    var formatting:IFormattingMap = {};
-    var properties = engineData.EngineDict.ParagraphRun.RunArray[runIndex].ParagraphSheet.Properties;
+    let formatting:IFormattingMap = {};
+    let properties = engineData.EngineDict.ParagraphRun.RunArray[runIndex].ParagraphSheet.Properties;
     formatting["marginLeft"] = properties.StartIndent;
     formatting["marginRight"] = properties.EndIndent;
     formatting["spaceBefore"] = properties.SpaceBefore;
@@ -57,25 +56,25 @@ export class EngineDataImport {
   }
 
   static parse(engineData:IEngineData):Array<Paragraph> {
-   var runs:Array<Run> = [];
+   let runs:Array<Run> = [];
    console.log(engineData);
     console.log(engineData.EngineDict.Editor.Text);
 
-   var text = engineData.EngineDict.Editor.Text;
-   var text = decodeURIComponent(encodeURIComponent(text));
+   let text = engineData.EngineDict.Editor.Text;
+   text = decodeURIComponent(encodeURIComponent(text));
    text = text.replace(/\r/g,"\n");
-   var charCounter = 0;
+   let charCounter = 0;
 
-   var paragraphs:Array<Paragraph> = [];
-   var paragraphOrdinal = 0;
-   var runOrdinal = 0;
+   let paragraphs:Array<Paragraph> = [];
+   let paragraphOrdinal = 0;
+   let runOrdinal = 0;
    engineData.EngineDict.ParagraphRun.RunArray.forEach((paragraphRunData:IParagraphRunData, i : number)=>{
-     var paragraphLength = engineData.EngineDict.ParagraphRun.RunLengthArray[i];
-     var runLength:number;
-     var paragraph = new Paragraph();
+     let paragraphLength = engineData.EngineDict.ParagraphRun.RunLengthArray[i];
+     let runLength:number;
+     let paragraph = new Paragraph();
 
      //get runs and partial runs in this paragraph
-     var j = 0;
+     let j = 0;
      runOrdinal = 0;
      runLength = engineData.EngineDict.StyleRun.RunLengthArray[j];
      while(runOrdinal+runLength < paragraphOrdinal) {
@@ -83,15 +82,15 @@ export class EngineDataImport {
        runLength = engineData.EngineDict.StyleRun.RunLengthArray[++j];
      }
 
-     var formatting = EngineDataImport.getCharacterFormatting(engineData,j);
-     var run = new Run(text.substring(paragraphOrdinal,Math.min(runOrdinal + runLength, paragraphOrdinal+paragraphLength)),formatting,paragraph);
+     let formatting = EngineDataImport.getCharacterFormatting(engineData,j);
+     let run = new Run(text.substring(paragraphOrdinal,Math.min(runOrdinal + runLength, paragraphOrdinal+paragraphLength)),formatting,paragraph);
      paragraph.addRun(run);
      runOrdinal += runLength;
      runLength = engineData.EngineDict.StyleRun.RunLengthArray[++j];
 
      while(runOrdinal < paragraphOrdinal+paragraphLength) {
       formatting = EngineDataImport.getCharacterFormatting(engineData,j);
-      var run = new Run(text.substring(runOrdinal,Math.min(runOrdinal + runLength, paragraphOrdinal+paragraphLength)),formatting,paragraph);
+      let run = new Run(text.substring(runOrdinal,Math.min(runOrdinal + runLength, paragraphOrdinal+paragraphLength)),formatting,paragraph);
       paragraph.addRun(run);
       runOrdinal += runLength;
       runLength = engineData.EngineDict.StyleRun.RunLengthArray[++j];

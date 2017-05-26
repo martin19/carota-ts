@@ -6,6 +6,7 @@ var filter = require("gulp-filter");
 gulp.task( 'build', function() {
 
   return gulp.src([
+    "src/Polyfills.ts",
     "src/Characters.ts",
     "src/Dom.ts",
     "src/Editor.ts",

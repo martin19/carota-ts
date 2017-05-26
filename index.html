@@ -121,8 +121,7 @@
         x : 400,
         y : 400,
         w : 400,
-        h : 500,
-        anchorAtFirstCharacter : true
+        h : 500
       });
       var exampleEditor = editor.getDoc();
 
@@ -171,19 +170,19 @@
           });
           exampleEditor.load(paragraphs);
 
-          console.log(JSON.stringify(carota.EngineDataExport.save(exampleEditor),2," "));
+          //console.log(JSON.stringify(carota.EngineDataExport.save(exampleEditor),2," "));
         }
       };
 
-      var load = function() {
-        $.getJSON("./src/importexport/enginedata_area.json", function(engineData) {
-        //$.getJSON("./src/import/enginedata_paragraphs.json", function(engineData) {
-          var runs = carota.EngineDataImport.parse(engineData);
-          exampleEditor.load(runs);
-
-            console.log(JSON.stringify(carota.EngineDataExport.save(exampleEditor),2," "));
-        });
-      };
+//      var load = function() {
+//        $.getJSON("./src/importexport/enginedata_area.json", function(engineData) {
+//        //$.getJSON("./src/import/enginedata_paragraphs.json", function(engineData) {
+//          var runs = carota.EngineDataImport.parse(engineData);
+//          exampleEditor.load(runs);
+//
+//            console.log(JSON.stringify(carota.EngineDataExport.save(exampleEditor),2," "));
+//        });
+//      };
 
       //dat.gui
       var TextBoxController = {
