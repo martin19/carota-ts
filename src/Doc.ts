@@ -778,7 +778,7 @@ export class CarotaDoc extends CNode {
    * @param desiredX x position of caret
    * @return {number}
    */
-  changeLine(ordinal:number, direction:number, desiredX? : number) {
+  changeLine(ordinal:number, direction:number, desiredX? : number|null) {
 
     let originalCaret = this.getCaretCoords(ordinal);
     let newCaret:Rect = originalCaret;

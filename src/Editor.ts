@@ -388,6 +388,7 @@ export class Editor {
   }
 
   private updateCaretAndSelection(ordinal:number) {
+    if(this.keyboardSelect === null) return;
     let start = this.doc.selection.start,
       end = this.doc.selection.end;
 

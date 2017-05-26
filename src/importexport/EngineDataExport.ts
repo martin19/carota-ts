@@ -6,7 +6,7 @@ import {Paragraph, IParagraphFormatting} from "../Paragraph";
 import {CarotaDoc} from "../Doc";
 import {Run, ICharacterFormatting} from "../Run";
 
-var DefaultParagraphSheet:IParagraphSheet = {
+let DefaultParagraphSheet:IParagraphSheet = {
   "DefaultStyleSheet": 0,
   "Properties": {
     "Justification": 0,
@@ -33,7 +33,7 @@ var DefaultParagraphSheet:IParagraphSheet = {
   }
 };
 
-var DefaultStyleSheet:IStyleSheet = {
+let DefaultStyleSheet:IStyleSheet = {
   "StyleSheetData": {
     "Font": 1,
     "FontSize": 12,
@@ -74,7 +74,7 @@ var DefaultStyleSheet:IStyleSheet = {
   }
 };
 
-var DefaultFontSet:Array<IFont> = [
+let DefaultFontSet:Array<IFont> = [
   {
     Name: "LiberationSans",
     Script: 0,
@@ -93,7 +93,7 @@ var DefaultFontSet:Array<IFont> = [
   }
 ];
 
-var DefaultEngineData:IEngineData = {
+let DefaultEngineData:IEngineData = {
   "EngineDict":{
     "Editor": {
       "Text": ""
@@ -154,10 +154,10 @@ var DefaultEngineData:IEngineData = {
             },
             "Cookie": {
               "Photoshop": {
-                "ShapeType": null,
-                "BoxBounds": null,
+                "ShapeType": -1,
+                "BoxBounds": [0,0,0,0],
                 "Base": {
-                  "ShapeType": null,
+                  "ShapeType": -1,
                   "TransformPoint0": [1,0],
                   "TransformPoint1": [0,1],
                   "TransformPoint2": [0,0]
@@ -396,10 +396,11 @@ var DefaultEngineData:IEngineData = {
 };
 
 function rgbaToIColor(colorStr : string):IColor {
+  let color:IColor;
   if(!colorStr) return { Type : 1, Values : [1,0,0,0] };
-  var colorArr = colorStr.slice(colorStr.indexOf('(') + 1, colorStr.indexOf(')')).split(",");
+  let colorArr = colorStr.slice(colorStr.indexOf('(') + 1, colorStr.indexOf(')')).split(",");
   if(colorArr && colorArr.length==4) {
-    var color:IColor = {
+    color = {
       Type : 1,
       Values : [parseFloat(colorArr[3]), parseFloat(colorArr[0])/255,parseFloat(colorArr[1])/255,parseFloat(colorArr[2])/255]
     }
@@ -415,7 +416,7 @@ export class EngineDataExport {
   static getStyleSheet(run:Run, fontSet : Array<IFont>) {
 
     function getFontIndex(name : string) {
-      var fontIndex:number = null;
+      let fontIndex:number|null = null;
       fontSet.forEach((f:IFont, i : number)=>{
         if(f.Name === name) {
           fontIndex = i;
@@ -433,9 +434,9 @@ export class EngineDataExport {
       return fontIndex;
     }
 
-    var styleSheet:IStyleSheet = JSON.parse(JSON.stringify(DefaultStyleSheet));
-    var styleSheetData:IStyleSheetData = styleSheet.StyleSheetData;
-    var formatting = run.formatting as ICharacterFormatting;
+    let styleSheet:IStyleSheet = JSON.parse(JSON.stringify(DefaultStyleSheet));
+    let styleSheetData:IStyleSheetData = styleSheet.StyleSheetData;
+    let formatting = run.formatting as ICharacterFormatting;
     if(typeof formatting.size !== "undefined") styleSheetData.FontSize = formatting.size;
     if(typeof formatting.font !== "undefined") {
       styleSheetData.Font = getFontIndex(formatting.font);
@@ -463,9 +464,9 @@ export class EngineDataExport {
   }
 
   static getParagraphSheet(paragraph:Paragraph) {
-    var paragraphSheet:IParagraphSheet = JSON.parse(JSON.stringify(DefaultParagraphSheet));
-    var properties:IParagraphProperties = paragraphSheet.Properties;
-    var formatting = paragraph.formatting as IParagraphFormatting;
+    let paragraphSheet:IParagraphSheet = JSON.parse(JSON.stringify(DefaultParagraphSheet));
+    let properties:IParagraphProperties = paragraphSheet.Properties;
+    let formatting = paragraph.formatting as IParagraphFormatting;
     if(typeof formatting.marginLeft !== "undefined") properties.StartIndent = formatting.marginLeft;
     if(typeof formatting.marginRight !== "undefined") properties.EndIndent = formatting.marginRight;
     if(typeof formatting.spaceBefore !== "undefined") properties.SpaceBefore = formatting.spaceBefore;
@@ -487,12 +488,12 @@ export class EngineDataExport {
   }
 
   static save(doc : CarotaDoc) {
-    var engineData = JSON.parse(JSON.stringify(DefaultEngineData)) as IEngineData;
-    var fontSet:Array<IFont> = JSON.parse(JSON.stringify(DefaultFontSet));
+    let engineData = JSON.parse(JSON.stringify(DefaultEngineData)) as IEngineData;
+    let fontSet:Array<IFont> = JSON.parse(JSON.stringify(DefaultFontSet));
     engineData.EngineDict.Editor.Text = doc.documentRange().plainText().replace(/\n/g,"\r");
-    var paragraphs = doc.documentRange().save();
+    let paragraphs = doc.documentRange().save();
     paragraphs.forEach((p:Paragraph)=>{
-      var paragraphRun:IParagraphRunData = {
+      let paragraphRun:IParagraphRunData = {
         ParagraphSheet : EngineDataExport.getParagraphSheet(p),
         Adjustments: { Axis: [1,0,1], XY: [0,0] }
       };
@@ -501,7 +502,7 @@ export class EngineDataExport {
       engineData.EngineDict.ParagraphRun.IsJoinable = 1;
       
       p.runs((r:Run)=>{
-        var styleRun:IStyleRunData = {
+        let styleRun:IStyleRunData = {
           StyleSheet : {
             StyleSheetData : EngineDataExport.getStyleSheet(r, fontSet)
           }
@@ -515,15 +516,15 @@ export class EngineDataExport {
     engineData.ResourceDict.FontSet = fontSet;
     engineData.DocumentResources.FontSet = fontSet;
 
-    var shape:IShape = {
-      ShapeType : null,
+    let shape:IShape = {
+      ShapeType : -1,
       Procession : 0,
       Lines : { WritingDirection : 0, Children : [] },
       Cookie : {
         Photoshop: {
-          ShapeType: null,
+          ShapeType: -1,
           Base: {
-            ShapeType: null,
+            ShapeType: -1,
             TransformPoint0: [1,0],
             TransformPoint1: [0,1],
             TransformPoint2: [0,0]
