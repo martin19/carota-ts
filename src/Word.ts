@@ -162,7 +162,7 @@ export class Word {
    * @returns {string}
    */
   align() {
-    var first = this.text.parts[0];
+    let first = this.text.parts[0];
     return first ? (<ICharacterFormatting>first.run.formatting).align : 'left';
   }
 
@@ -172,23 +172,20 @@ export class Word {
    * @param range
    */
   runs(emit:(p:Run)=>void, range?:IRange) {
-    var start = range && range.start || 0,
-      end = range && range.end;
-    if (typeof end !== 'number') {
-      end = Number.MAX_VALUE;
-    }
+    let start = range && range.start || 0;
+    let end = (range && typeof range.end === "number") ? range.end : Number.MAX_VALUE;
     [this.text, this.space].forEach(function (section) {
-      section.parts.some(function (part) {
+      section.parts.some((part) => {
         if (start >= end || end <= 0) {
           return true;
         }
-        var run = part.run, text = run.text;
+        let run = part.run, text = run.text;
         if (typeof text === 'string') {
           if (start <= 0 && end >= text.length) {
             emit(run);
           } else if (start < text.length) {
-            var pieceRun = run.clone();
-            var firstChar = Math.max(0, start);
+            let pieceRun = run.clone();
+            let firstChar = Math.max(0, start);
             pieceRun.text = text.substr(
               firstChar,
               Math.min(text.length, end - firstChar)
@@ -204,14 +201,15 @@ export class Word {
           start--;
           end--;
         }
+        return false;
       });
     });
   }
 }
 
 
-var section = function (runEmitter:((p:(r:Run)=>void)=>void)|Array<Run>) {
-  var s:ISection = {
+let section = function (runEmitter:((p:(r:Run)=>void)=>void)|Array<Run>) {
+  let s:ISection = {
     parts: new Per(runEmitter).map(function (p:Run) {
       return new Part(p);
     }).all(),

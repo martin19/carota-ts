@@ -32,14 +32,14 @@ export class Editor {
   textArea:HTMLTextAreaElement;
   textAreaContent:string;
   doc:CarotaDoc;
-  keyboardSelect:number;
+  keyboardSelect:number|null;
   /**
    * Remember the current x position of the cursor.
    */
-  keyboardX:number;
-  nextKeyboardX:number;
-  selectDragStart:number;
-  focusChar:number;
+  keyboardX:number|null;
+  nextKeyboardX:number|null;
+  selectDragStart:number|null;
+  focusChar:number|null;
   richClipboard:Array<Paragraph>;
   plainClipboard:string;
   toggles:{[n:number]:string};
@@ -78,7 +78,7 @@ export class Editor {
     this.manageTextArea = typeof options.manageTextArea === "boolean" ? options.manageTextArea : true;
     this.paintSelection = typeof options.paintSelection === "boolean" ? options.paintSelection : true;
     this.paintBaselines = typeof options.paintBaselines === "boolean" ? options.paintBaselines : false;
-    this.backgroundColor = typeof options.backgroundColor === "string" ? options.backgroundColor : null;
+    this.backgroundColor = typeof options.backgroundColor === "string" ? options.backgroundColor : "rgba(0,0,0,0.0)";
     this.manualRepaint = typeof options.manualRepaint === "boolean" ? options.manualRepaint : false;
     this.clipAtBounds = typeof options.clipAtBounds === "boolean" ? options.clipAtBounds : true;
 
@@ -98,13 +98,13 @@ export class Editor {
     this.setOrigin(typeof options.originX !== "undefined" ? options.originX : "center",
       typeof options.originY !== "undefined" ? options.originY : "center");
 
-    this.keyboardSelect = 0;
+    this.keyboardSelect = null;
     this.keyboardX = null;
     this.nextKeyboardX = null;
     this.selectDragStart = null;
     this.focusChar = null;
-    this.richClipboard = null;
-    this.plainClipboard = null;
+    this.richClipboard = [];
+    this.plainClipboard = "";
     this.toggles = {
       66: 'bold',
       73: 'italic',
@@ -138,7 +138,7 @@ export class Editor {
    * @return {Editor}
    */
   clone():Editor {
-    var clone = new Editor({
+    let clone = new Editor({
       canvas: this.canvas,
       x: this.cx,
       y: this.cy,
@@ -172,9 +172,9 @@ export class Editor {
    */
   update() {
 
-    var requirePaint = false;
+    let requirePaint = false;
 
-    var now = new Date().getTime();
+    let now = new Date().getTime();
     if (now > this.nextCaretToggle) {
       this.nextCaretToggle = now + 500;
       if (this.doc.toggleCaret()) {
@@ -201,11 +201,11 @@ export class Editor {
    * @returns {{x: number, y: number}}
    */
   computeAnchorRatio(actual:boolean) {
-    var b = this.bounds(false);
-    var bA = this.bounds(true);
-    var b2 = this.bounds(actual);
-    var ratioX:number;
-    var ratioY:number;
+    let b = this.bounds(false);
+    let bA = this.bounds(true);
+    let b2 = this.bounds(actual);
+    let ratioX:number = 1.0;
+    let ratioY:number = 1.0;
     switch (this.originX) {
       case "left"          :
         ratioX = (b.l / b2.w) - b2.l - 0.5;
@@ -262,10 +262,10 @@ export class Editor {
    * @returns {{x: number, y: number}}
    */
   computeAnchorOffset() {
-    var bounds = this.bounds();
-    var boundsActual = this.bounds(true);
-    var anchorX:number;
-    var anchorY:number;
+    let bounds = this.bounds();
+    let boundsActual = this.bounds(true);
+    let anchorX:number = 0.0;
+    let anchorY:number = 0.0;
     switch (this.originX) {
       case "left"  :
         anchorX = this.cx - (bounds.l);
@@ -323,14 +323,18 @@ export class Editor {
       this.doc.frame.setSize(this.w, this.h);
     }
 
-    var bounds = this.bounds();
-    var boundsActual = this.bounds(true);
-    var anchor = this.computeAnchorOffset();
+    let bounds = this.bounds();
+    let boundsActual = this.bounds(true);
+    let anchor = this.computeAnchorOffset();
 
+    let ctx : CanvasRenderingContext2D|null;
     if (typeof canvas !== "undefined") {
-      var ctx = canvas.getContext("2d");
+      ctx = canvas.getContext("2d");
     } else {
       ctx = this.canvas.getContext('2d');
+    }
+    if(!ctx) {
+      throw "ctx is null";
     }
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     ctx.save();
@@ -351,7 +355,7 @@ export class Editor {
       this.updateTextArea(bounds.w, bounds.h);
     }
 
-    var viewport = this.clipAtBounds ? bounds : null;
+    let viewport = this.clipAtBounds ? bounds : undefined;
     this.doc.draw(ctx, viewport);
 
     if (this.paintBaselines) {
@@ -366,9 +370,9 @@ export class Editor {
   }
 
   private updateTextArea(logicalWidth:number, logicalHeight:number) {
-    var anchor = this.computeAnchorOffset();
+    let anchor = this.computeAnchorOffset();
 
-    var transform = "translate(" + this.cx + "px," + this.cy + "px) " +
+    let transform = "translate(" + this.cx + "px," + this.cy + "px) " +
       "rotate(" + this.alpha + "rad) " +
       "skewY(" + this.skewY + "rad) " +
       "skewX(" + this.skewX + "rad) " +
@@ -384,7 +388,7 @@ export class Editor {
   }
 
   private updateCaretAndSelection(ordinal:number) {
-    var start = this.doc.selection.start,
+    let start = this.doc.selection.start,
       end = this.doc.selection.end;
 
     switch (this.keyboardSelect) {
@@ -404,7 +408,7 @@ export class Editor {
     } else {
       if (start > end) {
         this.keyboardSelect = -this.keyboardSelect;
-        var t = end;
+        let t = end;
         end = start;
         start = t;
       }
@@ -415,7 +419,7 @@ export class Editor {
   }
 
   private getOrdinal() {
-    var start = this.doc.selection.start, end = this.doc.selection.end;
+    let start = this.doc.selection.start, end = this.doc.selection.end;
     return this.keyboardSelect === 1 ? end : start;
   }
 
@@ -423,9 +427,9 @@ export class Editor {
    * Delete the character before the caret.
    */
   delCharBefore() {
-    var start = this.doc.selection.start,
+    let start = this.doc.selection.start,
       end = this.doc.selection.end;
-    var ordinal = this.getOrdinal();
+    let ordinal = this.getOrdinal();
     if (start === end && start > 0) {
       this.doc.range(start - 1, start).clear();
       this.focusChar = start - 1;
@@ -438,10 +442,10 @@ export class Editor {
    * Deletes the character after the caret.
    */
   delCharAfter() {
-    var start = this.doc.selection.start,
+    let start = this.doc.selection.start,
       end = this.doc.selection.end,
       length = this.doc.frame.length - 1;
-    var ordinal = this.getOrdinal();
+    let ordinal = this.getOrdinal();
 
     if (start === end && start < length) {
       this.doc.range(start, start + 1).clear();
@@ -453,7 +457,7 @@ export class Editor {
    * Moves caret to start of document.
    */
   goDocStart() {
-    var ordinal = 0;
+    let ordinal = 0;
     this.updateCaretAndSelection(ordinal);
   }
 
@@ -461,7 +465,7 @@ export class Editor {
    * Moves caret to end of document.
    */
   goDocEnd() {
-    var ordinal = this.doc.frame.length - 1;
+    let ordinal = this.doc.frame.length - 1;
     this.updateCaretAndSelection(ordinal);
   }
 
@@ -469,7 +473,7 @@ export class Editor {
    * Moves caret to start of line.
    */
   goLineStart() {
-    var ordinal = this.getOrdinal();
+    let ordinal = this.getOrdinal();
     ordinal = this.doc.endOfLine(ordinal, -1);
     this.updateCaretAndSelection(ordinal);
   }
@@ -478,7 +482,7 @@ export class Editor {
    * Moves caret to end of line.
    */
   goLineEnd() {
-    var ordinal = this.getOrdinal();
+    let ordinal = this.getOrdinal();
     ordinal = this.doc.endOfLine(ordinal, 1);
     this.updateCaretAndSelection(ordinal);
   }
@@ -487,8 +491,8 @@ export class Editor {
    * Moves caret one line up.
    */
   goLineUp() {
-    var ordinal = this.getOrdinal();
-    var caretX = this.doc.getCaretCoords(ordinal).l;
+    let ordinal = this.getOrdinal();
+    let caretX = this.doc.getCaretCoords(ordinal).l;
     ordinal = this.doc.changeLine(ordinal, -1, this.keyboardX);
     this.nextKeyboardX = this.keyboardX ? this.keyboardX : caretX;
     this.updateCaretAndSelection(ordinal);
@@ -498,8 +502,8 @@ export class Editor {
    * Moves caret one line down.
    */
   goLineDown() {
-    var ordinal = this.getOrdinal();
-    var caretX = this.doc.getCaretCoords(ordinal).l;
+    let ordinal = this.getOrdinal();
+    let caretX = this.doc.getCaretCoords(ordinal).l;
     ordinal = this.doc.changeLine(ordinal, 1, this.keyboardX);
     this.nextKeyboardX = this.keyboardX ? this.keyboardX : caretX;
     this.updateCaretAndSelection(ordinal);
@@ -509,9 +513,9 @@ export class Editor {
    * Moves caret left one character.
    */
   goCharLeft() {
-    var start = this.doc.selection.start,
+    let start = this.doc.selection.start,
       end = this.doc.selection.end;
-    var ordinal = this.getOrdinal();
+    let ordinal = this.getOrdinal();
     if (!this.keyboardSelect && start != end) {
       ordinal = start;
     }
@@ -525,9 +529,9 @@ export class Editor {
    * Moves caret right one character.
    */
   goCharRight() {
-    var start = this.doc.selection.start,
+    let start = this.doc.selection.start,
       end = this.doc.selection.end;
-    var ordinal = this.getOrdinal();
+    let ordinal = this.getOrdinal();
     if (!this.keyboardSelect && start != end) {
       ordinal = end;
     }
@@ -541,14 +545,14 @@ export class Editor {
    * Moves caret left one word.
    */
   goWordLeft() {
-    var start = this.doc.selection.start,
+    let start = this.doc.selection.start,
       end = this.doc.selection.end;
-    var ordinal = this.getOrdinal();
+    let ordinal = this.getOrdinal();
     if (!this.keyboardSelect && start != end) {
       ordinal = start;
     }
     if (ordinal > 0) {
-      var wordInfo = this.doc.wordContainingOrdinal(ordinal);
+      let wordInfo = this.doc.wordContainingOrdinal(ordinal);
       if (wordInfo.ordinal === ordinal) {
         ordinal = wordInfo.index > 0 ? this.doc.wordOrdinal(wordInfo.index - 1) : 0;
       } else {
@@ -562,15 +566,15 @@ export class Editor {
    * Moves caret right one word.
    */
   goWordRight() {
-    var start = this.doc.selection.start,
+    let start = this.doc.selection.start,
       end = this.doc.selection.end;
-    var ordinal = this.getOrdinal();
+    let ordinal = this.getOrdinal();
     if (!this.keyboardSelect && start != end) {
       ordinal = end;
     }
-    var length = this.doc.frame.length - 1;
+    let length = this.doc.frame.length - 1;
     if (ordinal < length) {
-      var wordInfo = this.doc.wordContainingOrdinal(ordinal);
+      let wordInfo = this.doc.wordContainingOrdinal(ordinal);
       ordinal = wordInfo.ordinal + wordInfo.word.length;
       this.updateCaretAndSelection(ordinal);
     }
@@ -580,7 +584,7 @@ export class Editor {
    * Select whole document.
    */
   selectAll() {
-    var length = this.doc.frame.length - 1;
+    let length = this.doc.frame.length - 1;
     this.doc.select(0, length);
   }
 
@@ -705,24 +709,24 @@ export class Editor {
   }
 
   getWorldToEditorTransform() {
-    var alpha = this.alpha;
+    let alpha = this.alpha;
 
-    var anchor = this.computeAnchorOffset();
-    var ax = anchor.x;
-    var ay = anchor.y;
+    let anchor = this.computeAnchorOffset();
+    let ax = anchor.x;
+    let ay = anchor.y;
 
-    var sx = this.sx;
-    var sy = this.sy;
-    var sky = this.skewY;
-    var skx = this.skewX;
-    var cx = this.cx;
-    var cy = this.cy;
+    let sx = this.sx;
+    let sy = this.sy;
+    let sky = this.skewY;
+    let skx = this.skewX;
+    let cx = this.cx;
+    let cy = this.cy;
 
     function Sec(alpha:number) {
       return 1 / Math.cos(alpha);
     }
 
-    var a:number, b:number, c:number, d:number, e:number, f:number;
+    let a:number, b:number, c:number, d:number, e:number, f:number;
     a = (Math.cos(sky) * Math.cos(alpha - skx) * Sec(sky + skx)) / sx;
     b = -(Math.cos(skx) * Sec(sky + skx) * Math.sin(alpha + sky)) / sy;
     c = (Math.cos(sky) * Sec(sky + skx) * Math.sin(alpha - skx)) / sx;
@@ -739,24 +743,24 @@ export class Editor {
    * @returns {number[]}
    */
   getEditorToWorldTransform() {
-    var alpha = this.alpha;
+    let alpha = this.alpha;
 
-    var anchor = this.computeAnchorOffset();
-    var ax = anchor.x;
-    var ay = anchor.y;
+    let anchor = this.computeAnchorOffset();
+    let ax = anchor.x;
+    let ay = anchor.y;
 
-    var sx = this.sx;
-    var sy = this.sy;
-    var sky = this.skewY;
-    var skx = this.skewX;
-    var cx = this.cx;
-    var cy = this.cy;
+    let sx = this.sx;
+    let sy = this.sy;
+    let sky = this.skewY;
+    let skx = this.skewX;
+    let cx = this.cx;
+    let cy = this.cy;
 
     function Sec(alpha:number) {
       return 1 / Math.cos(alpha);
     }
 
-    var a:number, b:number, c:number, d:number, e:number, f:number;
+    let a:number, b:number, c:number, d:number, e:number, f:number;
     a = sx * Math.cos(alpha + sky) * Sec(sky);
     b = sx * Sec(sky) * Math.sin(alpha + sky);
     c = -sy * Sec(skx) * Math.sin(alpha - skx);
@@ -788,12 +792,12 @@ export class Editor {
 }
 
 setInterval(function () {
-  var editors = document.querySelectorAll('.carotaEditorCanvas');
+  let editors = document.querySelectorAll('.carotaEditorCanvas');
 
-  var ev = document.createEvent('Event');
+  let ev = document.createEvent('Event');
   ev.initEvent('carotaEditorSharedTimer', true, true);
 
-  for (var n = 0; n < editors.length; n++) {
+  for (let n = 0; n < editors.length; n++) {
     editors[n].dispatchEvent(ev);
   }
 }, 200);

@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
     "module": "amd",
+    "target":"es6",
     "noImplicitAny": true,
     "removeComments": false,
     "preserveConstEnums": true,
     "sourceMap": true,
-    "target":"es5",
-    "declaration":false
+    "declaration":false,
+    "strictNullChecks": true
   },
-  "exclude": []
+  "exclude": ["fontService/typings"]
 }

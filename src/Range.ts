@@ -40,21 +40,20 @@ export class Range implements IRange{
    */
   parts(emit:(n:CNode)=>void, list?:Array<CNode>) {
     list = list || this.doc.children();
-    var self = this;
-
-    list.some(function (item) {
-      if (item.ordinal + item.length <= self.start) {
+    list.some((item) => {
+      if (item.ordinal + item.length <= this.start) {
         return false;
       }
-      if (item.ordinal >= self.end) {
+      if (item.ordinal >= this.end) {
         return true;
       }
-      if (item.ordinal >= self.start &&
-        item.ordinal + item.length <= self.end) {
+      if (item.ordinal >= this.start &&
+        item.ordinal + item.length <= this.end) {
         emit(item);
       } else {
-        self.parts(emit, item.children());
+        this.parts(emit, item.children());
       }
+      return false;
     });
   }
 
@@ -99,13 +98,13 @@ export class Range implements IRange{
    * Save an array of runs by consolidating.
    */
   save():Array<Paragraph> {
-    var paragraphs = new Per(this.paragraphs, this).all();
+    let paragraphs = new Per(this.paragraphs, this).all();
 
     //consolidate runs in paragraphs and remove paragraph reference
-    var consolidatedParagraphs = paragraphs.map((p:Paragraph)=>{
+    let consolidatedParagraphs = paragraphs.map((p:Paragraph)=>{
       p = p.clone();
-      var runs:Array<Run> = [];
-      var cons = new Per<Run>(Run.consolidate()).into(runs);
+      let runs:Array<Run> = [];
+      let cons = new Per<Run>(Run.consolidate()).into(runs);
       p.runs((r:Run)=>{
         cons.submit(r);
       });
@@ -123,9 +122,9 @@ export class Range implements IRange{
    * @returns {IFormattingMap}
    */
   getCharacterFormatting():ICharacterFormatting {
-    var range = this;
+    let range = this;
     if (range.start === range.end) {
-      var pos = range.start;
+      let pos = range.start;
       // take formatting of character before, if any, because that's
       // where plain text picks up formatting when inserted
       if (pos > 0) {
@@ -135,11 +134,11 @@ export class Range implements IRange{
       range.end = pos + 1;
     }
 
-    var formatting = Run.cloneFormatting(Run.defaultFormatting);
-    var lastRun = new Per(range.runs, range).reduce(Run.merge).last();
+    let formatting = Run.cloneFormatting(Run.defaultFormatting);
+    let lastRun = new Per(range.runs, range).reduceWithoutSeed(Run.merge).last();
     if(lastRun) {
-      var specificFormatting:IFormattingMap = lastRun.formatting;
-      for(var prop in specificFormatting) {
+      let specificFormatting:IFormattingMap = lastRun.formatting;
+      for(let prop in specificFormatting) {
         if(specificFormatting.hasOwnProperty(prop)) {
           formatting[prop] = specificFormatting[prop]
         }
@@ -154,12 +153,12 @@ export class Range implements IRange{
    * @param value
    */
   setCharacterFormatting(attribute:string, value:string|boolean|number) {
-    var range:Range = this;
+    let range:Range = this;
     if (range.start === range.end) {
       range.doc.modifyInsertFormatting(attribute, value);
     } else {
-      var saved = range.save();
-      var formatting:IFormattingMap = {};
+      let saved = range.save();
+      let formatting:IFormattingMap = {};
       formatting[attribute] = value;
 
       saved.forEach((p:Paragraph)=>{
@@ -176,18 +175,18 @@ export class Range implements IRange{
    * @returns {IParagraphFormatting}
    */
   getParagraphFormatting():IParagraphFormatting {
-    var start = this.doc.paragraphContainingOrdinal(this.start),
+    let start = this.doc.paragraphContainingOrdinal(this.start),
       end = this.doc.paragraphContainingOrdinal(this.end);
 
     if(!start || !end) return {} as IParagraphFormatting;
 
-    var paragraphs = this.doc._paragraphs.slice(start.index,end.index+1);
+    let paragraphs = this.doc._paragraphs.slice(start.index,end.index+1);
 
-    var formatting = Paragraph.cloneFormatting(Paragraph.defaultFormatting);
-    var lastParagraph = new Per(paragraphs).reduce(Paragraph.merge).last();
+    let formatting = Paragraph.cloneFormatting(Paragraph.defaultFormatting);
+    let lastParagraph = new Per(paragraphs).reduceWithoutSeed(Paragraph.merge).last();
     if(lastParagraph) {
-      var specificFormatting:IFormattingMap = lastParagraph.formatting;
-      for(var prop in specificFormatting) {
+      let specificFormatting:IFormattingMap = lastParagraph.formatting;
+      for(let prop in specificFormatting) {
         if(specificFormatting.hasOwnProperty(prop)) {
           formatting[prop] = specificFormatting[prop]
         }
@@ -202,11 +201,11 @@ export class Range implements IRange{
    * @param value
    */
   setParagraphFormatting(attribute:string, value:string|boolean|number) {
-    var start = this.doc.paragraphContainingOrdinal(this.start),
+    let start = this.doc.paragraphContainingOrdinal(this.start),
       end = this.doc.paragraphContainingOrdinal(this.end);
 
-    var extendedRange = new Range(this.doc, start.ordinal, end.ordinal + this.doc._paragraphs[end.index].length );
-    var saved = extendedRange.save();
+    let extendedRange = new Range(this.doc, start.ordinal, end.ordinal + this.doc._paragraphs[end.index].length );
+    let saved = extendedRange.save();
 
     saved.forEach((p:Paragraph)=>{
       p.formatting[attribute] = value;

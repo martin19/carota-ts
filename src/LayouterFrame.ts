@@ -21,13 +21,12 @@ import {PositionedParagraph} from "./PositionedParagraph";
  */
 export var LayouterFrame = function (left:number, top:number, width:number, ordinal:number, wrap:boolean, parent:Frame) {
 
-  var quit:boolean|void;
-  var lastNewLineHeight = 0;
-  var layouter:(emit:(p:PositionedParagraph)=>void, word:Word)=>void|boolean;
-  var y = top;
-  var paragraphIndex = 0;
+  let quit:boolean|void;
+  let layouter:(emit:(p:PositionedParagraph)=>void, word:Word)=>void|boolean;
+  let y = top;
+  let paragraphIndex = 0;
 
-  var paragraphs = parent._parent._paragraphs;
+  let paragraphs = parent._parent._paragraphs;
   layouter = PositionedParagraph.layout(left, y, width, ordinal, wrap, parent, paragraphs[paragraphIndex]);
 
   return function (emit:(p:PositionedParagraph)=>boolean|void, word:Word) {
@@ -41,7 +40,7 @@ export var LayouterFrame = function (left:number, top:number, width:number, ordi
     }, word);
     if (word.isNewLine()) {
 
-      var spaceBefore = 0;
+      let spaceBefore = 0;
       if(paragraphs[paragraphIndex]) {
         spaceBefore += paragraphs[paragraphIndex].formatting["spaceAfter"]||0;
       }

@@ -138,22 +138,19 @@ export class Paragraph {
    * @param range - absolute or relative to paragraph start?
    */
   runs(emit:(p:Run)=>void, range?:IRange) {
-    var start = range && range.start || 0,
-      end = range && range.end;
-    if (typeof end !== 'number') {
-      end = Number.MAX_VALUE;
-    }
+    let start = range && range.start || 0;
+    let end = (range && typeof range.end === "number") ? range.end : Number.MAX_VALUE;
     this.runs_.some((run:Run)=>{
       if (start >= end || end <= 0) {
         return true;
       }
-      var text = run.text;
+      let text = run.text;
       if(typeof text === "string") {
         if (start <= 0 && end >= text.length) {
           emit(run);
         } else if (start < text.length) {
-          var pieceRun = run.clone();
-          var firstChar = Math.max(0, start);
+          let pieceRun = run.clone();
+          let firstChar = Math.max(0, start);
           pieceRun.text = text.substr(
             firstChar,
             Math.min(text.length, end - firstChar)
@@ -163,13 +160,14 @@ export class Paragraph {
         start -= text.length;
         end -= text.length;
       }
+      return false;
     });
   }
 
   // TODO: copied from Run.cloneFormatting - refactor?
   static cloneFormatting(formattingMap:IFormattingMap) {
-    var clone:IFormattingMap = {};
-    for (var i in formattingMap) {
+    let clone:IFormattingMap = {};
+    for (let i in formattingMap) {
       if (formattingMap.hasOwnProperty(i)) {
         clone[i] = formattingMap[i];
       }
@@ -192,7 +190,7 @@ export class Paragraph {
       return Paragraph.merge(Array.prototype.slice.call(arguments, 0));
     }
     if(p1 instanceof Paragraph && p2 instanceof Paragraph) {
-      var mergedFormatting:IFormattingMap = {};
+      let mergedFormatting:IFormattingMap = {};
       Paragraph.formattingKeys.forEach(function (key) {
         if (key in p1.formatting || key in p2.formatting) {
           if ((p1.formatting)[key] === (p2.formatting)[key]) {
@@ -215,7 +213,7 @@ export class Paragraph {
    * @returns {function(function(Run): void, Run): void}
    */
   static consolidate() {
-    var current:Paragraph;
+    let current:Paragraph|null;
     return (emit:(p:Paragraph)=>void, paragraph:Paragraph)=> {
       if(!current) {
         if(!paragraph.endsWithNewLine()) {

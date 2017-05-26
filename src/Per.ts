@@ -4,9 +4,9 @@ export type Source<T> = Per<T>|Transformer<T>|T[]|T;
 
 interface IMonitor<T> {
   limit?: number,
-  count?: number,
-  first?: T,
-  last?: T,
+  count?: number|null,
+  first?: T|null,
+  last?: T|null,
 }
 
 export class Per<T> {
@@ -48,8 +48,8 @@ export class Per<T> {
   }
 
   per<T_OUT>(valOrFunc:Source<T_OUT>, bindThis?:any):Per<T_OUT> {
-    var first = this.forEach;
-    var second:Transformer<T_OUT> = Per.toFunc(valOrFunc && (<Per<T_OUT>>valOrFunc).forEach || valOrFunc, bindThis);
+    let first = this.forEach;
+    let second:Transformer<T_OUT> = Per.toFunc(valOrFunc && (<Per<T_OUT>>valOrFunc).forEach || valOrFunc, bindThis);
     return Per.create(function (emit:Emitter<T_OUT>, value:T_OUT) {
       return first(function (firstVal:T) {
         return second(emit, firstVal);
@@ -64,14 +64,14 @@ export class Per<T> {
   }
 
   map<T_IN,T_OUT>(mapFunc:string|((t:T_IN)=>T_OUT)):Per<T_OUT> {
-    var mapFunc_ = Per.lambda<T_IN,T_OUT>(mapFunc);
+    let mapFunc_ = Per.lambda<T_IN,T_OUT>(mapFunc);
     return this.per<T_OUT>(function (emit:Emitter<T_OUT>, value:T_IN) {
       return emit(mapFunc_(value));
     });
   }
 
   filter<T_IN>(predicate:string|((t:T_IN)=>boolean)) {
-    var predicate_ = Per.lambda<T_IN,boolean>(predicate);
+    let predicate_ = Per.lambda<T_IN,boolean>(predicate);
     return this.per(function (emit:Emitter<T_IN>, value:T_IN) {
       if (predicate_(value)) {
         return emit(value);
@@ -80,16 +80,16 @@ export class Per<T> {
   }
 
   concat<T_IN>(second:Source<T_IN>, secondThis?:any) {
-    var second_:Transformer<T_IN> = null;
+    let second_:Transformer<T_IN>|null = null;
     if (second instanceof Per) {
       second_ = second.forEach;
     } else {
       second_ = Per.toFunc(second, secondThis);
     }
-    var first = this.forEach;
+    let first = this.forEach;
     return Per.create(function (emit:Emitter<T_IN|T>, value:T_IN) {
       first(emit, value);
-      second_(emit, value);
+      second_ && second_(emit, value);
     });
   };
 
@@ -132,9 +132,21 @@ export class Per<T> {
     });
   }
 
-  reduce(reducer:(l:T,r:T)=>T, seed?:T) {
-    var result = seed;
-    var started = arguments.length == 2;
+  reduceWithSeed(reducer:(l:T,r:T)=>T, seed:T) {
+    let result = seed;
+    let started = arguments.length == 2;
+    if(typeof seed === "undefined") {
+      return this.per(function (emit:Emitter<T>, value:T) {
+        result = started ? reducer(result, value) : value;
+        emit(result);
+        started = true;
+      });
+    }
+  };
+
+  reduceWithoutSeed(reducer:(l:T,r:T)=>T) {
+    let result : T;
+    let started = false;
     return this.per(function (emit:Emitter<T>, value:T) {
       result = started ? reducer(result, value) : value;
       emit(result);
@@ -143,17 +155,17 @@ export class Per<T> {
   };
 
   multicast(destinations:Per<T>|Transformer<T>|Array<Per<T>|Transformer<T>>, ...optional:Array<Per<T>|Transformer<T>>) {
-    var destinations_:Array<Per<T>|Transformer<T>> = [];
+    let destinations_:Array<Per<T>|Transformer<T>> = [];
     if (arguments.length !== 1) {
       destinations_ = Array.prototype.slice.call(arguments, 0);
     }
-    var destinations__ = destinations_.map(function (destination:Per<T>|Transformer<T>) {
+    let destinations__ = destinations_.map(function (destination:Per<T>|Transformer<T>) {
       return typeof destination === 'function' ? destination :
         destination instanceof Per ? destination.forEach :
           Per.ignore;
     });
     return this.listen(function (value:T) {
-      var quit = true;
+      let quit = true;
       destinations__.forEach(function (destination:Transformer<T>) {
         if (!destination(Per.ignore, value)) {
           quit = false;
@@ -163,7 +175,7 @@ export class Per<T> {
     });
   }
 
-  static optionalLimit(limit:number) {
+  static optionalLimit(limit?:number) {
     return typeof limit != 'number' ? Number.MAX_VALUE : limit;
   }
 
@@ -175,18 +187,19 @@ export class Per<T> {
     if (!Array.isArray(ar)) {
       throw new Error("into expects an array");
     }
-    limit = Per.optionalLimit(limit);
-    return this.listen(function (value:T) {
-      if (limit <= 0) {
+    let lim = Per.optionalLimit(limit);
+    return this.listen((value:T) => {
+      if (lim <= 0) {
         return true;
       }
       ar.push(value);
-      limit--;
+      lim--;
+      return false;
     });
   };
 
   static setOrCall(obj:{[s:string]:any}, name:string) {
-    var prop = obj[name];
+    let prop = obj[name];
     if (typeof prop === 'function') {
       return prop;
     }
@@ -200,8 +213,8 @@ export class Per<T> {
    * up to an optional limit (see 'first' and 'last' methods).
    */
   monitor(data:{[s:string]:any}) {
-    var n = 0;
-    var count = Per.setOrCall(data, 'count'),
+    let n = 0;
+    let count = Per.setOrCall(data, 'count'),
       first = Per.setOrCall(data, 'first'),
       last = Per.setOrCall(data, 'last'),
       limit = data['limit'];
@@ -211,16 +224,14 @@ export class Per<T> {
     if (limit < 1) {
       return this;
     }
-    return this.listen(function (value:T) {
+    return this.listen((value:T) => {
       if (n === 0) {
         first(value);
       }
       n++;
       count(n);
       last(value);
-      if (n >= limit) {
-        return true;
-      }
+      return n >= limit;
     });
   }
 
@@ -236,33 +247,33 @@ export class Per<T> {
   };
 
   all() {
-    var results:Array<T> = [];
+    let results:Array<T> = [];
     this.into(results).submit();
     return results;
   };
 
   first() {
-    var results:IMonitor<T> = {
+    let results:IMonitor<T> = {
       limit: 1,
       count: null,
       first: null,
       last: null,
     };
     this.monitor(results).submit();
-    return results.count > 0 ? results.first : (void 0);
+    return (results.count && results.count > 0) ? results.first : (void 0);
   };
 
   last() {
-    var results:IMonitor<T> = {
+    let results:IMonitor<T> = {
       count: null,
       first: null,
       last: null,
     };
     this.monitor(results).submit();
-    return results.count > 0 ? results.last : (void 0);
+    return (results.count && results.count > 0) ? results.last : (void 0);
   };
 
-  static truthy(value:boolean) {
+  static truthy(value:any) {
     return !!value;
   }
 
@@ -276,7 +287,7 @@ export class Per<T> {
   }
 
   min():Per<number> {
-    return this.reduce(Per.min, <any>Number.MAX_VALUE) as any as Per<number>;
+    return this.reduceWithSeed(Per.min, <any>Number.MAX_VALUE) as any as Per<number>;
   }
 
   static max(l:any, r:any):any {
@@ -284,7 +295,7 @@ export class Per<T> {
   }
 
   max():Per<number> {
-    return this.reduce(Per.max, <any>Number.MIN_VALUE) as any as Per<number>;
+    return this.reduceWithSeed(Per.max, <any>Number.MIN_VALUE) as any as Per<number>;
   }
 
   static sum(l:any, r:any) {
@@ -292,7 +303,7 @@ export class Per<T> {
   }
 
   sum():Per<number> {
-    return this.reduce(Per.sum, <any>0) as any as Per<number>;
+    return this.reduceWithSeed(Per.sum, <any>0) as any as Per<number>;
   }
 
   static and(l:any, r:any):any {
@@ -300,7 +311,7 @@ export class Per<T> {
   }
 
   and():Per<boolean> {
-    return this.reduce(Per.and, <any>true) as any as Per<boolean>;
+    return this.reduceWithSeed(Per.and, <any>true) as any as Per<boolean>;
   }
 
   static or(l:any, r:any):any {
@@ -308,7 +319,7 @@ export class Per<T> {
   }
 
   or():Per<boolean> {
-    return this.reduce(Per.or, <any>false) as any as Per<boolean>;
+    return this.reduceWithSeed(Per.or, <any>false) as any as Per<boolean>;
   };
 
   static not(v:boolean):any {
@@ -321,7 +332,7 @@ export class Per<T> {
 
   /*
   per.create.pulse = function (ms) {
-    var counter = 0;
+    let counter = 0;
     return create(function (emit) {
       function step() {
         if (emit(counter++) !== true) {

@@ -14,7 +14,7 @@ export class CNode {
     return [];
   }
 
-  parent():CNode {
+  parent():CNode|null {
     return null;
   }
 
@@ -40,17 +40,17 @@ export class CNode {
    * @returns {CNode}
    */
   next() {
-    var self:CNode = this;
+    let self:CNode = this;
     for (; ;) {
-      var parent = self.parent();
+      let parent = self.parent();
       if (!parent) {
         return null;
       }
-      var siblings = parent.children();
-      var next = siblings[siblings.indexOf(self) + 1];
+      let siblings = parent.children();
+      let next = siblings[siblings.indexOf(self) + 1];
       if (next) {
         for (; ;) {
-          var first = next.first();
+          let first = next.first();
           if (!first) {
             break;
           }
@@ -67,29 +67,30 @@ export class CNode {
    * the parent's last child.
    * @returns {CNode}
    */
-  previous():CNode {
-    var parent = this.parent();
+  previous():CNode|null {
+    let parent = this.parent();
     if (!parent) {
       return null;
     }
-    var siblings = parent.children();
-    var prev = siblings[siblings.indexOf(this) - 1];
+    let siblings = parent.children();
+    let prev = siblings[siblings.indexOf(this) - 1];
     if (prev) {
       return prev;
     }
-    var prevParent = parent.previous();
+    let prevParent = parent.previous();
     return !prevParent ? null : prevParent.last();
   }
 
-  byOrdinal(index:number) {
-    var found:CNode = null;
-    if (this.children().some(function (child) {
+  byOrdinal(index:number):CNode|null {
+    let found:CNode|null = null;
+    if (this.children().some((child) => {
         if (index >= child.ordinal && index < child.ordinal + child.length) {
           found = child.byOrdinal(index);
           if (found) {
             return true;
           }
         }
+        return false;
       })) {
       return found;
     }
@@ -104,11 +105,11 @@ export class CNode {
    * @returns {CNode}
    */
   findChildByCoordinate(x:number, y: number, actualBounds?:boolean) {
-    var found:CNode = null;
+    let found:CNode|null = null;
     if(this.bounds(actualBounds).contains(x,y)) {
       found = this;
       this.children().forEach((child:CNode)=>{
-        var foundChild = child.findChildByCoordinate(x,y,actualBounds);
+        let foundChild = child.findChildByCoordinate(x,y,actualBounds);
         if(foundChild) {
           found = foundChild;
         }
@@ -124,16 +125,16 @@ export class CNode {
    * @param actualBounds - determines if user set bounds or actual bounds are considered.
    * @returns {CNode}
    */
-  byCoordinate(x:number, y:number, actualBounds?:boolean):CNode[] {
-    var found:Array<CNode>;
-    var foundNodes:Array<CNode> = [];
+  byCoordinate(x:number, y:number, actualBounds?:boolean):CNode[]|null {
+    let found:Array<CNode>|null;
+    let foundNodes:Array<CNode> = [];
 
     function dist2(a:{x:number, y:number},b:{x:number, y:number}) {
       return (a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y);
     }
 
     this.children().forEach((child:CNode)=> {
-      var b = child.bounds(actualBounds);
+      let b = child.bounds(actualBounds);
       if (b.contains(x, y)) {
         found = child.byCoordinate(x, y, actualBounds);
         if (found) {
@@ -150,7 +151,7 @@ export class CNode {
     if (foundNodes.length == 0) {
       foundNodes.push(this.last());
       while (foundNodes[0]) {
-        var next = foundNodes[0].last();
+        let next = foundNodes[0].last();
         if (!next) {
           break;
         }
@@ -166,8 +167,8 @@ export class CNode {
     });
   }
 
-  parentOfType(type:string):CNode {
-    var p = this.parent();
+  parentOfType(type:string):CNode|null {
+    let p = this.parent();
     return (p && (p.type === type ? p : p.parentOfType(type)));
   }
 
@@ -176,9 +177,9 @@ export class CNode {
    * @returns {Rect}
    */
   bounds(actual?:boolean) {
-    var l = this._left, t = this._top, r = 0, b = 0;
+    let l = this._left, t = this._top, r = 0, b = 0;
     this.children().forEach(function (child) {
-      var cb = child.bounds();
+      let cb = child.bounds();
       l = Math.min(l, cb.l);
       t = Math.min(t, cb.t);
       r = Math.max(r, cb.l + cb.w);
@@ -222,7 +223,7 @@ export class generic extends CNode {
   }
 
   finalize(startDecrement?:number, lengthIncrement?:number) {
-    var start = Number.MAX_VALUE, end = 0;
+    let start = Number.MAX_VALUE, end = 0;
     this._children.forEach(function (child) {
       start = Math.min(start, child.ordinal);
       end = Math.max(end, child.ordinal + child.length);

@@ -4,12 +4,8 @@ import {Part} from "./Part";
 import {Rect} from "./Rect";
 import {Line} from "./Line";
 import {Word} from "./Word";
-import {Run} from "./Run";
+import {newLineWidth, Run} from "./Run";
 import {PositionedChar} from "./PositionedChar";
-
-var newLineWidth = function (run:Run) {
-  return Text.measure(Text.enter, run).width;
-};
 
 /**
  * A PositionedWord is just a realised Word plus a reference back to the containing Line and
@@ -132,7 +128,7 @@ export class PositionedWord extends CNode {
    * Returns the parent Line object of the PositionedWord.
    * @returns {Line}
    */
-  parent():Line {
+  parent():CNode|null {
     return this.line;
   }
 

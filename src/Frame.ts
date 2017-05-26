@@ -46,16 +46,16 @@ export class Frame extends CNode {
    */
   layout() {
 
-    var left = this.left;
-    var top = this.top;
-    var width = this.width;
-    var words = this.parent().words;
-    var wrap = this.parent().wrap;
-    var ordinal = 0;
+    let left = this.left;
+    let top = this.top;
+    let width = this.width;
+    let words = this.parent().words;
+    let wrap = this.parent().wrap;
+    let ordinal = 0;
 
     this.paragraphs = [];
-    var layouter = LayouterFrame(left, top, width, ordinal, wrap, this);
-    var length = 0, height = 0;
+    let layouter = LayouterFrame(left, top, width, ordinal, wrap, this);
+    let length = 0, height = 0;
 
     new Per(words).forEach((word:Word)=> {
       if (layouter((p:PositionedParagraph)=> {
@@ -76,10 +76,10 @@ export class Frame extends CNode {
    * @returns {Rect}
    */
   bounds(actual?:boolean) {
-    var left = Number.MAX_VALUE, top = Number.MAX_VALUE, right = -Number.MAX_VALUE, bottom = -Number.MAX_VALUE;
+    let left = Number.MAX_VALUE, top = Number.MAX_VALUE, right = -Number.MAX_VALUE, bottom = -Number.MAX_VALUE;
     if (this.paragraphs.length) {
       this.paragraphs.forEach((paragraph:PositionedParagraph, i:number)=> {
-        var b = paragraph.bounds(actual);
+        let b = paragraph.bounds(actual);
         left = Math.min(left, b.l);
         top = Math.min(top, b.t);
         right = Math.max(right, b.l + b.w);
@@ -107,7 +107,7 @@ export class Frame extends CNode {
 
   updateActualWidth() {
     if (!this.actualWidth) {
-      var result = 0;
+      let result = 0;
       this.paragraphs.forEach((p:PositionedParagraph)=> {
         if (typeof p.actualWidth === 'number') {
           result = Math.max(result, p.actualWidth);
@@ -132,12 +132,12 @@ export class Frame extends CNode {
     });
 
     //draw frame bounds
-    var b = this.bounds();
+    let b = this.bounds();
     ctx.strokeStyle = "red";
     ctx.strokeRect(b.l, b.t, b.w, b.h);
 
     //draw actual frame bounds
-    var b = this.bounds(true);
+    b = this.bounds(true);
     ctx.strokeStyle = "yellow";
     ctx.strokeRect(b.l, b.t, b.w, b.h);
   }

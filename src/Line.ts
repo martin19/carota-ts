@@ -64,7 +64,7 @@ export class Line extends CNode {
   constructor(paragraph:PositionedParagraph, left:number, width:number, baseline:number, ascent:number, descent:number, ascentUnscaled:number, descentUnscaled:number, maxLineHeight:number, words:Array<Word>, ordinal:number) {
     super();
     this.type = 'line';
-    var self = this;
+    let self = this;
 
     this.paragraph = paragraph;
     this.left = left;
@@ -76,21 +76,21 @@ export class Line extends CNode {
     this.descentUnscaled = descentUnscaled;
     this.maxLineHeight = maxLineHeight;
     this.ordinal = ordinal;
-    var align = this.paragraph.formatting.align;
+    let align = this.paragraph.formatting.align;
     this.align = align;
 
-    var actualWidth = 0;
+    let actualWidth = 0;
     words.forEach(function (word) {
       actualWidth += word.width;
     });
     actualWidth -= words[words.length - 1].space.width;
 
-    var last = words[words.length-1].isNewLine();
+    let last = words[words.length-1].isNewLine();
     if(last && align == "justifyLastLeft") align = "left";
     if(last && align == "justifyLastCentered") align = "center";
     if(last && align == "justifyLastRight") align = "right";
 
-    var x = 0, spacing = 0;
+    let x = 0, spacing = 0;
     if (actualWidth < width) {
       switch (align) {
         case "left":
@@ -116,9 +116,9 @@ export class Line extends CNode {
     }
 
     this.positionedWords = words.map(function (word:Word) {
-      var wordLeft = x;
+      let wordLeft = x;
       x += (word.width + spacing);
-      var wordOrdinal = ordinal;
+      let wordOrdinal = ordinal;
       ordinal += (word.text.length + word.space.length);
       return new PositionedWord(word, self, wordLeft, wordOrdinal, word.width + spacing);
     });
@@ -133,7 +133,7 @@ export class Line extends CNode {
    */
   bounds(actual?:boolean) {
     if (actual) {
-      var firstWord = this.first().bounds(),
+      let firstWord = this.first().bounds(),
         lastWord = this.last().bounds();
       return new Rect(
         firstWord.l,
@@ -145,7 +145,7 @@ export class Line extends CNode {
     }
   }
 
-  parent() {
+  parent():CNode|null {
     return this.paragraph;
   }
 

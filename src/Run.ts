@@ -1,5 +1,13 @@
 import {Paragraph} from "./Paragraph";
+import {Text} from "./Text";
 export type IFormattingMap = {[s:string]:any};
+
+export function newLineWidth(run:Run|null) {
+  if(!run) {
+    return Text.defaultNewLineWidth;
+  }
+  return Text.measure(Text.enter, run).width;
+};
 
 export interface ICharacterFormatting {
   size?: number;
@@ -47,7 +55,7 @@ export class Run {
     'capitals'
   ];
 
-  static defaultFormatting:ICharacterFormatting = {
+  static defaultFormatting = {
     size: 10,
     baselineShift : 0,
     letterSpacing:0,
@@ -68,19 +76,19 @@ export class Run {
 
   static multipleValues = {};
 
-  parent : Paragraph;
+  parent : Paragraph|null;
   text : string|Array<string>;
   formatting : IFormattingMap;
 
-  constructor(text:string|Array<string>, formatting : IFormattingMap, parent:Paragraph) {
+  constructor(text:string|Array<string>, formatting : IFormattingMap, parent:Paragraph|null) {
     this.parent = parent;
     this.text = text;
     this.formatting = Run.cloneFormatting(formatting);
   }
 
   static cloneFormatting(formattingMap:IFormattingMap) {
-    var clone:IFormattingMap = {};
-    for (var i in formattingMap) {
+    let clone:IFormattingMap = {};
+    for (let i in formattingMap) {
       if (formattingMap.hasOwnProperty(i)) {
         clone[i] = formattingMap[i];
       }
@@ -115,7 +123,7 @@ export class Run {
       if(run1.parent !== run2.parent) {
         //throw "Cannot merge runs of different paragraphs."
       }
-      var mergedFormatting:IFormattingMap = {};
+      let mergedFormatting:IFormattingMap = {};
       Run.formattingKeys.forEach(function (key) {
         if (key in run1.formatting || key in run2.formatting) {
           if ((run1.formatting)[key] === (run2.formatting)[key]) {
@@ -135,7 +143,7 @@ export class Run {
    * @param template
    */
   format(template:IFormattingMap) {
-    Object.keys(template).forEach(function (key) {
+    Object.keys(template).forEach((key) => {
       if ((template)[key] !== Run.multipleValues) {
         this.formatting[key] = template[key];
       }
@@ -161,7 +169,7 @@ export class Run {
    * @returns {function(function(Run): void, Run): void}
    */
   static consolidate() {
-    var current:Run;
+    let current:Run;
     return (emit:(p:Run)=>void, run:Run)=> {
       if(run.text.length !== 0) {
         if (!current || !this.sameFormatting(run,current) ||
@@ -181,7 +189,7 @@ export class Run {
       return run.text;
     }
     if (Array.isArray(run.text)) {
-      var str:Array<string> = [];
+      let str:Array<string> = [];
       (<Array<string>>(run.text)).forEach((piece:string)=> {
         str.push(this.getPiecePlainText(piece));
       });
@@ -213,8 +221,8 @@ export class Run {
       return text.length;
     }
     if (Array.isArray(text)) {
-      var length = 0;
-      text.forEach(function (piece) {
+      let length = 0;
+      text.forEach((piece) => {
         length += this.getPieceLength(piece);
       });
       return length;
@@ -232,31 +240,32 @@ export class Run {
       return;
     }
     if (Array.isArray(text)) {
-      var pos = 0;
-      text.some(function (piece) {
+      let pos = 0;
+      text.some((piece) => {
         if (count <= 0) {
           return true;
         }
-        var pieceLength = this.getPieceLength(piece);
+        let pieceLength = this.getPieceLength(piece);
         if (pos + pieceLength > start) {
           if (pieceLength === 1) {
             emit(piece);
             count -= 1;
           } else {
-            var str = piece.substr(Math.max(0, start - pos), count);
+            let str = piece.substr(Math.max(0, start - pos), count);
             emit(str);
             count -= str.length;
           }
         }
         pos += pieceLength;
+        return false;
       });
       return;
     }
   }
 
   static getTextChar(text:string|Array<string>, offset:number) {
-    var result:string;
-    this.getSubText(function (c) {
+    let result:string = "";
+    this.getSubText((c) => {
       result = c
     }, text, offset, 1);
     return result;
@@ -269,7 +278,7 @@ export class Run {
    */
   static pieceCharacters(each:(s:string|Array<string>)=>void, piece:string|Array<string>) {
     if (typeof piece === 'string') {
-      for (var c = 0; c < piece.length; c++) {
+      for (let c = 0; c < piece.length; c++) {
         each(piece[c]);
       }
     } else {

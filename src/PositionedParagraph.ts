@@ -50,10 +50,10 @@ export class PositionedParagraph extends CNode {
    * @return {function(function(PositionedParagraph): void, Word): boolean}
    */
   static layout(left:number, top:number, width:number, ordinal:number, wrap:boolean, parent:Frame, paragraph:Paragraph) {
-    var length = 0;
-    var height = 0;
-    var marginLeft = 0, marginRight = 0, spaceBefore = 0, spaceAfter = 0;
-    var pp = new PositionedParagraph(parent, left, top, width, ordinal);
+    let length = 0;
+    let height = 0;
+    let marginLeft = 0, marginRight = 0, spaceBefore = 0, spaceAfter = 0;
+    let pp = new PositionedParagraph(parent, left, top, width, ordinal);
     if(paragraph) {
       pp.formatting = paragraph.formatting as IParagraphFormatting;
       marginLeft = pp.formatting.marginLeft || 0;
@@ -62,9 +62,9 @@ export class PositionedParagraph extends CNode {
       pp.top = top;
       pp.width = width - (marginLeft + marginRight);
     }
-    var lines = pp.lines;
+    let lines = pp.lines;
 
-    var layouter = LayouterParagraph(pp.left, pp.top, pp.width, ordinal, wrap, pp);
+    let layouter = LayouterParagraph(pp.left, pp.top, pp.width, ordinal, wrap, pp);
 
     return (emit:(p:PositionedParagraph)=>void, word:Word) => {
 
@@ -90,10 +90,10 @@ export class PositionedParagraph extends CNode {
     if(!actual) {
       return new Rect(this.left, this.top, this.width, this.height);
     } else {
-      var left = Number.MAX_VALUE, top = Number.MAX_VALUE, right = -Number.MAX_VALUE, bottom = -Number.MAX_VALUE;
+      let left = Number.MAX_VALUE, top = Number.MAX_VALUE, right = -Number.MAX_VALUE, bottom = -Number.MAX_VALUE;
       if (this.lines.length) {
         this.lines.forEach((line:Line,i:number)=> {
-          var b = line.bounds(actual);
+          let b = line.bounds(actual);
           left = Math.min(left, b.l);
           top = Math.min(top, b.t);
           right = Math.max(right, b.l + b.w);
@@ -104,7 +104,7 @@ export class PositionedParagraph extends CNode {
     }
   }
 
-  parent() {
+  parent():CNode|null {
     return this.frame;
   }
 
@@ -115,7 +115,7 @@ export class PositionedParagraph extends CNode {
   drawBaselines(ctx:CanvasRenderingContext2D, viewport:Rect) {
     ctx.strokeStyle = "black";
     this.lines.forEach((line:Line)=>{
-      var b = line.bounds(true);
+      let b = line.bounds(true);
       if(viewport.contains(line.left,line.baseline) && viewport.contains(line.left+line.width, line.baseline)) {
         ctx.beginPath();
         ctx.moveTo(b.l, line.baseline);
@@ -126,10 +126,10 @@ export class PositionedParagraph extends CNode {
   }
 
   draw(ctx:CanvasRenderingContext2D, viewPort:Rect) {
-    var top = viewPort ? viewPort.t : -Number.MAX_VALUE;
-    var bottom = viewPort ? (viewPort.t + viewPort.h) : Number.MAX_VALUE;
+    let top = viewPort ? viewPort.t : -Number.MAX_VALUE;
+    let bottom = viewPort ? (viewPort.t + viewPort.h) : Number.MAX_VALUE;
     this.lines.some((l:Line)=> {
-      var b = l.bounds();
+      let b = l.bounds();
       if (b.t + b.h < top) {
         return false;
       }
@@ -137,6 +137,7 @@ export class PositionedParagraph extends CNode {
         return true;
       }
       l.draw(ctx, viewPort);
+      return false;
     });
   }
 

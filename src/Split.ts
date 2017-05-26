@@ -15,13 +15,15 @@ import {ICoords} from "./Word";
  * at the start of a line. So even in this case, whitespace is always treated as "trailing
  * after" a word - even if that word happens to be zero characters long!
  */
-export var Split = function() {
+export const Split = function() {
 
-  var word:Character = null, trailingSpaces:Character = null, newLine = true;
+  let word:Character|null = null;
+  let trailingSpaces:Character|null = null;
+  let newLine = true;
 
-  return function(emit:(p:ICoords)=>boolean, inputChar:Character) {
+  return function(emit:(p:ICoords|null)=>boolean, inputChar:Character) {
 
-    var endOfWord:boolean;
+    let endOfWord:boolean = false;
     if (inputChar.char === null) {
       endOfWord = true;
     } else {

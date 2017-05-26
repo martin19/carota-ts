@@ -46,11 +46,13 @@ export class Input {
 
   registerMouseEvent(name:string, handler:(n:CNode)=>void) {
     Dom.handleMouseEvent(this.editor.canvas, name, (e:MouseEvent,x:number,y:number) => {
-      var W2E = this.editor.getWorldToEditorTransform();
-      var xE = W2E[0] * x + W2E[2] * y + W2E[4];
-      var yE = W2E[1] * x + W2E[3] * y + W2E[5];
-
-      handler(this.editor.doc.byCoordinate(xE, yE)[0]||this.editor.doc.frame);
+      let W2E = this.editor.getWorldToEditorTransform();
+      let xE = W2E[0] * x + W2E[2] * y + W2E[4];
+      let yE = W2E[1] * x + W2E[3] * y + W2E[5];
+      let nodes = this.editor.doc.byCoordinate(xE, yE);
+      if(nodes) {
+        handler(nodes[0]||this.editor.doc.frame);
+      }
     });
   }
 
@@ -60,7 +62,7 @@ export class Input {
   };
 
   onMouseMove(node:CNode) {
-    var editor = this.editor;
+    let editor = this.editor;
     if (editor.selectDragStart !== null) {
       if (node) {
         editor.focusChar = node.ordinal;
@@ -74,8 +76,8 @@ export class Input {
   };
 
   onDblClick(node:CNode) {
-    var editor = this.editor;
-    var positionedWord = node.parent();
+    let editor = this.editor;
+    let positionedWord = node.parent();
     if (positionedWord instanceof PositionedWord) {
       editor.doc.select(positionedWord.ordinal, positionedWord.ordinal +
         (positionedWord.word ? positionedWord.word.text.length : positionedWord.length));
@@ -83,14 +85,14 @@ export class Input {
   };
 
   onMouseDown(node:CNode) {
-    var editor = this.editor;
+    let editor = this.editor;
     editor.selectDragStart = node.ordinal;
     editor.doc.select(node.ordinal, node.ordinal);
     editor.keyboardX = null;
   };
 
   onInput() {
-    var newText:string|Array<Paragraph> = this.editor.textArea.value;
+    let newText:string|Array<Paragraph> = this.editor.textArea.value;
     if (this.editor.textAreaContent != newText) {
       this.editor.textAreaContent = '';
       this.editor.textArea.value = '';
@@ -102,12 +104,12 @@ export class Input {
   };
 
   onKeyDown(key:number, selecting:boolean, ctrlKey:boolean) {
-    var editor = this.editor;
+    let editor = this.editor;
     editor.nextKeyboardX = null;
 
     //Note: this prevents the event being propagated to the textarea
     //which causes trouble e.g for CTRL+Z
-    var handled = false;
+    let handled = false;
 
     if (!selecting) {
       editor.keyboardSelect = 0;

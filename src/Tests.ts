@@ -20,7 +20,7 @@ var assert = function(expected:any, actual:any) {
 };
 
 // Super minimal usage, push a single value - does nothing helpful:
-var result:string;
+var result:string = "";
 new Per('hi').forEach(function(value) { result = value; });
 assert('hi', result);
 
@@ -52,11 +52,11 @@ assert([false, true, true, false, true, false],
 var concat = function(left:string, right:string) { return left + ' ' + right; };
 
 // Changed in 0.1.7 - one input, one output (more consistent/intuitive/useful)
-assert(['hi'], new Per('hi').reduce(concat).all());
+assert(['hi'], new Per('hi').reduceWithoutSeed(concat).all());
 
-assert(['hi', 'hi ho'], new Per(['hi', 'ho']).reduce(concat).all());
+assert(['hi', 'hi ho'], new Per(['hi', 'ho']).reduceWithoutSeed(concat).all());
 assert(['hi', 'hi ho', 'hi ho silver'],
-  new Per(['hi', 'ho', 'silver']).reduce(concat).all());
+  new Per(['hi', 'ho', 'silver']).reduceWithoutSeed(concat).all());
 
 // Sum (built on reduce)
 assert([2, 6, 12], new Per([1, 2, 3]).map('x*2').sum().all());

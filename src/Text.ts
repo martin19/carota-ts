@@ -18,8 +18,9 @@ interface IExtendedFontMetrics {
 }
 
 export class Text {
+  static defaultNewLineWidth : number = 10;
 
-  static ctxMeasure:CanvasRenderingContext2D = document.createElement("canvas").getContext("2d");
+  static ctxMeasure:CanvasRenderingContext2D;
 
   /**
    * Returns a font CSS/Canvas string based on the settings in a run
@@ -28,7 +29,7 @@ export class Text {
    */
   static getFontString(run:Run) {
 
-    var size = (run && (<ICharacterFormatting>run.formatting).size) || Run.defaultFormatting.size;
+    let size = (run && (<ICharacterFormatting>run.formatting).size) || Run.defaultFormatting.size;
 
     if (run) {
       switch ((<ICharacterFormatting>run.formatting).script) {
@@ -67,10 +68,10 @@ export class Text {
    * @param run
    * @return {string}
    */
-  static getRunStyle(run:Run) {
-    var parts:Array<string> = [];
+  static getRunStyle(run:Run|null) {
+    let parts:Array<string> = [];
     if (run) {
-      var formatting = <ICharacterFormatting>run.formatting;
+      let formatting = <ICharacterFormatting>run.formatting;
 
       parts.push('font: ' + Text.getFontString(run));
 
@@ -119,13 +120,13 @@ export class Text {
   in chrome with experimental canvas features turned on.
 
   static measureText2(text_:string, style:string) {
-    var canvas = document.createElement("canvas");
-    var ctx = canvas.getContext("2d");
+    let canvas = document.createElement("canvas");
+    let ctx = canvas.getContext("2d");
     ctx.font = style.split(";")[0].replace("font:","");
     console.log(ctx.font);
     document.body.appendChild(canvas);
-    var metrics = ctx.measureText(text_.replace(/\s/g, Text.nbsp));
-    var result:ITextMeasurement = {
+    let metrics = ctx.measureText(text_.replace(/\s/g, Text.nbsp));
+    let result:ITextMeasurement = {
       ascent : metrics.fontBoundingBoxAscent,
       height : metrics.fountBoundingBoxAscent + metrics.fontBoundingBoxDescent,
       descent: metrics.fontBoundingBoxDescent,
@@ -148,7 +149,7 @@ export class Text {
    * @return {ITextMeasurement}
    */
   static measureText(text_:string, style:string, formatting:ICharacterFormatting) {
-    var span:HTMLSpanElement, block:HTMLDivElement, div:HTMLDivElement;
+    let span:HTMLSpanElement, block:HTMLDivElement, div:HTMLDivElement|null;
 
     span = document.createElement('span');
     block = document.createElement('div');
@@ -168,25 +169,26 @@ export class Text {
     div.appendChild(span);
     div.appendChild(block);
     document.body.appendChild(div);
-    try {
-      var result:ITextMeasurement = {
-        ascent : null,
-        height : null,
-        descent : null,
-        width : null,
-        lineHeight : null,
-        ascentUnscaled : null,
-        descentUnscaled : null
-      };
 
+    let result:ITextMeasurement = {
+      ascent : -1.0,
+      height : -1.0,
+      descent : -1.0,
+      width : -1.0,
+      lineHeight : -1.0,
+      ascentUnscaled : -1.0,
+      descentUnscaled : -1.0
+    };
+
+    try {
       span.setAttribute('style', style);
-      var letterSpacing = formatting && formatting.letterSpacing ? formatting.letterSpacing : Run.defaultFormatting.letterSpacing;
-      var verticalScaling = formatting && formatting.verticalScaling ? formatting.verticalScaling : Run.defaultFormatting.verticalScaling;
-      var horizontalScaling = formatting && formatting.horizontalScaling ? formatting.horizontalScaling : Run.defaultFormatting.horizontalScaling;
-      var fontSize = formatting && formatting.size ? formatting.size : Run.defaultFormatting.size;
-      //var lineHeight = formatting && formatting.lineHeight ? formatting.lineHeight : Run.defaultFormatting.lineHeight;
-      var lineHeight = formatting && formatting.lineHeight ? formatting.lineHeight : fontSize*1.2;
-      var baselineShift = formatting && formatting.baselineShift ? formatting.baselineShift : Run.defaultFormatting.baselineShift;
+      let letterSpacing = formatting && formatting.letterSpacing ? formatting.letterSpacing : Run.defaultFormatting.letterSpacing;
+      let verticalScaling = formatting && formatting.verticalScaling ? formatting.verticalScaling : Run.defaultFormatting.verticalScaling;
+      let horizontalScaling = formatting && formatting.horizontalScaling ? formatting.horizontalScaling : Run.defaultFormatting.horizontalScaling;
+      let fontSize = formatting && formatting.size ? formatting.size : Run.defaultFormatting.size;
+      //let lineHeight = formatting && formatting.lineHeight ? formatting.lineHeight : Run.defaultFormatting.lineHeight;
+      let lineHeight = formatting && formatting.lineHeight ? formatting.lineHeight : fontSize*1.2;
+      let baselineShift = formatting && formatting.baselineShift ? formatting.baselineShift : Run.defaultFormatting.baselineShift;
       span.style.lineHeight = "normal";
 
       span.innerHTML = '';
@@ -219,7 +221,8 @@ export class Text {
       result.lineHeight = lineHeight;
       result.extendedFontMetrics = Text.ComputeExtendedFontMetrics(formatting);
     } finally {
-      div.parentNode.removeChild(div);
+      let parent = div.parentNode;
+      parent && parent.removeChild(div);
       div = null;
     }
     return result;
@@ -227,24 +230,25 @@ export class Text {
 
   static ExtendedFontMetricsCache : {[s:string]:IExtendedFontMetrics};
   static ComputeExtendedFontMetrics(formatting:ICharacterFormatting) {
+    let i = 0;
     if(typeof formatting === "undefined") {
       return { estimatedTypeAscender : 0 }
     }
-    var key = (formatting.size||Run.defaultFormatting.size) + "px " + (formatting.font||Run.defaultFormatting.font);
-    var result = Text.ExtendedFontMetricsCache[key];
+    let key = (formatting.size||Run.defaultFormatting.size) + "px " + (formatting.font||Run.defaultFormatting.font);
+    let result = Text.ExtendedFontMetricsCache[key];
     if(!result) {
-      var ctx = Text.ctxMeasure;
+      let ctx = Text.ctxMeasure;
       ctx.font = key;
-      var x = 0;
-      var y = ctx.canvas.height/2;
-      var w = Math.ceil(ctx.measureText("d").width);
+      let x = 0;
+      let y = ctx.canvas.height/2;
+      let w = Math.ceil(ctx.measureText("d").width);
       ctx.clearRect(0,0,ctx.canvas.width, ctx.canvas.height);
       ctx.fillText("d",0,y);
-      var data = ctx.getImageData(x,0,w,y).data;
-      for(var i = y-1; i >= 0; i--) {
-        var clean = true;
-        var x0 = (i*w*4);
-        for(var j = 0; j <= (w*4); j+=4) {
+      let data = ctx.getImageData(x,0,w,y).data;
+      for(i = y-1; i >= 0; i--) {
+        let clean = true;
+        let x0 = (i*w*4);
+        for(let j = 0; j <= (w*4); j+=4) {
           if(data[x0+j+3] != 0) {
             clean = false;
             break;
@@ -265,11 +269,11 @@ export class Text {
    *
    * So for example:
    *
-   * var measure = cachedMeasureText();
+   * let measure = cachedMeasureText();
    *
    * Then you can repeatedly do lots of separate calls to measure, e.g.:
    *
-   * var m = measure('Hello, world', 'font: 12pt Arial');
+   * let m = measure('Hello, world', 'font: 12pt Arial');
    * console.log(m.ascent, m.descent, m.width);
    *
    * A cache may grow without limit if the text varies a lot. However, during normal interactive
@@ -280,10 +284,10 @@ export class Text {
    * @return {function(any, any): *}
    */
   static createCachedMeasureText() {
-    var cache:{[s:string]:ITextMeasurement} = {};
+    let cache:{[s:string]:ITextMeasurement} = {};
     return (text_:string, style:string, formatting:ICharacterFormatting)=> {
-      var key = style + '<>!&%' + text_;
-      var result = cache[key];
+      let key = style + '<>!&%' + text_;
+      let result = cache[key];
       if (!result) {
         cache[key] = result = Text.measureText(text_, style, formatting);
       }
@@ -294,10 +298,7 @@ export class Text {
   static cachedMeasureText:(text:string,style:string,formatting:ICharacterFormatting)=>ITextMeasurement;
 
   static measure(str:string, run:Run) {
-    var formatting:ICharacterFormatting;
-    if(run) {
-      formatting = run.formatting;
-    }
+    let formatting:ICharacterFormatting = run.formatting;
     return Text.cachedMeasureText(str, Text.getRunStyle(run), formatting);
   };
 
@@ -314,13 +315,13 @@ export class Text {
     }
     //ctx.fillText(str === '\n' ? Text.enter : str, left, baseline);
 
-    var vscale = formatting.formatting["verticalScaling"] || Run.defaultFormatting.verticalScaling;
-    var hscale = formatting.formatting["horizontalScaling"] || Run.defaultFormatting.horizontalScaling;
-    var baselineShift = formatting.formatting["baselineShift"] || Run.defaultFormatting.baselineShift;
+    let vscale = formatting.formatting["verticalScaling"] || Run.defaultFormatting.verticalScaling;
+    let hscale = formatting.formatting["horizontalScaling"] || Run.defaultFormatting.horizontalScaling;
+    let baselineShift = formatting.formatting["baselineShift"] || Run.defaultFormatting.baselineShift;
 
     ctx.scale(hscale,vscale);
 
-    var totalWidth = 0;
+    let totalWidth = 0;
     if(str === '\n') {
       ctx.fillText(Text.enter, left/hscale, baseline/vscale);
     } else {
@@ -328,9 +329,9 @@ export class Text {
         ctx.fillText(str, left/hscale, baseline/vscale - baselineShift);
         totalWidth = width;
       } else {
-        var leftPointer = left;
-        for(var i = 0; i < str.length; i++) {
-          var measurement = Text.measure(str[i], formatting);
+        let leftPointer = left;
+        for(let i = 0; i < str.length; i++) {
+          let measurement = Text.measure(str[i], formatting);
           ctx.fillText(str[i], leftPointer/hscale, baseline/vscale - baselineShift);
           leftPointer += measurement.width;
           totalWidth += measurement.width;
@@ -350,5 +351,10 @@ export class Text {
 }
 Text.cachedMeasureText = Text.createCachedMeasureText();
 Text.ExtendedFontMetricsCache = {};
+let ctx = document.createElement("canvas").getContext("2d");
+if(!ctx) {
+  throw "ctx is null";
+}
+Text.ctxMeasure = ctx;
 Text.ctxMeasure.canvas.width = 300;
 Text.ctxMeasure.canvas.height = 600;

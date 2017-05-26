@@ -53,20 +53,21 @@ export class Part {
   constructor(run:Run) {
     this.run = run;
     
-    var m : ITextMeasurement, isNewLine : boolean;
+    let m : ITextMeasurement;
+    let isNewLine : boolean = false;
     if (typeof run.text === 'string') {
       isNewLine = (run.text.length === 1) && (run.text[0] === '\n');
       m = Text.measure(isNewLine ? Text.nbsp : this.maybeCapitalize(run.text as string), run);
+      this.width = isNewLine ? 0 : m.width;
+      this.ascent = m.ascent;
+      this.descent = m.descent;
+      this.ascentUnscaled = m.ascentUnscaled;
+      this.descentUnscaled = m.descentUnscaled;
+      this.lineHeight = m.lineHeight || 0;
+      this.estimatedTypeAscender = m.extendedFontMetrics ? m.extendedFontMetrics.estimatedTypeAscender : 0;
     }
 
     this.isNewLine = isNewLine;
-    this.width = isNewLine ? 0 : m.width;
-    this.ascent = m.ascent;
-    this.descent = m.descent;
-    this.ascentUnscaled = m.ascentUnscaled;
-    this.descentUnscaled = m.descentUnscaled;
-    this.lineHeight = m.lineHeight;
-    this.estimatedTypeAscender = m.extendedFontMetrics.estimatedTypeAscender;
   }
 
   /**

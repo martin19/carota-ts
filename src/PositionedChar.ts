@@ -3,11 +3,7 @@ import {CNode} from "./Node";
 import {Rect} from "./Rect";
 import {PositionedWord} from "./PositionedWord";
 import {Part} from "./Part";
-import {Run} from "./Run";
-
-var newLineWidth = function (run:Run) {
-  return Text.measure(Text.enter, run).width;
-};
+import {newLineWidth, Run} from "./Run";
 
 export class PositionedChar extends CNode {
   /**
@@ -36,12 +32,12 @@ export class PositionedChar extends CNode {
   }
 
   bounds() {
-    var wb = this.word.bounds();
-    var width = this.word.word.isNewLine() ? newLineWidth(null) : this.width || this.part.width;
+    let wb = this.word.bounds();
+    let width = this.word.word.isNewLine() ? newLineWidth(null) : this.width || this.part.width;
     return new Rect(wb.l + this.left, wb.t, width, wb.h);
   }
 
-  parent() {
+  parent():CNode|null {
     return this.word;
   }
 
@@ -49,10 +45,12 @@ export class PositionedChar extends CNode {
     return this;
   }
 
-  byCoordinate(x:number, y:number):CNode[] {
+  byCoordinate(x:number, y:number):CNode[]|null {
     if (x <= this.bounds().center().x) {
       return [this];
     }
-    return [this.next()];
+    let next = this.next();
+    if(!next) return null;
+    return [next];
   }
 }

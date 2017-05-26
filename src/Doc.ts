@@ -68,27 +68,30 @@ interface IParagraphPointer {
   offset : number;
 }
 
-var makeEditCommand = function(doc:CarotaDoc, startWord:number, wordCount:number, words:Array<Word>,
+let makeEditCommand = function(doc:CarotaDoc, startWord:number, wordCount:number, words:Array<Word>,
   startParagraph : number, paragraphCount:number, paragraphs:Array<Paragraph>) {
-  var selStart = doc.selection.start, selEnd = doc.selection.end;
+  let selStart = doc.selection.start, selEnd = doc.selection.end;
   return function(log:(f1:(f2:()=>void)=>void)=>void) {
     doc._wordOrdinals = [];
     doc._paragraphOrdinals = [];
 
-    var oldParagraphs = doc._paragraphs.splice(startParagraph, paragraphCount);
+    let oldParagraphs = doc._paragraphs.splice(startParagraph, paragraphCount);
     doc._paragraphs = doc._paragraphs.slice(0,startParagraph).concat(paragraphs).concat(doc._paragraphs.slice(startParagraph));
     
-    var oldWords = doc.words.splice(startWord,wordCount);
+    let oldWords = doc.words.splice(startWord,wordCount);
     doc.words = doc.words.slice(0,startWord).concat(words).concat(doc.words.slice(startWord));
 
     //All runs in words in new paragraphs must reference the new paragraphs.
     paragraphs.forEach((p:Paragraph, i : number)=>{
-      var paragraphStart = doc.paragraphOrdinal(startParagraph + i);
-      var paragraphEnd = paragraphStart + p.length - 1;
-      var startWord = doc.wordContainingOrdinal(paragraphStart);
-      var endWord = doc.wordContainingOrdinal(paragraphEnd);
-      for(var i = startWord.index; i <= endWord.index; i++) {
-        var word = doc.words[i];
+      let paragraphStart = doc.paragraphOrdinal(startParagraph + i);
+      let paragraphEnd = paragraphStart + p.length - 1;
+      let startWord = doc.wordContainingOrdinal(paragraphStart);
+      let endWord = doc.wordContainingOrdinal(paragraphEnd);
+      if(!startWord || !endWord) {
+        throw "wordContainingOrdinal returned null";
+      }
+      for(let i = startWord.index; i <= endWord.index; i++) {
+        let word = doc.words[i];
         word.text.parts.forEach((part:Part)=>{ part.run.parent = p; });
         word.space.parts.forEach((part:Part)=>{ part.run.parent = p; });
       }
@@ -104,11 +107,10 @@ interface logFunction {
   len:number;
 }
 
-var makeTransaction = function(perform:(f1:(f2:()=>void)=>void)=>void) {
-  var commands:Array<(f1:()=>void)=>void> = [];
+let makeTransaction = function(perform:(f1:(f2:()=>void)=>void)=>void) {
+  const commands:Array<(f1:()=>void)=>void> = [];
 
-
-  var log:logFunction = <logFunction>function(command:()=>void) {
+  let log:logFunction = <logFunction>function(command:()=>void) {
     commands.push(command);
     log.len = commands.length;
   };
@@ -118,13 +120,14 @@ var makeTransaction = function(perform:(f1:(f2:()=>void)=>void)=>void) {
   return function(outerLog:(f1:(f2:()=>void)=>void)=>void) {
     outerLog(makeTransaction(function(innerLog:()=>void) {
       while (commands.length) {
-        commands.pop()(innerLog);
+        let command = commands.pop();
+        command && command(innerLog);
       }
     }));
   };
 };
 
-var isBreaker = function(word:Word) {
+let isBreaker = function(word:Word) {
   if (word.isNewLine()) {
     return true;
   }
@@ -133,7 +136,7 @@ var isBreaker = function(word:Word) {
 export class CarotaDoc extends CNode {
   type : string;
   selection : ISelection;
-  _nextSelection : ISelection;
+  _nextSelection : ISelection|null;
   caretVisible : boolean;
   selectionChanged : LiteEvent<any>;
   contentChanged : LiteEvent<any>;
@@ -152,7 +155,7 @@ export class CarotaDoc extends CNode {
   frame : Frame;
   nextInsertFormatting:{[s:string]:string|boolean|number};
   selectionJustChanged:boolean;
-  _currentTransaction:(f1:(f2:()=>void)=>void)=>void;
+  _currentTransaction:((f1:(f2:()=>void)=>void)=>void)|null;
   sendKey:(key:number, selecting:boolean, ctrlKey:boolean)=>void;
   wrap : boolean;
 
@@ -177,20 +180,20 @@ export class CarotaDoc extends CNode {
   }
 
   load(paragraphs:Array<Paragraph>, takeFocus?:boolean) {
-    var self = this;
+    let self = this;
     this.undo = [];
     this.redo = [];
     this._wordOrdinals = [];
     this._paragraphOrdinals = [];
 
     if(!paragraphs.length) {
-      var p = new Paragraph();
+      let p = new Paragraph();
       p.addRun(new Run("\n",{},p));
       paragraphs = [p];
     }
 
     this._paragraphs = paragraphs;
-    var runs = new Per(paragraphs).per(Paragraph.runs).all();
+    let runs = new Per(paragraphs).per(Paragraph.runs).all();
     this.words = new Per(characters(runs)).per(Split()).map(function (w:ICoords) {
       return new Word(w);
     }).all();
@@ -209,7 +212,7 @@ export class CarotaDoc extends CNode {
       console.error('A bug somewhere has produced an invalid state - rolling back');
       this.performUndo();
     } else if (this._nextSelection) {
-      var next = this._nextSelection;
+      let next = this._nextSelection;
       this._nextSelection = null;
       this.select(next.start, next.end);
     }
@@ -257,34 +260,36 @@ export class CarotaDoc extends CNode {
    */
   wordOrdinal(index:number) {
     if (index < this.words.length) {
-      var cached = this._wordOrdinals.length;
+      let cached = this._wordOrdinals.length;
       if (cached < (index + 1)) {
-        var o = cached > 0 ? this._wordOrdinals[cached - 1] + this.words[cached-1].length: 0;
-        for (var n = cached; n <= index; n++) {
+        let o = cached > 0 ? this._wordOrdinals[cached - 1] + this.words[cached-1].length: 0;
+        for (let n = cached; n <= index; n++) {
           this._wordOrdinals[n] = o;
           o += this.words[n].length;
         }
       }
       return this._wordOrdinals[index];
     }
+    throw "word ordinal index out of bounds";
   }
 
   /**
    * Returns the ordinal number (first character) of paragraph with index 
    * @param index
    */
-  paragraphOrdinal(index:number) {
+  paragraphOrdinal(index:number):number {
     if(index < this._paragraphs.length) {
-      var cached = this._paragraphOrdinals.length;
+      let cached = this._paragraphOrdinals.length;
       if(cached < (index + 1)) {
-        var o = cached > 0 ? this._paragraphOrdinals[cached -1] + this._paragraphs[cached-1].length: 0;
-        for(var n = cached; n <= index; n++) {
+        let o = cached > 0 ? this._paragraphOrdinals[cached -1] + this._paragraphs[cached-1].length: 0;
+        for(let n = cached; n <= index; n++) {
           this._paragraphOrdinals[n] = o;
           o += this._paragraphs[n].length;
         }
       }
       return this._paragraphOrdinals[index];
-    }  
+    }
+    throw "paragraph index out of bounds";
   }
 
   /**
@@ -292,11 +297,11 @@ export class CarotaDoc extends CNode {
    * @param ordinal
    * @return {{word: Word, ordinal: number, index: number, offset: number}}
    */
-  wordContainingOrdinal(ordinal:number) {
+  wordContainingOrdinal(ordinal:number):IWordPointer {
     // could rewrite to be faster using binary search over this.wordOrdinal
-    var result : IWordPointer;
-    var pos = 0;
-    this.words.some(function (word:Word, i:number) {
+    let result : IWordPointer|null = null;
+    let pos = 0;
+    this.words.some((word:Word, i:number) => {
       if (ordinal >= pos && ordinal < (pos + word.length)) {
         result = {
           word: word,
@@ -304,10 +309,16 @@ export class CarotaDoc extends CNode {
           index: i,
           offset: ordinal - pos
         };
+        pos += word.length;
         return true;
+      } else {
+        pos += word.length;
+        return false;
       }
-      pos += word.length;
     });
+    if(!result) {
+      throw "wordContainingOrdinal is null";
+    }
     return result;
   }
 
@@ -316,11 +327,11 @@ export class CarotaDoc extends CNode {
    * @param ordinal
    * @returns {Paragraph}
    */
-  paragraphContainingOrdinal(ordinal:number) {
-    var result : IParagraphPointer;
+  paragraphContainingOrdinal(ordinal:number):IParagraphPointer {
+    let result : IParagraphPointer|null = null;
 
     //compute ordinal, index and offset
-    var pos = 0;
+    let pos = 0;
     this._paragraphs.some((p:Paragraph, i : number)=>{
       if(ordinal >= pos && ordinal < (pos + p.length)) {
         result = {
@@ -329,10 +340,16 @@ export class CarotaDoc extends CNode {
           index : i,
           offset: ordinal - pos
         };
+        pos += p.length;
         return true;
+      } else {
+        pos += p.length;
+        return false;
       }
-      pos += p.length;
     });
+    if(!result) {
+      throw "paragraphContainingOrdinal is null";
+    }
     return result;
   }
 
@@ -345,9 +362,17 @@ export class CarotaDoc extends CNode {
     if(!range) {
       range = this.documentRange();
     }
-    var start = this.wordContainingOrdinal(Math.max(0, range.start)),
+    let rangeStart = range && range.start || 0;
+    let rangeEnd = range && range.end;
+    if (typeof rangeEnd !== 'number') {
+      rangeEnd = Number.MAX_VALUE;
+    }
+    let start = this.wordContainingOrdinal(Math.max(0, rangeStart)),
       //end = this.wordContainingOrdinal(Math.min(range.end, this.frame.length - 1));
-      end = this.wordContainingOrdinal(Math.min(range.end, this.frame.length));
+      end = this.wordContainingOrdinal(Math.min(rangeEnd, this.frame.length));
+    if(!start || !end) {
+      throw "wordContainingOrdinal returned null";
+    }
     if (start.index === end.index) {
       start.word.runs(emit, {
         start: start.offset,
@@ -355,7 +380,7 @@ export class CarotaDoc extends CNode {
       });
     } else {
       start.word.runs(emit, {start: start.offset});
-      for (var n = start.index + 1; n < end.index; n++) {
+      for (let n = start.index + 1; n < end.index; n++) {
         this.words[n].runs(emit);
       }
       end.word.runs(emit, {end: end.offset});
@@ -371,14 +396,24 @@ export class CarotaDoc extends CNode {
     if(!range) {
       range = this.documentRange();
     }
-    var start = this.paragraphContainingOrdinal(Math.max(0, range.start)),
-          end = this.paragraphContainingOrdinal(Math.min(range.end-1, this.frame.length - 1));
+    let rangeStart = range && range.start || 0;
+    let rangeEnd = range && range.end;
+    if (typeof rangeEnd !== 'number') {
+      rangeEnd = Number.MAX_VALUE;
+    }
+
+    let start = this.paragraphContainingOrdinal(Math.max(0, rangeStart)),
+          end = this.paragraphContainingOrdinal(Math.min(rangeEnd-1, this.frame.length - 1));
+
+    if(!start || !end) {
+      throw "wordContainingOrdinal returned null";
+    }
 
     if (start.index === end.index) {
       emit(start.paragraph.partialParagraph({ start : start.offset, end : end.offset + 1}));
     } else {
       emit(start.paragraph.partialParagraph({ start : start.offset}));
-      for (var n = start.index + 1; n < end.index; n++) { emit(this._paragraphs[n]); }
+      for (let n = start.index + 1; n < end.index; n++) { emit(this._paragraphs[n]); }
       emit(end.paragraph.partialParagraph({ end : end.offset + 1}));
     }
   }
@@ -394,9 +429,9 @@ export class CarotaDoc extends CNode {
    */
   spliceWordsWithRuns(wordIndex:number, wordCount:number, runs:Array<Run>,
     paragraphIndex:number, paragraphCount:number, newParagraphs:Array<Paragraph>) {
-    var self = this;
+    let self = this;
 
-    var newWords = new Per(characters(runs))
+    let newWords = new Per(characters(runs))
       .per(Split())
       .truthy()
       .map(function (w:ICoords) {
@@ -417,29 +452,30 @@ export class CarotaDoc extends CNode {
    * @returns {number}
    */
   splice(start:number, end:number, text:Array<Paragraph>|string) {
-    var text_:Array<Paragraph>;
+    let text_:Array<Paragraph>;
     if (typeof text === 'string') {
       //If plaintext is entered, try to create a sampleRun by cloning the first run after "start"
-      var sample = Math.max(0, start - 1);
-      var sampleRun = new Per({start: sample, end: sample + 1}).per(this.runs, this).first();
+      let sample = Math.max(0, start - 1);
+      let sampleRun = new Per({start: sample, end: sample + 1}).per(this.runs, this).first();
       text_ = [];
       if(!sampleRun) {
         //If sampleRun could not be created, create a run with empty formatting.
-        sampleRun = new Run(text, {}, null)
+        sampleRun = new Run(text, {}, null);
       }
-      if (sampleRun) {
-        var paragraphText = text.split("\n");
+      const sR = sampleRun;
+      if (sR) {
+        let paragraphText = text.split("\n");
         paragraphText.forEach((t:string, i : number)=>{
-          var run = sampleRun.clone();
+          let run = sR.clone();
           run.text = t + ((i != paragraphText.length-1) ? "\n" : "");
-          var p = new Paragraph();
+          let p = new Paragraph();
           p.addRun(run);
           text_.push(p)
         });
       }
 
       //get this paragraphs formatting
-      var paragraphFormatting = this.paragraphContainingOrdinal(start).paragraph.formatting;
+      let paragraphFormatting = this.paragraphContainingOrdinal(start).paragraph.formatting;
 
       //apply insert formatting
       text_.forEach((p:Paragraph)=>{
@@ -450,14 +486,14 @@ export class CarotaDoc extends CNode {
       //If rich-text is entered, set text to the entered rich-text content.
       text_ = text;
     }
-    var textLength_ = 0;
+    let textLength_ = 0;
     text_.forEach((p:Paragraph)=>{
       textLength_+=p.length;
     });
 
     //Get old WordPointers for start and end
-    var startWordPtr = this.wordContainingOrdinal(start);
-    var endWordPtr = this.wordContainingOrdinal(Math.min(end,this.frame.length-1));
+    let startWordPtr = this.wordContainingOrdinal(start);
+    let endWordPtr = this.wordContainingOrdinal(Math.min(end,this.frame.length-1));
 
     //Include previous word and omit next word if breaker
     if (start === startWordPtr.ordinal) {
@@ -468,7 +504,7 @@ export class CarotaDoc extends CNode {
     if (end === endWordPtr.ordinal) {
       //if ((end === this.frame.length - 1) || isBreaker(endWordPtr.word)) {
       if (endWordPtr.word.eof) {
-        var previousWord = this.wordContainingOrdinal(this.wordOrdinal(endWordPtr.index-1));
+        let previousWord = this.wordContainingOrdinal(this.wordOrdinal(endWordPtr.index-1));
         if(previousWord) {
           endWordPtr = previousWord;
         }
@@ -476,45 +512,45 @@ export class CarotaDoc extends CNode {
     }
 
     //Get ParagraphPointers for start and end
-    var startParagraphPtr = this.paragraphContainingOrdinal(start);
-    var endParagraphPtr = this.paragraphContainingOrdinal(Math.min(end,this.frame.length-1));
+    let startParagraphPtr = this.paragraphContainingOrdinal(start);
+    let endParagraphPtr = this.paragraphContainingOrdinal(Math.min(end,this.frame.length-1));
 
     //Constitute array of new Paragraphs
-    var startParagraph = startParagraphPtr.paragraph;
-    var endParagraph = endParagraphPtr.paragraph;
-    var newParagraphs:Array<Paragraph> = [startParagraph.partialParagraph({end : startParagraphPtr.offset})]
+    let startParagraph = startParagraphPtr.paragraph;
+    let endParagraph = endParagraphPtr.paragraph;
+    let newParagraphs:Array<Paragraph> = [startParagraph.partialParagraph({end : startParagraphPtr.offset})]
       .concat(text_)
       .concat([endParagraph.partialParagraph({start : endParagraphPtr.offset})]);
 
     //Consolidate new Paragraphs
-    var consolidatedNewParagraphs:Array<Paragraph> = [];
-    var cons = new Per(Paragraph.consolidate()).into(consolidatedNewParagraphs);
+    let consolidatedNewParagraphs:Array<Paragraph> = [];
+    let cons = new Per(Paragraph.consolidate()).into(consolidatedNewParagraphs);
     new Per(newParagraphs).forEach((p:Paragraph)=>cons.submit(p));
 
     //Consolidate runs in consolidatedNewParagraphs
     consolidatedNewParagraphs.forEach((p:Paragraph)=>{
-      var runs:Array<Run> = [];
-      var consRuns = new Per(Run.consolidate()).into(runs);
+      let runs:Array<Run> = [];
+      let consRuns = new Per(Run.consolidate()).into(runs);
       new Per(p.runs,p).forEach((r:Run)=>consRuns.submit(r));
       p.clearRuns();
       p.addRuns(runs);
     });
 
-    var textLengthDiff = textLength_ - (Math.min(end,this.frame.length-1)-start);
+    let textLengthDiff = textLength_ - (Math.min(end,this.frame.length-1)-start);
 
     //Get new Runs from consolidated new paragraphs.
-    var newRuns:Array<Run> = [];
+    let newRuns:Array<Run> = [];
     //start of start word relative to startParagraphPtr
-    var startOrdinal = startWordPtr.ordinal - startParagraphPtr.ordinal;
+    let startOrdinal = startWordPtr.ordinal - startParagraphPtr.ordinal;
     //end of end word relative to startParagraphPtr
-    var endOrdinal = textLengthDiff + endWordPtr.ordinal + endWordPtr.word.length  - startParagraphPtr.ordinal;
+    let endOrdinal = textLengthDiff + endWordPtr.ordinal + endWordPtr.word.length  - startParagraphPtr.ordinal;
     consolidatedNewParagraphs.forEach((p:Paragraph, i : number)=>{
       newRuns = newRuns.concat( new Per({start:startOrdinal, end:endOrdinal }).per(p.runs,p).all() );
       startOrdinal = Math.max(startOrdinal - p.length, 0);
       endOrdinal = Math.max(endOrdinal - p.length, 0);
     });
 
-    var oldLength = this.frame.length;
+    let oldLength = this.frame.length;
 
     this.spliceWordsWithRuns(startWordPtr.index, (endWordPtr.index - startWordPtr.index) + 1, newRuns,
       startParagraphPtr.index, (endParagraphPtr.index - startParagraphPtr.index) + 1, consolidatedNewParagraphs
@@ -532,7 +568,7 @@ export class CarotaDoc extends CNode {
   }
 
   toggleCaret() {
-    var old = this.caretVisible;
+    let old = this.caretVisible;
     if (this.selection.start === this.selection.end) {
       if (this.selectionJustChanged) {
         this.selectionJustChanged = false;
@@ -544,16 +580,27 @@ export class CarotaDoc extends CNode {
   }
 
   getCaretCoords(ordinal:number):Rect {
-    var node = this.byOrdinal(ordinal), b:Rect;
+    let node = this.byOrdinal(ordinal), b:Rect;
     if (node) {
       if (node.block && ordinal > 0) {
-        var nodeBefore = this.byOrdinal(ordinal - 1);
+        let nodeBefore = this.byOrdinal(ordinal - 1);
         //if (nodeBefore.newLine) {
         if (nodeBefore instanceof PositionedChar) {
-          var newLineBounds = nodeBefore.bounds();
-          var lineBounds = nodeBefore.parent().parent().bounds();
+          let newLineBounds = nodeBefore.bounds();
+          let positionedWord = nodeBefore.parent();
+          if(!positionedWord) {
+            throw "parent is null";
+          }
+          let line = positionedWord.parent();
+          if(!line) {
+            throw "parent is null";
+          }
+          let lineBounds = line.bounds();
           b = new Rect(lineBounds.l, lineBounds.b, 2, newLineBounds.h);
         } else {
+          if(!nodeBefore) {
+            throw "nodeBefore is null";
+          }
           b = nodeBefore.bounds();
           b = new Rect(b.r, b.t, 2, b.h);
         }
@@ -567,11 +614,12 @@ export class CarotaDoc extends CNode {
       }
       return b;
     }
+    throw "getCaretCoords is null";
   }
 
   // byCoordinate(x:number, y:number) {
-  //   var ordinal = this.frame.byCoordinate(x, y).ordinal;
-  //   var caret = this.getCaretCoords(ordinal);
+  //   let ordinal = this.frame.byCoordinate(x, y).ordinal;
+  //   let caret = this.getCaretCoords(ordinal);
   //   while (caret.b <= y && ordinal < (this.frame.length - 1)) {
   //     ordinal++;
   //     caret = this.getCaretCoords(ordinal);
@@ -592,7 +640,7 @@ export class CarotaDoc extends CNode {
   drawSelection(ctx:CanvasRenderingContext2D, hasFocus:boolean, viewport:Rect) {
     if (this.selection.end === this.selection.start) {
       if (this.selectionJustChanged || hasFocus && this.caretVisible) {
-        var caret = this.getCaretCoords(this.selection.start);
+        let caret = this.getCaretCoords(this.selection.start);
         if (caret && viewport.contains(caret.l, caret.t) && viewport.contains(caret.r, caret.b)) {
           ctx.save();
           ctx.fillStyle = 'rgba(0,0,0,1.0)';
@@ -607,7 +655,7 @@ export class CarotaDoc extends CNode {
       ctx.fillStyle = hasFocus ? 'rgba(0, 0, 0, 1.0)' : 'rgba(160, 160, 160, 0.3)';
       ctx.beginPath();
       this.selectedRange().parts(function (part:CNode) {
-        var b = part.bounds(true);
+        let b = part.bounds(true);
         if(viewport.contains(b.l,b.t) && viewport.contains(b.r,b.b)) {
         //if(viewport.t <= b.t && viewport.b >= b.b) {
           ctx.moveTo(b.l, b.t);
@@ -626,9 +674,9 @@ export class CarotaDoc extends CNode {
   notifySelectionChanged(takeFocus?:boolean) {
     // When firing selectionChanged, we pass a function can be used
     // to obtain the formatting, as this highly likely to be needed
-    var cachedFormatting:ICharacterFormatting = null;
-    var self = this;
-    var getFormatting = function () {
+    let cachedFormatting:ICharacterFormatting|null = null;
+    let self = this;
+    let getFormatting = function () {
       if (!cachedFormatting) {
         cachedFormatting = self.selectedRange().getCharacterFormatting();
       }
@@ -637,7 +685,7 @@ export class CarotaDoc extends CNode {
     this.selectionChanged.trigger({ getFormatting: getFormatting, takeFocus:takeFocus});
   }
 
-  select(ordinal:number, ordinalEnd:number, takeFocus?:boolean) {
+  select(ordinal:number, ordinalEnd:number|null, takeFocus?:boolean) {
     //console.log("select:" + ordinal + "->" + ordinalEnd);
     if (!this.frame) {
       // Something has gone terribly wrong - doc.transaction will rollback soon
@@ -666,7 +714,7 @@ export class CarotaDoc extends CNode {
   }
 
   performUndo(redo?:boolean) {
-    var fromStack = redo ? this.redo : this.undo,
+    let fromStack = redo ? this.redo : this.undo,
       toStack = redo ? this.undo : this.redo,
       oldCommand = fromStack.pop();
 
@@ -687,12 +735,12 @@ export class CarotaDoc extends CNode {
     if (this._currentTransaction) {
       perform(this._currentTransaction);
     } else {
-      var self = this;
+      let self = this;
       while (this.undo.length > 50) {
         self.undo.shift();
       }
       this.redo.length = 0;
-      var changed = false;
+      let changed = false;
       this.undo.push(makeTransaction(function (log:(f1:(f2:()=>void)=>void)=>void) {
         self._currentTransaction = log;
         try {
@@ -720,7 +768,7 @@ export class CarotaDoc extends CNode {
    * @return {boolean}
    */
   differentLine(caret1:Rect, caret2:Rect) {
-    return (caret1.b <= caret2.t) || (caret2.b <= caret1.t);
+    return (caret1.t < caret2.t) || (caret2.t < caret1.t);
   }
 
   /**
@@ -732,8 +780,9 @@ export class CarotaDoc extends CNode {
    */
   changeLine(ordinal:number, direction:number, desiredX? : number) {
 
-    var originalCaret = this.getCaretCoords(ordinal), newCaret:Rect;
-    var keyboardX = desiredX ? desiredX : originalCaret.l;
+    let originalCaret = this.getCaretCoords(ordinal);
+    let newCaret:Rect = originalCaret;
+    let keyboardX = desiredX ? desiredX : originalCaret.l;
 
     while (!this.exhausted(ordinal, direction)) {
       ordinal += direction;
@@ -768,7 +817,7 @@ export class CarotaDoc extends CNode {
    * @return {number}
    */
   endOfLine(ordinal:number, direction:number) {
-    var originalCaret = this.getCaretCoords(ordinal), newCaret:Rect;
+    let originalCaret = this.getCaretCoords(ordinal), newCaret:Rect;
     while (!this.exhausted(ordinal, direction)) {
       ordinal += direction;
       newCaret = this.getCaretCoords(ordinal);

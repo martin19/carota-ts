@@ -23,7 +23,7 @@ export class Character {
   /**
    * The character data.
    */
-  char:string;
+  char:string|null;
 
   constructor(runArray:Array<Run>, run:number, offset:number) {
     this._runs = runArray;
@@ -44,16 +44,16 @@ export class Character {
    */
   cut(upTo:Character) {
     compatible(this, upTo);
-    var self = this;
+    let self = this;
     return (eachRun:(r:Run)=>void) => {
-      for (var runIndex = self._run; runIndex <= upTo._run; runIndex++) {
-        var run = self._runs[runIndex];
+      for (let runIndex = self._run; runIndex <= upTo._run; runIndex++) {
+        let run = self._runs[runIndex];
         if (run) {
-          var start = (runIndex === self._run) ? self._offset : 0;
-          var stop = (runIndex === upTo._run) ? upTo._offset : Run.getTextLength(run.text);
+          let start = (runIndex === self._run) ? self._offset : 0;
+          let stop = (runIndex === upTo._run) ? upTo._offset : Run.getTextLength(run.text);
           if (start < stop) {
             Run.getSubText(function (piece) {
-              var pieceRun = run.clone();
+              let pieceRun = run.clone();
               pieceRun.text = piece;
               eachRun(pieceRun);
             }, run.text, start, stop - start);
@@ -84,9 +84,9 @@ function firstNonEmpty(runArray:Array<Run>, n:number) {
  * @param runArray
  * @returns {function(function(Character): void): undefined}
  */
-export var characters = function (runArray:Array<Run>) {
+export let characters = function (runArray:Array<Run>) {
   return (emit:(c:Character)=>void)=> {
-    var c = firstNonEmpty(runArray, 0);
+    let c = firstNonEmpty(runArray, 0);
     while (!emit(c) && (c.char !== null)) {
       c = (c._offset + 1 < Run.getTextLength(runArray[c._run].text))
         ? new Character(runArray, c._run, c._offset + 1)
