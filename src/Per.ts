@@ -1,5 +1,5 @@
 export type Emitter<T> = (t:T)=>boolean
-export type Transformer<T> = (p:(t:T)=>void, ...optional:any[])=>void;
+export type Transformer<T> = (p:(t:T)=>void|boolean, ...optional:any[])=>boolean|undefined|void;
 export type Source<T> = Per<T>|Transformer<T>|T[]|T;
 
 interface IMonitor<T> {

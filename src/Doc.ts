@@ -71,7 +71,7 @@ interface IParagraphPointer {
 let makeEditCommand = function(doc:CarotaDoc, startWord:number, wordCount:number, words:Array<Word>,
   startParagraph : number, paragraphCount:number, paragraphs:Array<Paragraph>) {
   let selStart = doc.selection.start, selEnd = doc.selection.end;
-  return function(log:(f1:(f2:()=>void)=>void)=>void) {
+  return function(log:(f1:(f2?:any)=>void)=>void) {
     doc._wordOrdinals = [];
     doc._paragraphOrdinals = [];
 
@@ -108,7 +108,7 @@ interface logFunction {
 }
 
 let makeTransaction = function(perform:(f1:(f2:()=>void)=>void)=>void) {
-  const commands:Array<(f1:()=>void)=>void> = [];
+  const commands:Array<(f1:(f2:()=>void)=>void)=>void> = [];
 
   let log:logFunction = <logFunction>function(command:()=>void) {
     commands.push(command);
@@ -117,8 +117,8 @@ let makeTransaction = function(perform:(f1:(f2:()=>void)=>void)=>void) {
 
   perform(log);
 
-  return function(outerLog:(f1:(f2:()=>void)=>void)=>void) {
-    outerLog(makeTransaction(function(innerLog:()=>void) {
+  return (outerLog:(f1:(f2:(f3?:any)=>void)=>void)=>void) => {
+    outerLog(makeTransaction((innerLog:(f2:()=>void)=>void) => {
       while (commands.length) {
         let command = commands.pop();
         command && command(innerLog);
@@ -140,8 +140,8 @@ export class CarotaDoc extends CNode {
   caretVisible : boolean;
   selectionChanged : LiteEvent<any>;
   contentChanged : LiteEvent<any>;
-  undo : Array<(f1:(f2:()=>void)=>void)=>void>;
-  redo : Array<(f1:(f2:()=>void)=>void)=>void>;
+  undo : Array<(f1:(f2:(f3?:any)=>void)=>void)=>void>;
+  redo : Array<(f1:(f2:(f3?:any)=>void)=>void)=>void>;
   words : Array<Word>;
   _paragraphs : Array<Paragraph>;
   /**
@@ -155,7 +155,7 @@ export class CarotaDoc extends CNode {
   frame : Frame;
   nextInsertFormatting:{[s:string]:string|boolean|number};
   selectionJustChanged:boolean;
-  _currentTransaction:((f1:(f2:()=>void)=>void)=>void)|null;
+  _currentTransaction:((f1:()=>void)=>void)|null;
   sendKey:(key:number, selecting:boolean, ctrlKey:boolean)=>void;
   wrap : boolean;
 
@@ -194,9 +194,7 @@ export class CarotaDoc extends CNode {
 
     this._paragraphs = paragraphs;
     let runs = new Per(paragraphs).per(Paragraph.runs).all();
-    this.words = new Per(characters(runs)).per(Split()).map(function (w:ICoords) {
-      return new Word(w);
-    }).all();
+    this.words = new Per(characters(runs)).per(Split()).map((w:ICoords) => { return new Word(w); }).all();
     this.layout();
     this.contentChanged.trigger();
     this.select(0, 0, takeFocus);
@@ -439,7 +437,7 @@ export class CarotaDoc extends CNode {
       })
       .all();
 
-    this.transaction(function (log) {
+    this.transaction((log:(f1:()=>void)=>void) => {
       makeEditCommand(self, wordIndex, wordCount, newWords, paragraphIndex, paragraphCount, newParagraphs)(log);
     });
   }
@@ -719,7 +717,7 @@ export class CarotaDoc extends CNode {
       oldCommand = fromStack.pop();
 
     if (oldCommand) {
-      oldCommand(function (newCommand) {
+      oldCommand((newCommand) => {
         toStack.push(newCommand);
       });
       this.layout();
@@ -741,7 +739,7 @@ export class CarotaDoc extends CNode {
       }
       this.redo.length = 0;
       let changed = false;
-      this.undo.push(makeTransaction(function (log:(f1:(f2:()=>void)=>void)=>void) {
+      this.undo.push(makeTransaction((log:(f1:()=>void)=>void) => {
         self._currentTransaction = log;
         try {
           perform(log);

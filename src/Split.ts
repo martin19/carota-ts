@@ -21,7 +21,7 @@ export const Split = function() {
   let trailingSpaces:Character|null = null;
   let newLine = true;
 
-  return function(emit:(p:ICoords|null)=>boolean, inputChar:Character) {
+  return (emit:(p:ICoords|null)=>void|boolean, inputChar:Character):boolean|undefined => {
 
     let endOfWord:boolean = false;
     if (inputChar.char === null) {
